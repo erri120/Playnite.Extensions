@@ -49,7 +49,10 @@ namespace DLSiteMetadata
                 list.Add(MetadataField.Name);
             
             if(!_game.Circle.IsEmpty())
+            {
                 list.Add(MetadataField.Developers);
+                list.Add(MetadataField.Publishers);
+            }
 
             if (!_game.Description.IsEmpty())
                 list.Add(MetadataField.Description);
@@ -85,6 +88,13 @@ namespace DLSiteMetadata
             return !AvailableFields.Contains(MetadataField.Developers)
                 ? base.GetDevelopers()
                 : new List<string> {_game.Circle};
+        }
+
+        public override List<string> GetPublishers()
+        {
+            return !AvailableFields.Contains(MetadataField.Publishers)
+                ? base.GetPublishers()
+                : new List<string> { _game.Circle };
         }
 
         public override string GetDescription()

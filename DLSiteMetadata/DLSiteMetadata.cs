@@ -24,9 +24,9 @@ namespace DLSiteMetadata
             MetadataField.Publishers,
             MetadataField.BackgroundImage,
             MetadataField.CoverImage,
-            MetadataField.CommunityScore,
+            //MetadataField.CommunityScore,
             MetadataField.Genres,
-            MetadataField.Icon,
+            //MetadataField.Icon,
             MetadataField.Links,
             MetadataField.ReleaseDate,
             // Include addition fields if supported by the metadata source

@@ -163,10 +163,10 @@ namespace DLSiteMetadata
                 if (key == Consts.GetReleaseTranslation(isEnglish))
                 {
                     var dateNode = td.SelectSingleNode("a");
-                    if (!dateNode.IsNull(logger, "Release", id))
+                    if (!dateNode.IsNull(logger, "Release Date", id))
                     {
                         var sDate = dateNode.DecodeInnerText();
-                        if (!sDate.IsEmpty(logger, "Date", id))
+                        if (!sDate.IsEmpty(logger, "Release Date", id))
                             game.Release = sDate;
                     }
 
@@ -242,6 +242,11 @@ namespace DLSiteMetadata
             });
 
             return game;
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }
