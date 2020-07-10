@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using HtmlAgilityPack;
+using Playnite.SDK;
 
 namespace DLSiteMetadata
 {
@@ -11,6 +12,33 @@ namespace DLSiteMetadata
         internal static bool IsEmpty(this string s)
         {
             return string.IsNullOrEmpty(s);
+        }
+
+        internal static bool IsEmpty(this string s, ILogger logger, string name, string id)
+        {
+            if (!IsEmpty(s))
+                return false;
+
+            logger.Warn($"{name} for {id} is empty!");
+            return true;
+        }
+
+        internal static bool IsNull(this HtmlNode node, ILogger logger, string name, string id)
+        {
+            if (node != null)
+                return false;
+
+            logger.Warn($"Found no {name} node for {id}!");
+            return true;
+        }
+
+        internal static bool IsNullOrEmpty(this HtmlNodeCollection collection, ILogger logger, string name, string id)
+        {
+            if (collection != null && collection.Count > 0)
+                return false;
+
+            logger.Warn($"Found no {name} for {id}!");
+            return true;
         }
 
         internal static void Do<T>(this IEnumerable<T> col, Action<T> a)
