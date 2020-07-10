@@ -8,24 +8,35 @@ namespace DLSiteMetadata
 {
     public class DLSiteMetadata : MetadataPlugin
     {
-        private static readonly ILogger logger = LogManager.GetLogger();
+        private static readonly ILogger Logger = LogManager.GetLogger();
 
-        private DLSiteMetadataSettings settings { get; set; }
+        internal ILogger GetLogger => Logger;
+
+        private DLSiteMetadataSettings Settings { get; }
 
         public override Guid Id { get; } = Guid.Parse("6bff51a5-ad52-4474-af76-f8e410b66e20");
 
         public override List<MetadataField> SupportedFields { get; } = new List<MetadataField>
         {
-            MetadataField.Description
+            MetadataField.Name,
+            MetadataField.Description,
+            MetadataField.Developers,
+            MetadataField.Publishers,
+            MetadataField.BackgroundImage,
+            MetadataField.CoverImage,
+            MetadataField.CommunityScore,
+            MetadataField.Genres,
+            MetadataField.Icon,
+            MetadataField.Links,
+            MetadataField.ReleaseDate,
             // Include addition fields if supported by the metadata source
         };
 
-        // Change to something more appropriate
-        public override string Name => "Custom Metadata";
+        public override string Name => "DLSite";
 
         public DLSiteMetadata(IPlayniteAPI api) : base(api)
         {
-            settings = new DLSiteMetadataSettings(this);
+            Settings = new DLSiteMetadataSettings(this);
         }
 
         public override OnDemandMetadataProvider GetMetadataProvider(MetadataRequestOptions options)
@@ -35,7 +46,7 @@ namespace DLSiteMetadata
 
         public override ISettings GetSettings(bool firstRunSettings)
         {
-            return settings;
+            return Settings;
         }
 
         public override UserControl GetSettingsView(bool firstRunSettings)

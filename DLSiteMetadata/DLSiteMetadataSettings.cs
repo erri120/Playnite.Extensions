@@ -6,7 +6,7 @@ namespace DLSiteMetadata
 {
     public class DLSiteMetadataSettings : ISettings
     {
-        private readonly DLSiteMetadata plugin;
+        private readonly DLSiteMetadata _plugin;
 
         public string Option1 { get; set; } = string.Empty;
 
@@ -25,7 +25,7 @@ namespace DLSiteMetadata
         public DLSiteMetadataSettings(DLSiteMetadata plugin)
         {
             // Injecting your plugin instance is required for Save/Load method because Playnite saves data to a location based on what plugin requested the operation.
-            this.plugin = plugin;
+            _plugin = plugin;
 
             // Load saved settings.
             var savedSettings = plugin.LoadPluginSettings<DLSiteMetadataSettings>();
@@ -53,7 +53,7 @@ namespace DLSiteMetadata
         {
             // Code executed when user decides to confirm changes made since BeginEdit was called.
             // This method should save settings made to Option1 and Option2.
-            plugin.SavePluginSettings(this);
+            _plugin.SavePluginSettings(this);
         }
 
         public bool VerifySettings(out List<string> errors)
