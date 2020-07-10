@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30225.117
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DLSiteMetadata", "DLSiteMetadata\DLSiteMetadata.csproj", "{A54423D1-8E7A-4339-B0D5-24E7CEFE469B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A54423D1-8E7A-4339-B0D5-24E7CEFE469B}.Debug|x64.ActiveCfg = Debug|x64
+		{A54423D1-8E7A-4339-B0D5-24E7CEFE469B}.Debug|x64.Build.0 = Debug|x64
+		{A54423D1-8E7A-4339-B0D5-24E7CEFE469B}.Release|x64.ActiveCfg = Release|x64
+		{A54423D1-8E7A-4339-B0D5-24E7CEFE469B}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9551CA3C-2612-4DD0-A4CF-DFDB266DB3EC}
+	EndGlobalSection
+EndGlobal
