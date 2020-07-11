@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Web;
 using HtmlAgilityPack;
 using Playnite.SDK;
@@ -38,6 +39,21 @@ namespace Extensions.Common
                 return false;
 
             logger.Warn($"Found no {name} for {id}!");
+            return true;
+        }
+
+        public static bool TryGetInnerText(this HtmlNode baseNode, string xpath, ILogger logger, string name, string id, out string innerText)
+        {
+            innerText = null;
+            var node = baseNode.SelectSingleNode(xpath);
+            if (node.IsNull(logger, name, id))
+                return false;
+
+            var sText = node.DecodeInnerText();
+            if (sText.IsEmpty(logger, name, id))
+                return false;
+
+            innerText = sText;
             return true;
         }
 

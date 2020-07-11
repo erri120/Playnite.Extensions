@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Playnite.SDK;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace DLSiteMetadata.Test
 {
@@ -8,8 +9,9 @@ namespace DLSiteMetadata.Test
     {
         private readonly ILogger _logger;
 
-        public TestDLSiteGame(TestLoggerFixture fixture)
+        public TestDLSiteGame(TestLoggerFixture fixture, ITestOutputHelper output)
         {
+            fixture.Logger.SetOutputHelper(output);
             _logger = fixture.Logger;
         }
 

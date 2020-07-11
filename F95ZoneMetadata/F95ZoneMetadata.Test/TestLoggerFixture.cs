@@ -2,7 +2,7 @@
 using Playnite.SDK;
 using Xunit.Abstractions;
 
-namespace DLSiteMetadata.Test
+namespace F95ZoneMetadata.Test
 {
     public class TestLoggerFixture : IDisposable
     {

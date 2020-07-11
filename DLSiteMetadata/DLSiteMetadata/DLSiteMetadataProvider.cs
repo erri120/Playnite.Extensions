@@ -16,7 +16,6 @@ namespace DLSiteMetadata
         private ILogger Logger => _plugin.GetLogger;
 
         private List<MetadataField> _availableFields;
-
         public override List<MetadataField> AvailableFields => _availableFields ?? (_availableFields = GetAvailableFields());
 
         private DLSiteGame _game;

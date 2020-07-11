@@ -77,14 +77,11 @@ namespace DLSiteMetadata
 
             var game = new DLSiteGame {DLSiteLink = url};
 
-            var nameNode = node.SelectSingleNode("//div[@id='top_wrapper']/div[@class='base_title_br clearfix']/h1[@id='work_name']/a");
-            if (!nameNode.IsNull(logger, "Name", id))
-            {
-                var sName = nameNode.DecodeInnerText();
-                if (!sName.IsEmpty(logger, "Name", id))
-                    game.Name = sName;
-            }
-
+            if (node.TryGetInnerText(
+                "//div[@id='top_wrapper']/div[@class='base_title_br clearfix']/h1[@id='work_name']/a", logger, "Name",
+                id, out var name))
+                game.Name = name;
+            
             var imageNodes =
                 node.SelectNodes(
                     "//div[@id='work_header']/div[@id='work_left']/div/div[@class='product-slider']/div[@class='product-slider-data']/div");

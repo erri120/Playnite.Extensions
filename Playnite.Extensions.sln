@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "F95ZoneMetadata", "F95ZoneM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extensions.Common", "Extensions.Common\Extensions.Common.csproj", "{5AC34E06-706A-4706-84D4-510AA345D7FC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "F95ZoneMetadata.Test", "F95ZoneMetadata\F95ZoneMetadata.Test\F95ZoneMetadata.Test.csproj", "{4630179E-A71A-41FA-918F-CF5478042441}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{5AC34E06-706A-4706-84D4-510AA345D7FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5AC34E06-706A-4706-84D4-510AA345D7FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5AC34E06-706A-4706-84D4-510AA345D7FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4630179E-A71A-41FA-918F-CF5478042441}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4630179E-A71A-41FA-918F-CF5478042441}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4630179E-A71A-41FA-918F-CF5478042441}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4630179E-A71A-41FA-918F-CF5478042441}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

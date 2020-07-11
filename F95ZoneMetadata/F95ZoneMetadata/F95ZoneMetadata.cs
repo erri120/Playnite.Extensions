@@ -9,6 +9,7 @@ namespace F95ZoneMetadata
     public class F95ZoneMetadata : MetadataPlugin
     {
         private static readonly ILogger Logger = LogManager.GetLogger();
+        internal ILogger GetLogger => Logger;
 
         private F95ZoneMetadataSettings Settings { get; }
 
