@@ -5,16 +5,16 @@ using System.Web;
 using HtmlAgilityPack;
 using Playnite.SDK;
 
-namespace DLSiteMetadata
+namespace Extensions.Common
 {
-    internal static partial class Utils
+    public static class Utils
     {
-        internal static bool IsEmpty(this string s)
+        public static bool IsEmpty(this string s)
         {
             return string.IsNullOrEmpty(s);
         }
 
-        internal static bool IsEmpty(this string s, ILogger logger, string name, string id)
+        public static bool IsEmpty(this string s, ILogger logger, string name, string id)
         {
             if (!IsEmpty(s))
                 return false;
@@ -23,7 +23,7 @@ namespace DLSiteMetadata
             return true;
         }
 
-        internal static bool IsNull(this HtmlNode node, ILogger logger, string name, string id)
+        public static bool IsNull(this HtmlNode node, ILogger logger, string name, string id)
         {
             if (node != null)
                 return false;
@@ -32,7 +32,7 @@ namespace DLSiteMetadata
             return true;
         }
 
-        internal static bool IsNullOrEmpty(this HtmlNodeCollection collection, ILogger logger, string name, string id)
+        public static bool IsNullOrEmpty(this HtmlNodeCollection collection, ILogger logger, string name, string id)
         {
             if (collection != null && collection.Count > 0)
                 return false;
@@ -41,17 +41,17 @@ namespace DLSiteMetadata
             return true;
         }
 
-        internal static void Do<T>(this IEnumerable<T> col, Action<T> a)
+        public static void Do<T>(this IEnumerable<T> col, Action<T> a)
         {
-            foreach(var item in col) a(item);
+            foreach (var item in col) a(item);
         }
 
-        internal static IEnumerable<T> NotNull<T>(this IEnumerable<T> col)
+        public static IEnumerable<T> NotNull<T>(this IEnumerable<T> col)
         {
             return col.Where(x => x != null);
         }
 
-        internal static string GetValue(this HtmlNode node, string attr)
+        public static string GetValue(this HtmlNode node, string attr)
         {
             if (!node.HasAttributes)
                 return null;
@@ -60,7 +60,7 @@ namespace DLSiteMetadata
             return value.IsEmpty() ? null : value;
         }
 
-        internal static string DecodeInnerText(this HtmlNode node)
+        public static string DecodeInnerText(this HtmlNode node)
         {
             return HttpUtility.HtmlDecode(node?.InnerText);
         }

@@ -2,6 +2,7 @@
 using Playnite.SDK.Plugins;
 using System.Collections.Generic;
 using System.Linq;
+using Extensions.Common;
 using Playnite.SDK;
 using Playnite.SDK.Metadata;
 using Playnite.SDK.Models;

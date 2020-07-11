@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1E2122F8-517B-45C0-9B36-57ACE0FA42EC}</ProjectGuid>
+    <ProjectGuid>{5AC34E06-706A-4706-84D4-510AA345D7FC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>F95ZoneMetadata</RootNamespace>
-    <AssemblyName>F95ZoneMetadata</AssemblyName>
+    <RootNamespace>Extensions.Common</RootNamespace>
+    <AssemblyName>Extensions.Common</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -31,44 +31,19 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xaml" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="F95ZoneGame.cs" />
-    <Compile Include="F95ZoneMetadata.cs" />
-    <Compile Include="F95ZoneMetadataProvider.cs" />
-    <Compile Include="F95ZoneMetadataSettings.cs" />
-    <Compile Include="F95ZoneMetadataSettingsView.xaml.cs">
-      <DependentUpon>F95ZoneMetadataSettingsView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="extension.yaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="icon.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Include="F95ZoneMetadataSettingsView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
+    <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack">
@@ -81,17 +56,5 @@
       <Version>5.2.0</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Extensions.Common\Extensions.Common.csproj">
-      <Project>{5ac34e06-706a-4706-84d4-510aa345d7fc}</Project>
-      <Name>Extensions.Common</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>xcopy $(ProjectDir)$(OutDir)*$(TargetExt) M:\Games\Playnite\Extensions\$(TargetName)\ /Y
-xcopy $(ProjectDir)$(OutDir)*.pdb M:\Games\Playnite\Extensions\$(TargetName)\ /Y
-xcopy $(ProjectDir)$(OutDir)extension.yaml M:\Games\Playnite\Extensions\$(TargetName)\ /Y
-xcopy $(ProjectDir)$(OutDir)icon.png M:\Games\Playnite\Extensions\$(TargetName)\ /Y</PostBuildEvent>
-  </PropertyGroup>
 </Project>

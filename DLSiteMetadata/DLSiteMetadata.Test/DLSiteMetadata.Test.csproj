@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Extensions.Common\Extensions.Common.csproj" />
     <ProjectReference Include="..\DLSiteMetadata\DLSiteMetadata.csproj" />
   </ItemGroup>
 

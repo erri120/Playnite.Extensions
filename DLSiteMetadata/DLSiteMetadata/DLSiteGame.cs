@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
-using System.Xml.XPath;
+using Extensions.Common;
 using HtmlAgilityPack;
 using Playnite.SDK;
 
@@ -24,7 +24,7 @@ namespace DLSiteMetadata
         Adults
     }
 
-    internal static partial class Utils
+    internal static class Utils
     {
         internal static DLSiteAgeRating ToAgeRating(string rating)
         {
