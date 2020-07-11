@@ -17,7 +17,13 @@ namespace F95ZoneMetadata
 
         public override List<MetadataField> SupportedFields { get; } = new List<MetadataField>
         {
-            MetadataField.Description
+            MetadataField.Name,
+            MetadataField.Description,
+            MetadataField.BackgroundImage,
+            MetadataField.CoverImage,
+            MetadataField.Developers,
+            MetadataField.Genres,
+            MetadataField.Tags
         };
 
         public override string Name => "F95Zone";

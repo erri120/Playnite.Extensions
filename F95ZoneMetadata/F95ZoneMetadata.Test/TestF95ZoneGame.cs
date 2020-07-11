@@ -19,7 +19,7 @@ namespace F95ZoneMetadata.Test
         public async Task TestLoadGame()
         {
             var game = await F95ZoneGame.LoadGame(
-                "https://f95zone.to/threads/meritocracy-of-the-oni-blade-oneone1.18664/", _logger);
+                "https://f95zone.to/threads/alien-quest-eve-v1-01-grimhelm.6016/", _logger);
 
             Assert.NotNull(game);
             Assert.NotNull(game.Name);
