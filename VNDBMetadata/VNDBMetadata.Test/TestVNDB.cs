@@ -15,10 +15,21 @@ namespace VNDBMetadata.Test
         }
 
         [Fact]
-        public async Task TestClient()
+        public async Task TestClientTCP()
         {
-            using var client = new VNDBClient();
+            using var client = new VNDBClient(false);
+            await TestClient(client);
+        }
 
+        [Fact]
+        public async Task TestClientTLS()
+        {
+            using var client = new VNDBClient(true);
+            await TestClient(client);
+        }
+
+        private static async Task TestClient(VNDBClient client)
+        {
             var login = await client.Login();
             Assert.True(login);
 

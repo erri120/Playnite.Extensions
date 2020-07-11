@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
+using System.Net.Security;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Extensions.Common;
 
@@ -12,9 +12,12 @@ namespace VNDBMetadata
     public class VNDBClient : IDisposable
     {
         private readonly TcpClient _client;
+        private readonly bool _useTLS;
+        private SslStream _sslStream;
 
-        public VNDBClient()
+        public VNDBClient(bool useTLS)
         {
+            _useTLS = useTLS;
             _client = new TcpClient();
         }
 
@@ -48,45 +51,69 @@ namespace VNDBMetadata
             return await RequestAndReceive<string>(command, null);
         }
 
+        private async Task Connect()
+        {
+            if (_client.Connected)
+            {
+                if (!_useTLS)
+                    return;
+
+                if(_sslStream == null)
+                    throw new Exception("Client is connected but ssl stream is null!");
+
+                return;
+            }
+
+            await _client.ConnectAsync(Consts.Host, _useTLS ? Consts.TLSPort : Consts.TCPPort);
+
+            if (!_useTLS)
+                return;
+
+            _sslStream = new SslStream(_client.GetStream());
+            await _sslStream.AuthenticateAsClientAsync(Consts.Host);
+
+            if(!_sslStream.IsAuthenticated)
+                throw new Exception("Authentication failed!");
+        }
+
         private async Task<string> RequestAndReceive<T>(string command, T obj)
         {
-            if (!_client.Connected)
-                await _client.ConnectAsync(Consts.Host, Consts.TCPPort);
+            await Connect();
 
-            var stream = _client.GetStream();
-
-            byte[] buffer = obj == null 
+            byte[] buffer = obj == null
                 ? AddEndOfTransmissionChar(command)
                 : AddEndOfTransmissionChar(ToVNDBJson(command, obj));
 
+            var stream = _useTLS ? _sslStream : (Stream)_client.GetStream();
+
             await stream.WriteAsync(buffer, 0, buffer.Length);
 
-            buffer = new byte[1024];
-            int byteRead;
+            buffer = new byte[2048];
             var response = new StringBuilder();
-            var retries = 0;
+            int bytes;
+            var iterations = 0;
 
-            RETRY:
             do
             {
-                byteRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-                if (byteRead == 0)
-                {
-                    if(retries > Consts.MaxRetries)
-                        throw new Exception("Max Retires reached!");
+                bytes = await stream.ReadAsync(buffer, 0, buffer.Length);
+                var decoder = Encoding.UTF8.GetDecoder();
+                var chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
+                decoder.GetChars(buffer, 0, bytes, chars, 0);
+                
 
-                    Thread.Sleep(10);
-                    retries++;
-                    goto RETRY;
+                if (chars.Any(x => (byte)x == Consts.EndOfTransmissionChar))
+                {
+                    response.Append(chars, 0, chars.Length-1);
+                    break;
                 }
 
-                var last = buffer[byteRead - 1];
-                response.AppendFormat("{0}", Encoding.UTF8.GetString(buffer, 0, last == Consts.EndOfTransmissionChar ? byteRead - 1 : byteRead));
-            } while (stream.DataAvailable);
+                response.Append(chars);
 
-            if (buffer[byteRead - 1] != Consts.EndOfTransmissionChar)
-                throw new Exception($"Last byte read is not the End Of Transmission char but {buffer[byteRead - 1]:X}");
-            
+                if(iterations >= Consts.MaxIterations)
+                    throw new Exception($"Max iterations reached: {iterations}");
+
+                iterations++;
+            } while (bytes != 0);
 
             return response.ToString();
         }
@@ -99,6 +126,15 @@ namespace VNDBMetadata
                 client = Consts.ClientName,
                 clientver = Consts.ClientVersion,
             };
+
+            if (!username.IsEmpty() && !password.IsEmpty())
+            {
+                if(!_useTLS)
+                    throw new Exception($"Username and password were provided but Client is not in TLS mode!");
+
+                login.username = username;
+                login.password = password;
+            }
 
             var res = await RequestAndReceive("login", login);
             if(res != Consts.OK)
@@ -116,6 +152,7 @@ namespace VNDBMetadata
 
         public void Dispose()
         {
+            _sslStream?.Dispose();
             _client.Dispose();
         }
     }
