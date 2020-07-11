@@ -34,14 +34,27 @@ namespace DLSiteMetadata
             if (game.Name.IsEmpty())
                 return list;
 
-            if (!game.Name.StartsWith("RJ", StringComparison.InvariantCultureIgnoreCase)
-                && !game.Name.StartsWith("RE", StringComparison.InvariantCultureIgnoreCase))
+            var id = game.Name;
+
+            IDCheck:
+            if (!id.StartsWith("RJ", StringComparison.InvariantCultureIgnoreCase)
+                && !id.StartsWith("RE", StringComparison.InvariantCultureIgnoreCase))
             {
-                Logger.Warn($"Trying to get metadata for {game.Name} but it does not start with RJ/RE!");
+                if (id.StartsWith(Consts.RootENG) || id.StartsWith(Consts.RootJPN))
+                {
+                    //https://www.dlsite.com/ecchi-eng/work/=/product_id/RE234198.html
+                    var root = id.StartsWith(Consts.RootENG) ? Consts.RootENG : Consts.RootJPN;
+                    id = id.Replace(root, "");
+                    //work/=/product_id/{id}.html
+                    id = id.Replace(".html", "").Replace("work/=/product_id/", "");
+                    goto IDCheck;
+                }
+
+                Logger.Warn($"Trying to get metadata for {id} but it does not start with RJ/RE!");
                 return list;
             }
 
-            _game = DLSiteGame.LoadGame(game.Name, Logger).Result;
+            _game = DLSiteGame.LoadGame(id, Logger).Result;
 
             list.Add(MetadataField.Links);
 
