@@ -38,4 +38,4 @@ Copy either the entire URL or just the ID (eg `RE234198` or `RJ173356`) into the
 
 ## Troubleshooting
 
-If an extension is not working correctly, make sure you take a look at the `playnite.log` file in `%appdata%/Roaming/Playnite`.
+If an extension is not working correctly, make sure you take a look at the `playnite.log` file in `%appdata%/Playnite`.
