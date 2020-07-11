@@ -1,15 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
 using System.Web;
 using HtmlAgilityPack;
+using Newtonsoft.Json;
 using Playnite.SDK;
 
 namespace Extensions.Common
 {
     public static class Utils
     {
+        private static JsonSerializerSettings GenericJsonSettings => new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            DateTimeZoneHandling = DateTimeZoneHandling.Utc
+        };
+
+        public static string ToJson<T>(this T obj)
+        {
+            return JsonConvert.SerializeObject(obj, GenericJsonSettings);
+        }
+
+        public static T FromJson<T>(this string data)
+        {
+            return JsonConvert.DeserializeObject<T>(data, GenericJsonSettings);
+        }
+
         public static bool IsEmpty(this string s)
         {
             return string.IsNullOrEmpty(s);
