@@ -5,6 +5,7 @@ Collection of Extensions I created for [Playnite](https://github.com/JosefNemec/
 - [Installation](#installation)
 - [Metadata Providers](#metadata-providers)
   - [DLSite](#dlsite)
+  - [F95Zone](#f95zone)
 - [Troubleshooting](#troubleshooting)
 
 ## Installation
@@ -34,7 +35,36 @@ Collection of Extensions I created for [Playnite](https://github.com/JosefNemec/
 
 Copy either the entire URL or just the ID (eg `RE234198` or `RJ173356`) into the Name field, click the _Download Metadata..._ button in the bottom left corner and select _DLSite_.
 
-![how-to-dlsite](images/how-to-dlsite.png)
+![how-to-dlsite-1](images/how-to-dlsite-1.png)
+
+Change any fields you want afterwards and click the _Save_ button in the bottom right corner.
+
+![how-to-dlsite-2](images/how-to-dlsite-2.png)
+
+### F95Zone
+
+**Website**: [F95](https://www.f95zone.to)
+
+**Supported Fields**:
+
+- Name
+- Developers
+- Description
+- Genres
+- Tags
+- Cover Image
+- Background Image
+- Links (not really)
+
+**Usage**:
+
+Copy the entire URL into the Name field, click the _Download Metadata..._ button in the bottom left corner and select _F95Zone_.
+
+![how-to-f95-1](images/how-to-f95-1.png)
+
+Change any fields you want afterwards and click the _Save_ button in the bottom right corner.
+
+![how-to-f95-2](images/how-to-f95-2.png)
 
 ## Troubleshooting
 
