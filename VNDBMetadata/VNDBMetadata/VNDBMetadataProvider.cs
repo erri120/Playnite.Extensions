@@ -3,6 +3,7 @@ using Playnite.SDK.Plugins;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Extensions.Common;
 using Playnite.SDK;
 using Playnite.SDK.Metadata;
@@ -71,6 +72,8 @@ namespace VNDBMetadata
                 
                 var item = _plugin.PlayniteApi.Dialogs.ChooseItemWithSearch(options, s =>
                 {
+                    if (s == name)
+                        return options;
                     Result<VisualNovel> results = _client.SearchVN(s).Result;
                     return results.items
                         .Select(x => new GenericItemOption(x.title, x.description))
@@ -115,10 +118,116 @@ namespace VNDBMetadata
                 : base.GetName();
         }
 
+        private static string ToHTML(string vndbDescription)
+        {
+            var sb = new StringBuilder();
+            
+            //weird things happen here, don't ask or try to understand it
+
+            var startingTag = false;
+            var endingTag = false;
+            var startingURL = false;
+            var finishedStartingTag = false;
+            var urlLink = new StringBuilder();
+            var urlName = new StringBuilder();
+            var finishedURL = false;
+
+            for (var i = 0; i < vndbDescription.Length; i++)
+            {
+                var cur = vndbDescription[i];
+
+                //from
+                //[url=http://en.wikipedia.org/wiki/Saya_no_Uta]Wikipedia[/url]
+                //to
+                //<a href="http://en.wikipedia.org/wiki/Saya_no_Uta">Wikipedia</a>
+                if (cur == '[')
+                {
+                    if (i != vndbDescription.Length - 1)
+                    {
+                        var next = vndbDescription[i + 1];
+                        if (next == 'u' || next == 'U')
+                        {
+                            startingTag = true;
+                            continue;
+                        }
+                    }
+                }
+
+                if (startingTag && !startingURL)
+                {
+                    if (cur == '=')
+                    {
+                        startingURL = true;
+                    }
+                    continue;
+                }
+
+                if (startingURL && cur != ']')
+                {
+                    urlLink.Append(cur);
+                    continue;
+                }
+
+                if (cur == ']' && startingURL)
+                {
+                    startingURL = false;
+                    startingTag = false;
+                    finishedStartingTag = true;
+                    continue;
+                }
+
+                if (finishedStartingTag && cur != '[')
+                {
+                    urlName.Append(cur);
+                    continue;
+                }
+
+                if (finishedStartingTag && cur == '[')
+                {
+                    if (i != vndbDescription.Length - 1)
+                    {
+                        var next = vndbDescription[i + 1];
+                        if (next == '/')
+                        {
+                            endingTag = true;
+                            finishedStartingTag = false;
+                            continue;
+                        }
+                    }
+                }
+
+                if (endingTag && cur != ']')
+                {
+                    continue;
+                }
+
+                if (endingTag && cur == ']')
+                {
+                    finishedURL = true;
+                }
+
+                if (finishedURL)
+                {
+                    sb.Append($"<a href=\"{urlLink}\">{urlName}</a>");
+                    startingTag = false;
+                    endingTag = false;
+                    urlLink.Clear();
+                    urlName.Clear();
+                    finishedURL = false;
+                    continue;
+                }
+
+                sb.Append(cur);
+            }
+
+            var result = sb.ToString();
+            return result;
+        }
+
         public override string GetDescription()
         {
             return AvailableFields.Contains(MetadataField.Description)
-                ? _visualNovel.description
+                ? ToHTML(_visualNovel.description)
                 : base.GetDescription();
         }
 

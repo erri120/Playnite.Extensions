@@ -42,9 +42,10 @@ namespace VNDBMetadata
         {
             if (res.StartsWith("error"))
                 throw new Exception($"Error: {res}");
-
             if (!res.StartsWith("results"))
-                throw new ArgumentException();
+                throw new Exception($"Message does not start with results! {res}");
+            if (!res.EndsWith("}"))
+                throw new Exception($"Message does not end with a closing bracket! {res}");
             res = res.Substring("results".Length).TrimStart();
             return res.FromJson<Result<T>>();
         }
@@ -94,21 +95,28 @@ namespace VNDBMetadata
             buffer = new byte[2048];
             var response = new StringBuilder();
             int bytes;
+            var totalBytes = 0;
             var iterations = 0;
 
             do
             {
                 bytes = await stream.ReadAsync(buffer, 0, buffer.Length);
+                totalBytes += bytes;
                 var decoder = Encoding.UTF8.GetDecoder();
                 var chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
                 decoder.GetChars(buffer, 0, bytes, chars, 0);
-                
 
-                if (chars.Any(x => (byte)x == Consts.EndOfTransmissionChar))
+                if (chars[chars.Length - 1] == (char) Consts.EndOfTransmissionChar)
+                {
+                    response.Append(chars, 0, chars.Length - 1);
+                    break;
+                }
+
+                /*if (chars.Any(x => x == (char)Consts.EndOfTransmissionChar))
                 {
                     response.Append(chars, 0, chars.Length-1);
                     break;
-                }
+                }*/
 
                 response.Append(chars);
 

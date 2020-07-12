@@ -56,8 +56,6 @@ namespace VNDBMetadata
             // Executed before EndEdit is called and EndEdit is not called if false is returned.
             // List of errors is presented to user if verification fails.
             errors = new List<string>();
-            if(MaxTags < 0)
-                errors.Add($"{nameof(MaxTags)} has to be at least 0!");
             return true;
         }
     }
