@@ -11,6 +11,6 @@
 
         internal static byte EndOfTransmissionChar => 0x04;
         internal static string OK => "ok";
-        internal static int MaxIterations => 10;
+        internal static int MaxIterations => 100;
     }
 }

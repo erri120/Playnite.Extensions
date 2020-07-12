@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Extensions.Common;
+
 // ReSharper disable InconsistentNaming
 // ReSharper disable IdentifierTypo
 // ReSharper disable NotAccessedField.Global
@@ -42,7 +44,7 @@ namespace VNDBMetadata
         public int num;
     }
 
-    public class GetVN
+    public class VisualNovel
     {
         /// <summary>
         /// Visual novel ID
@@ -137,6 +139,11 @@ namespace VNDBMetadata
         /// (Possibly empty) list of staff related to the VN
         /// </summary>
         public List<Staff> staff;
+
+        public override string ToString()
+        {
+            return title ?? original;
+        }
     }
 
     public class ImageFlagging

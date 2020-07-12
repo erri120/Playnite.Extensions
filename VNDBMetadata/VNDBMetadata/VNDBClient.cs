@@ -40,6 +40,9 @@ namespace VNDBMetadata
 
         private static Result<T> FromResults<T>(string res)
         {
+            if (res.StartsWith("error"))
+                throw new Exception($"Error: {res}");
+
             if (!res.StartsWith("results"))
                 throw new ArgumentException();
             res = res.Substring("results".Length).TrimStart();
@@ -130,7 +133,7 @@ namespace VNDBMetadata
             if (!username.IsEmpty() && !password.IsEmpty())
             {
                 if(!_useTLS)
-                    throw new Exception($"Username and password were provided but Client is not in TLS mode!");
+                    throw new Exception("Username and password were provided but Client is not in TLS mode!");
 
                 login.username = username;
                 login.password = password;
@@ -143,11 +146,23 @@ namespace VNDBMetadata
             return true;
         }
 
-        public async Task<Result<GetVN>> GetVN(int id)
-        {
+        public async Task<Result<VisualNovel>> GetVNByID(int id)
+        { 
             //var res = await RequestAndReceive($"get vn basic,details,anime,stats,screens,tags,relations,staff (id = {id})");
             var res = await RequestAndReceive($"get vn basic,details,stats,screens,tags (id = {id})");
-            return FromResults<GetVN>(res);
+            return FromResults<VisualNovel>(res);
+        }
+
+        public async Task<Result<VisualNovel>> GetVNByTitle(string title)
+        {
+            var res = await RequestAndReceive($"get vn basic,details,stats,screens,tags (title = \"{title}\" or original = \"{title}\")");
+            return FromResults<VisualNovel>(res);
+        }
+
+        public async Task<Result<VisualNovel>> SearchVN(string name)
+        {
+            var res = await RequestAndReceive($"get vn basic (title ~ \"{name}\" or original ~ \"{name}\")");
+            return FromResults<VisualNovel>(res);
         }
 
         public void Dispose()

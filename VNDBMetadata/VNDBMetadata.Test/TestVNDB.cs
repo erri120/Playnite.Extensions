@@ -28,12 +28,27 @@ namespace VNDBMetadata.Test
             await TestClient(client);
         }
 
+        [Fact]
+        public async Task TestSearch()
+        {
+            using var client = new VNDBClient(true);
+            var login = await client.Login();
+            Assert.True(login);
+
+            Result<VisualNovel> results = await client.SearchVN("Grisaia");
+            Assert.NotNull(results);
+            Assert.NotEmpty(results.items);
+
+            Assert.Equal(10, results.items.Count);
+            Assert.True(results.items.All(x => x.title.StartsWith("Grisaia")));
+        }
+
         private static async Task TestClient(VNDBClient client)
         {
             var login = await client.Login();
             Assert.True(login);
 
-            Result<GetVN> vnResults = await client.GetVN(11);
+            Result<VisualNovel> vnResults = await client.GetVNByID(11);
             Assert.NotNull(vnResults);
             Assert.NotEmpty(vnResults.items);
             Assert.True(vnResults.items.Count == 1);
