@@ -1,19 +1,11 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using Playnite.SDK;
 using Xunit;
 
 namespace VNDBMetadata.Test
 {
-    public class TestVNDB : IClassFixture<TestLoggerFixture>
+    public class TestVNDB
     {
-        private readonly ILogger _logger;
-
-        public TestVNDB(TestLoggerFixture fixture)
-        {
-            _logger = fixture.Logger;
-        }
-
         [Fact]
         public async Task TestClientTCP()
         {
