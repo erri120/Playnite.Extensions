@@ -13,7 +13,7 @@ namespace VNDBMetadata
         private static readonly ILogger Logger = LogManager.GetLogger();
         public ILogger GetLogger => Logger;
 
-        private VNDBMetadataSettings Settings { get; }
+        internal VNDBMetadataSettings Settings { get; }
 
         public override Guid Id { get; } = Guid.Parse("613c7bba-36e9-437f-858a-3a8478cd489c");
 

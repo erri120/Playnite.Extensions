@@ -3,12 +3,35 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:vndb="clr-namespace:VNDBMetadata"
              mc:Ignorable="d"
              d:DesignHeight="400" d:DesignWidth="600">
-    <StackPanel>
-        <TextBlock Text="Description for Option1:"/>
-        <TextBox Text="{Binding Option1}"/>
-        <TextBlock Text="Description for Option2:"/>
-        <CheckBox IsChecked="{Binding Option2}"/>
+    <StackPanel Margin="20">
+        <CheckBox Content="Use TLS"
+                  IsChecked="{Binding UseTLS}"/>
+
+        <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
+            <TextBlock Text="Max Tags" VerticalAlignment="Center"/>
+            <ComboBox SelectedValue="{Binding MaxTags}"
+                      Margin="5,0,0,0">
+                <ComboBox.ItemsSource>
+                    <x:Array Type="{x:Type sys:Int32}">
+                        <sys:Int32>0</sys:Int32>
+                        <sys:Int32>10</sys:Int32>
+                        <sys:Int32>20</sys:Int32>
+                        <sys:Int32>30</sys:Int32>
+                        <sys:Int32>50</sys:Int32>
+                        <sys:Int32>100</sys:Int32>
+                        <sys:Int32>200</sys:Int32>
+                    </x:Array>
+                </ComboBox.ItemsSource>
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource ObjectToStringConverter}}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
     </StackPanel>
 </UserControl>

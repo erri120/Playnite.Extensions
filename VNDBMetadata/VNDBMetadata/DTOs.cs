@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Extensions.Common;
+// ReSharper disable UnassignedField.Global
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable IdentifierTypo

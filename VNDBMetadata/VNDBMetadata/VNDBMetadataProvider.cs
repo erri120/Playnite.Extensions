@@ -27,9 +27,7 @@ namespace VNDBMetadata
             _options = options;
             _plugin = plugin;
 
-            //TODO: use settings for useTLS
-            _client = new VNDBClient(true);
-            //TODO: use settings for credentials
+            _client = new VNDBClient(plugin.Settings.UseTLS);
             var res = _client.Login().Result;
             if(!res)
                 throw new Exception("Login failed!");
@@ -206,8 +204,7 @@ namespace VNDBMetadata
                 return tag;
             }).NotNull().OrderByDescending(x => x.vns).ToList();
 
-            //TODO: max tags using settings
-            return tags.Take(Consts.MaxTags).Select(x => x.name).ToList();
+            return tags.Take(_plugin.Settings.MaxTags).Select(x => x.name).ToList();
         }
 
         public override void Dispose()
