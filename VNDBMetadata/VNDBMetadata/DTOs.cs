@@ -269,4 +269,57 @@ namespace VNDBMetadata
         public int year;
         public string type;
     }
+
+    public class BasicTag
+    {
+        /// <summary>
+        /// Tag ID
+        /// </summary>
+        public int id;
+        /// <summary>
+        /// Tag name
+        /// </summary>
+        public string name;
+        /// <summary>
+        /// Can include formatting codes as described in https://vndb.org/d9#3.
+        /// </summary>
+        public string description;
+        /// <summary>
+        /// Number of tagged VNs (including child tags)
+        /// </summary>
+        public int vns;
+
+        public override string ToString()
+        {
+            return $"{name} ({id})";
+        }
+    }
+
+    public class FullTag : BasicTag
+    {
+        /// <summary>
+        /// Whether this is a meta tag or not. This field only exists for backwards compatibility and is currently the inverse of "searchable".
+        /// </summary>
+        public bool meta;
+        /// <summary>
+        /// Whether it's possible to filter VNs by this tag.
+        /// </summary>
+        public bool searchable;
+        /// <summary>
+        /// Whether this tag can be applied to VN entries.
+        /// </summary>
+        public bool applicable;
+        /// <summary>
+        /// Tag category/classification: "cont" for content, "ero" for sexual stuff, and "tech" for technical details.
+        /// </summary>
+        public string cat;
+        /// <summary>
+        /// (Possibly empty) list of alternative names.
+        /// </summary>
+        public List<string> aliases;
+        /// <summary>
+        /// List of parent tags (empty for root tags).
+        /// </summary>
+        public List<int> parents;
+    }
 }

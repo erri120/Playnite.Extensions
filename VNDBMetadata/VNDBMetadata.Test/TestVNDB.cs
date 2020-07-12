@@ -48,5 +48,15 @@ namespace VNDBMetadata.Test
             var vn = vnResults.items.First();
             Assert.NotNull(vn);
         }
+
+        [Fact]
+        public async Task TestTags()
+        {
+            var res = await VNDBTags.GetLatestDumb("");
+            Assert.True(res);
+
+            var count = VNDBTags.ReadTags("");
+            Assert.True(count != 0);
+        }
     }
 }

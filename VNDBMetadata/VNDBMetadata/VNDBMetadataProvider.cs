@@ -1,6 +1,7 @@
 ﻿using System;
 using Playnite.SDK.Plugins;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Extensions.Common;
 using Playnite.SDK;
@@ -25,6 +26,7 @@ namespace VNDBMetadata
         {
             _options = options;
             _plugin = plugin;
+
             //TODO: use settings for useTLS
             _client = new VNDBClient(true);
             //TODO: use settings for credentials
@@ -102,6 +104,8 @@ namespace VNDBMetadata
                 list.Add(MetadataField.BackgroundImage);
             if (!_visualNovel.released.IsEmpty())
                 list.Add(MetadataField.ReleaseDate);
+            if (_visualNovel.tags != null && _visualNovel.tags.Count > 0)
+                list.Add(MetadataField.Genres);
 
             return list;
         }
@@ -188,6 +192,22 @@ namespace VNDBMetadata
             return !DateTime.TryParse(_visualNovel.released, out var date) 
                 ? base.GetReleaseDate() 
                 : date;
+        }
+
+        public override List<string> GetGenres()
+        {
+            if (!AvailableFields.Contains(MetadataField.Genres))
+                return base.GetGenres();
+
+            List<BasicTag> tags = _visualNovel.tags.Select(x =>
+            {
+                var id = (int) x[0];
+                var tag = VNDBTags.GetTagByID(id);
+                return tag;
+            }).NotNull().OrderByDescending(x => x.vns).ToList();
+
+            //TODO: max tags using settings
+            return tags.Take(Consts.MaxTags).Select(x => x.name).ToList();
         }
 
         public override void Dispose()

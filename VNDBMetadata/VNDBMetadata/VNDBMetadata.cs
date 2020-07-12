@@ -2,6 +2,8 @@
 using Playnite.SDK.Plugins;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace VNDBMetadata
@@ -17,7 +19,14 @@ namespace VNDBMetadata
 
         public override List<MetadataField> SupportedFields { get; } = new List<MetadataField>
         {
-            MetadataField.Description
+            MetadataField.Name,
+            MetadataField.Description,
+            MetadataField.CoverImage,
+            MetadataField.BackgroundImage,
+            MetadataField.ReleaseDate,
+            MetadataField.CommunityScore,
+            MetadataField.Genres,
+            MetadataField.Links
         };
 
         public override string Name => "VNDB";
@@ -25,6 +34,20 @@ namespace VNDBMetadata
         public VNDBMetadata(IPlayniteAPI api) : base(api)
         {
             Settings = new VNDBMetadataSettings(this);
+
+            Task.Run(async () =>
+            {
+                var dataDir = Path.Combine(api.Paths.ExtensionsDataPath, Id.ToString());
+                var res = await VNDBTags.GetLatestDumb(dataDir);
+                if (!res)
+                {
+                    Logger.Error("Unable to get latest tags dumb!");
+                    return;
+                }
+
+                var count = VNDBTags.ReadTags(dataDir);
+                Logger.Info($"Tags cache contains {count} tags");
+            });
         }
 
         public override OnDemandMetadataProvider GetMetadataProvider(MetadataRequestOptions options)

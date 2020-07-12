@@ -1,4 +1,6 @@
-﻿namespace VNDBMetadata
+﻿using System;
+
+namespace VNDBMetadata
 {
     internal static class Consts
     {
@@ -9,8 +11,13 @@
         internal static int TCPPort => 19534;
         internal static int TLSPort => 19535;
 
+        internal static int TagsCacheLivetime => 5;
+        internal static int MaxTags => 20;
+        internal static string LatestTagsDumb => "https://dl.vndb.org/dump/vndb-tags-latest.json.gz";
+        internal static string LatestTagsDumbFile => "vndb-tags-latest.json.gz";
+
         internal static byte EndOfTransmissionChar => 0x04;
         internal static string OK => "ok";
-        internal static int MaxIterations => 100;
+        internal static int MaxIterations => 20;
     }
 }
