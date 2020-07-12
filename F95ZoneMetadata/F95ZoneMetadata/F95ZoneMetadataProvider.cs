@@ -31,16 +31,27 @@ namespace F95ZoneMetadata
             var game = _options.GameData;
             var list = new List<MetadataField>();
 
-            if (game.Name.IsEmpty())
-                return list;
+            var name = game.Name;
 
-            if (!game.Name.StartsWith(F95ZoneGame.Root))
+            if (name.IsEmpty())
             {
-                Logger.Warn($"Tried to get metadata for {game.Name} but it does not start with {F95ZoneGame.Root}!");
-                return list;
+                var link = game.Links.FirstOrDefault(x =>
+                    x.Name.Equals("F95Zone", StringComparison.InvariantCultureIgnoreCase));
+                if (link == null)
+                    return list;
+                name = link.Url;
             }
 
-            _game = F95ZoneGame.LoadGame(game.Name, Logger).Result;
+            if (!name.StartsWith(F95ZoneGame.Root))
+            {
+                var link = game.Links.FirstOrDefault(x =>
+                    x.Name.Equals("F95Zone", StringComparison.InvariantCultureIgnoreCase));
+                if (link == null)
+                    return list;
+                name = link.Url;
+            }
+
+            _game = F95ZoneGame.LoadGame(name, Logger).Result;
 
             list.Add(MetadataField.Links);
 
@@ -124,8 +135,15 @@ namespace F95ZoneMetadata
             if (!AvailableFields.Contains(MetadataField.BackgroundImage))
                 return base.GetBackgroundImage();
 
-            var url = _game.PreviewImageURLs.First();
-            var file = new MetadataFile(url);
+            List<ImageFileOption> options = _game.PreviewImageURLs
+                .Select(x => new ImageFileOption(x))
+                .ToList();
+
+            var option = _plugin.PlayniteApi.Dialogs.ChooseImageFile(options, "Select Background Image");
+            if (option == null)
+                return base.GetBackgroundImage();
+
+            var file = new MetadataFile(option.Path);
             return file;
         }
     }

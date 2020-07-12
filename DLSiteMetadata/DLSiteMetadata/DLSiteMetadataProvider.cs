@@ -31,10 +31,18 @@ namespace DLSiteMetadata
             var game = _options.GameData;
             var list = new List<MetadataField>();
 
-            if (game.Name.IsEmpty())
-                return list;
+            var name = game.Name;
 
-            var id = game.Name;
+            if (name.IsEmpty())
+            {
+                var dlSiteLink = game.Links.FirstOrDefault(x =>
+                    x.Name.Equals("DLSite", StringComparison.InvariantCultureIgnoreCase));
+                if(dlSiteLink == null)
+                    return list;
+                name = dlSiteLink.Url;
+            }
+
+            var id = name;
 
             IDCheck:
             if (!id.StartsWith("RJ", StringComparison.InvariantCultureIgnoreCase)
@@ -47,6 +55,15 @@ namespace DLSiteMetadata
                     id = id.Replace(root, "");
                     //work/=/product_id/{id}.html
                     id = id.Replace(".html", "").Replace("work/=/product_id/", "");
+                    goto IDCheck;
+                }
+
+                var dlSiteLink = game.Links.FirstOrDefault(x =>
+                    x.Name.Equals("DLSite", StringComparison.InvariantCultureIgnoreCase));
+
+                if (dlSiteLink != null)
+                {
+                    id = dlSiteLink.Url;
                     goto IDCheck;
                 }
 
@@ -138,7 +155,15 @@ namespace DLSiteMetadata
         {
             if (!AvailableFields.Contains(MetadataField.CoverImage)) return base.GetCoverImage();
 
-            var file = new MetadataFile(_game.ImageURLs.First());
+            List<ImageFileOption> options = _game.ImageURLs
+                .Select(x => new ImageFileOption(x))
+                .ToList();
+
+            var option = _plugin.PlayniteApi.Dialogs.ChooseImageFile(options, "Select Cover Image");
+            if (option == null)
+                return base.GetCoverImage();
+
+            var file = new MetadataFile(option.Path);
             return file;
         }
 
@@ -146,7 +171,15 @@ namespace DLSiteMetadata
         {
             if (!AvailableFields.Contains(MetadataField.BackgroundImage)) return base.GetBackgroundImage();
 
-            var file = new MetadataFile(_game.ImageURLs[1]);
+            List<ImageFileOption> options = _game.ImageURLs
+                .Select(x => new ImageFileOption(x))
+                .ToList();
+
+            var option = _plugin.PlayniteApi.Dialogs.ChooseImageFile(options, "Select Background Image");
+            if (option == null)
+                return base.GetBackgroundImage();
+            
+            var file = new MetadataFile(option.Path);
             return file;
         }
 
