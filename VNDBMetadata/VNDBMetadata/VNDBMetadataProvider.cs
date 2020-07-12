@@ -54,7 +54,9 @@ namespace VNDBMetadata
                 name = name.Replace("https://vndb.org/v", "");
 
             //either ID or a name for search
-            Result<VisualNovel> res = !int.TryParse(name, out var id) 
+            var doSearch = !int.TryParse(name, out var id);
+
+            Result<VisualNovel> res = doSearch
                 ? _client.SearchVN(name).Result 
                 : _client.GetVNByID(id).Result;
 
@@ -88,6 +90,8 @@ namespace VNDBMetadata
             }
             else
             {
+                if(doSearch)
+                    res = _client.GetVNByTitle(name).Result;
                 _visualNovel = res.items.First();
             }
 
