@@ -2,13 +2,13 @@
 using Playnite.SDK;
 using Xunit.Abstractions;
 
-namespace F95ZoneMetadata.Test
+namespace Extensions.Test
 {
-    public class TestLoggerFixture : IDisposable
+    public class LoggerFixture : IDisposable
     {
         public readonly TestLogger Logger;
 
-        public TestLoggerFixture()
+        public LoggerFixture()
         {
             Logger = new TestLogger();
         }

@@ -82,7 +82,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Extensions.Common\Extensions.Common.csproj">
+    <ProjectReference Include="..\Extensions.Common\Extensions.Common.csproj">
       <Project>{5ac34e06-706a-4706-84d4-510aa345d7fc}</Project>
       <Name>Extensions.Common</Name>
     </ProjectReference>

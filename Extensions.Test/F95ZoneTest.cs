@@ -1,15 +1,16 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using F95ZoneMetadata;
 using Playnite.SDK;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace F95ZoneMetadata.Test
+namespace Extensions.Test
 {
-    public class TestF95ZoneGame : IClassFixture<TestLoggerFixture>
+    public class F95ZoneTest : IClassFixture<LoggerFixture>
     {
         private readonly ILogger _logger;
 
-        public TestF95ZoneGame(TestLoggerFixture fixture, ITestOutputHelper output)
+        public F95ZoneTest(LoggerFixture fixture, ITestOutputHelper output)
         {
             fixture.Logger.SetOutputHelper(output);
             _logger = fixture.Logger;

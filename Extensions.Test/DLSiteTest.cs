@@ -1,15 +1,16 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using DLSiteMetadata;
 using Playnite.SDK;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace DLSiteMetadata.Test
+namespace Extensions.Test
 {
-    public class TestDLSiteGame : IClassFixture<TestLoggerFixture>
+    public class DLSiteTest : IClassFixture<LoggerFixture>
     {
         private readonly ILogger _logger;
 
-        public TestDLSiteGame(TestLoggerFixture fixture, ITestOutputHelper output)
+        public DLSiteTest(LoggerFixture fixture, ITestOutputHelper output)
         {
             fixture.Logger.SetOutputHelper(output);
             _logger = fixture.Logger;
@@ -20,17 +21,7 @@ namespace DLSiteMetadata.Test
         {
             //https://www.dlsite.com/ecchi-eng/work/=/product_id/RE234198.html
             var game = await DLSiteGame.LoadGame("RE234198", _logger);
-            
-            Assert.NotNull(game);
-            Assert.NotNull(game.DLSiteLink);
-            Assert.NotNull(game.Name);
-            Assert.NotNull(game.Description);
-            Assert.NotNull(game.Circle);
-            Assert.NotNull(game.CircleLink);
-            Assert.NotNull(game.Genres);
-            Assert.NotEmpty(game.Genres);
-            Assert.NotNull(game.ImageURLs);
-            Assert.NotEmpty(game.ImageURLs);
+            TestGame(game);
         }
 
         [Fact]
@@ -38,7 +29,11 @@ namespace DLSiteMetadata.Test
         {
             //https://www.dlsite.com/maniax/work/=/product_id/RJ173356.html
             var game = await DLSiteGame.LoadGame("RJ173356", _logger);
+            TestGame(game);
+        }
 
+        private static void TestGame(DLSiteGame game)
+        {
             Assert.NotNull(game);
             Assert.NotNull(game.DLSiteLink);
             Assert.NotNull(game.Name);

@@ -1,10 +1,11 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using VNDBMetadata;
 using Xunit;
 
-namespace VNDBMetadata.Test
+namespace Extensions.Test
 {
-    public class TestVNDB
+    public class VNDBTest
     {
         [Fact]
         public async Task TestClientTCP()
