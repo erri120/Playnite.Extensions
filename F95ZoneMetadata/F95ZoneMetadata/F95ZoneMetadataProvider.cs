@@ -52,6 +52,10 @@ namespace F95ZoneMetadata
             }
 
             _game = F95ZoneGame.LoadGame(name, Logger).Result;
+            if(_game == null)
+            {
+                throw new Exception($"Game for {name} is null!");
+            }
 
             list.Add(MetadataField.Links);
 

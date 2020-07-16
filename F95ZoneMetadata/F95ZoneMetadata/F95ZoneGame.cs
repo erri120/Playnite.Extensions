@@ -46,7 +46,7 @@ namespace F95ZoneMetadata
 
             var headerNode =
                 bodyNode.SelectSingleNode(
-                    "//div[@class='p-body-header ']/div[@class='pageContent']/div[@class='uix_headerInner']");
+                    "//div[@class='pageContent']/div[@class='uix_headerInner']");
             if (headerNode.IsNull(logger, "Header", url))
                 return null;
 
