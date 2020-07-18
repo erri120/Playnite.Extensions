@@ -33,5 +33,27 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
         </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
+            <TextBlock Text="Tags Cache Livetime (in days)" VerticalAlignment="Center"/>
+            <ComboBox SelectedValue="{Binding TagsCacheLivetime}"
+                      Margin="5,0,0,0">
+                <ComboBox.ItemsSource>
+                    <x:Array Type="{x:Type sys:Int32}">
+                        <sys:Int32>1</sys:Int32>
+                        <sys:Int32>2</sys:Int32>
+                        <sys:Int32>3</sys:Int32>
+                        <sys:Int32>5</sys:Int32>
+                        <sys:Int32>10</sys:Int32>
+                        <sys:Int32>30</sys:Int32>
+                    </x:Array>
+                </ComboBox.ItemsSource>
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource ObjectToStringConverter}}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
     </StackPanel>
 </UserControl>

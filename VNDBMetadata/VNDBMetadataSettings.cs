@@ -3,13 +3,34 @@ using System.Collections.Generic;
 
 namespace VNDBMetadata
 {
+    public static class StaticSettings
+    {
+        public static bool UseTLS { get; set; } = true;
+        public static int MaxTags { get; set; } = 50;
+        public static int TagsCacheLivetime { get; set; } = 1;
+    }
+
     public class VNDBMetadataSettings : ISettings
     {
         private readonly VNDBMetadata _plugin;
 
-        public bool UseTLS { get; set; }
+        public bool UseTLS
+        {
+            get => StaticSettings.UseTLS;
+            set => StaticSettings.UseTLS = value;
+        }
 
-        public int MaxTags { get; set; }
+        public int MaxTags
+        {
+            get => StaticSettings.MaxTags;
+            set => StaticSettings.MaxTags = value;
+        }
+
+        public int TagsCacheLivetime
+        {
+            get => StaticSettings.TagsCacheLivetime;
+            set => StaticSettings.TagsCacheLivetime = value;
+        }
 
         // Parameterless constructor must exist if you want to use LoadPluginSettings method.
         public VNDBMetadataSettings()
@@ -29,6 +50,7 @@ namespace VNDBMetadata
             {
                 UseTLS = savedSettings.UseTLS;
                 MaxTags = savedSettings.MaxTags;
+                TagsCacheLivetime = savedSettings.TagsCacheLivetime;
             }
         }
 

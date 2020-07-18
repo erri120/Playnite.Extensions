@@ -9,7 +9,6 @@
         internal static int TCPPort => 19534;
         internal static int TLSPort => 19535;
 
-        internal static int TagsCacheLivetime => 5;
         internal static string LatestTagsDumb => "https://dl.vndb.org/dump/vndb-tags-latest.json.gz";
         internal static string LatestTagsDumbFile => "vndb-tags-latest.json.gz";
 

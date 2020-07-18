@@ -28,7 +28,7 @@ namespace VNDBMetadata
             _options = options;
             _plugin = plugin;
 
-            _client = new VNDBClient(plugin.Settings.UseTLS);
+            _client = new VNDBClient(StaticSettings.UseTLS);
             var res = _client.Login().Result;
             if(!res)
                 throw new Exception("Login failed!");
@@ -317,7 +317,7 @@ namespace VNDBMetadata
                 return tag;
             }).NotNull().OrderByDescending(x => x.vns).ToList();
 
-            return tags.Take(_plugin.Settings.MaxTags).Select(x => x.name).ToList();
+            return tags.Take(StaticSettings.MaxTags).Select(x => x.name).ToList();
         }
 
         public override void Dispose()

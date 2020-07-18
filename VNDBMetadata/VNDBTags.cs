@@ -43,7 +43,7 @@ namespace VNDBMetadata
             if (File.Exists(filePath) && File.Exists(outputPath))
             {
                 var fsi = new FileInfo(filePath);
-                if ((DateTime.UtcNow - fsi.CreationTimeUtc).TotalDays > Consts.TagsCacheLivetime)
+                if ((DateTime.UtcNow - fsi.CreationTimeUtc).TotalDays > StaticSettings.TagsCacheLivetime)
                 {
                     File.Delete(filePath);
                     File.Delete(outputPath);
