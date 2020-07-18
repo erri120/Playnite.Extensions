@@ -30,8 +30,11 @@ namespace VNDBMetadata
 
         public static int ReadTags(string dataDir)
         {
-            var json = Path.Combine(dataDir, "tags.json");
-            _tags = File.ReadAllText(json).FromJson<List<BasicTag>>().OrderByDescending(x => x.vns).ToList();
+            var file = Path.Combine(dataDir, "tags.json");
+            if (!File.Exists(file))
+                return 0;
+
+            _tags = File.ReadAllText(file).FromJson<List<BasicTag>>().OrderByDescending(x => x.vns).ToList();
             return _tags.Count;
         }
 

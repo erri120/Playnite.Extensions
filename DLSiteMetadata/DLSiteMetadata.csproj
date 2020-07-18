@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Consts.cs" />
     <Compile Include="DLSiteGame.cs" />
+    <Compile Include="DLSiteGenres.cs" />
     <Compile Include="DLSiteMetadata.cs" />
     <Compile Include="DLSiteMetadataProvider.cs" />
     <Compile Include="DLSiteMetadataSettings.cs" />

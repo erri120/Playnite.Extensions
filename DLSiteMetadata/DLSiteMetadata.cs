@@ -2,6 +2,8 @@
 using Playnite.SDK.Plugins;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace DLSiteMetadata
@@ -37,6 +39,13 @@ namespace DLSiteMetadata
         public DLSiteMetadata(IPlayniteAPI api) : base(api)
         {
             Settings = new DLSiteMetadataSettings(this);
+
+            Task.Run(() =>
+            {
+                var dataDir = Path.Combine(api.Paths.ExtensionsDataPath, Id.ToString());
+                var count = DLSiteGenres.LoadGenres(dataDir);
+                Logger.Info($"Loaded {count} DLSite genres");
+            });
         }
 
         public override OnDemandMetadataProvider GetMetadataProvider(MetadataRequestOptions options)

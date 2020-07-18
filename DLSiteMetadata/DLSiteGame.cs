@@ -58,7 +58,7 @@ namespace DLSiteMetadata
         public List<string> WorkFormats { get; private set; }
         public string FileFormat { get; private set; }
 
-        public List<string> Genres { get; private set; }
+        public List<DLSiteGenre> Genres { get; private set; }
         public string FileSize { get; private set; }
 
         public static async Task<DLSiteGame> LoadGame(string id, ILogger logger)
@@ -217,7 +217,42 @@ namespace DLSiteMetadata
                 {
                     var genreNodes = td.SelectNodes("div[@class='main_genre']/a");
                     if (!genreNodes.IsNullOrEmpty(logger, "Genres", id))
-                        game.Genres = genreNodes.Select(y => y.DecodeInnerText()).NotNull().ToList();
+                    {
+                        game.Genres = genreNodes.Select(genreNode =>
+                        {
+                            var genreUrl = genreNode.GetValue("href");
+                            var genreID = isEnglish ? DLSiteGenre.GetENGID(genreUrl) : DLSiteGenre.GetJPNID(genreUrl);
+                            if (genreID == -1)
+                            {
+                                logger.Error($"Could not get ID from {genreUrl}");
+                                return null;
+                            }
+
+                            if (DLSiteGenres.TryGetGenre(genreID, out var cachedGenre))
+                                return cachedGenre;
+
+                            var genre = new DLSiteGenre(genreID);
+                            var genreName = genreNode.DecodeInnerText();
+                            if (isEnglish)
+                            {
+                                genre.ENG = genreName;
+                            }
+                            else
+                            {
+                                genre.JPN = genreName;
+                                var resultConvert = DLSiteGenres.ConvertTo(genre, logger, isEnglish);
+                                if (string.IsNullOrEmpty(resultConvert))
+                                {
+                                    logger.Error($"Unable to convert {genreName} to English genre!");
+                                    return null;
+                                }
+
+                                genre.ENG = resultConvert;
+                            }
+
+                            return genre;
+                        }).NotNull().ToList();
+                    }
 
                     return;
                 }

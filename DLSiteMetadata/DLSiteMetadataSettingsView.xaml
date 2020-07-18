@@ -5,6 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
              d:DesignHeight="400" d:DesignWidth="600">
-    <StackPanel>
+    <StackPanel Margin="20">
+        <CheckBox Content="Convert JPN tags to ENG"
+                  IsChecked="{Binding ConvertJPNToEng}"/>
     </StackPanel>
 </UserControl>

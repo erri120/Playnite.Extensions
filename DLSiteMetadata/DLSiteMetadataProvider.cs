@@ -1,7 +1,9 @@
 ﻿using System;
 using Playnite.SDK.Plugins;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Extensions.Common;
 using Playnite.SDK;
 using Playnite.SDK.Metadata;
@@ -72,6 +74,13 @@ namespace DLSiteMetadata
             }
 
             _game = DLSiteGame.LoadGame(id, Logger).Result;
+
+            Task.Run(() =>
+            {
+                DLSiteGenres.AddGenres(_game.Genres);
+                var dataDir = Path.Combine(_plugin.PlayniteApi.Paths.ExtensionsDataPath, _plugin.Id.ToString());
+                DLSiteGenres.SaveGenres(dataDir);
+            });
 
             list.Add(MetadataField.Links);
 
@@ -148,7 +157,7 @@ namespace DLSiteMetadata
         {
             return !AvailableFields.Contains(MetadataField.Genres) 
                 ? base.GetGenres()
-                : _game.Genres;
+                : _game.Genres.Select(x => x.ENG).ToList();
         }
 
         public override MetadataFile GetCoverImage()

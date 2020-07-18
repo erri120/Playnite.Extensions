@@ -1,21 +1,22 @@
-﻿using Newtonsoft.Json;
-using Playnite.SDK;
+﻿using Playnite.SDK;
 using System.Collections.Generic;
 
 namespace DLSiteMetadata
 {
+    public static class StaticSettings
+    {
+        public static bool ConvertJPNToEng { get; set; } = true;
+    }
+
     public class DLSiteMetadataSettings : ISettings
     {
         private readonly DLSiteMetadata _plugin;
 
-        public string Option1 { get; set; } = string.Empty;
-
-        public bool Option2 { get; set; } = false;
-
-        // Playnite serializes settings object to a JSON object and saves it as text file.
-        // If you want to exclude some property from being saved then use `JsonIgnore` ignore attribute.
-        [JsonIgnore]
-        public bool OptionThatWontBeSaved { get; set; } = false;
+        public bool ConvertJPNToEng
+        {
+            get => StaticSettings.ConvertJPNToEng;
+            set => StaticSettings.ConvertJPNToEng = value;
+        }
 
         // Parameterless constructor must exist if you want to use LoadPluginSettings method.
         public DLSiteMetadataSettings()
@@ -33,8 +34,7 @@ namespace DLSiteMetadata
             // LoadPluginSettings returns null if not saved data is available.
             if (savedSettings != null)
             {
-                Option1 = savedSettings.Option1;
-                Option2 = savedSettings.Option2;
+                ConvertJPNToEng = savedSettings.ConvertJPNToEng;
             }
         }
 
