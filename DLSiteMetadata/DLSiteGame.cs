@@ -229,7 +229,10 @@ namespace DLSiteMetadata
                             }
 
                             if (DLSiteGenres.TryGetGenre(genreID, out var cachedGenre))
-                                return cachedGenre;
+                            {
+                                if(cachedGenre.ENG != null)
+                                    return cachedGenre;
+                            }
 
                             var genre = new DLSiteGenre(genreID);
                             var genreName = genreNode.DecodeInnerText();
