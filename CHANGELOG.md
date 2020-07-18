@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.0
+
+- Added JPN to ENG translation option for DLSite genres
+
 ## 1.2.0
 
 - Added VNDB Metadata Provider
