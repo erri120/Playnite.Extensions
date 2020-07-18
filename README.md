@@ -42,6 +42,12 @@ Change any fields you want afterwards and click the _Save_ button in the bottom 
 
 ![how-to-dlsite-2](images/how-to-dlsite-2.png)
 
+**JPN to ENG**:
+
+Not every game on DLSite has a page in English. In this case you can end up having the same genres twice, in English and in Japanese. To circumvent this, I added an optional feature for converting JPN genres to ENG. They fortunately have an ID system meaning that eg ID `60` is the same in JPN as it is ENG, that being `女性視点` and `Woman's Viewpoint` respectively.
+
+Loading Metadata for a game can take a bit longer if you have this feature installed because it has to connect to DLSite for every genre it doesn't know the translation of. The translation ofc gets cached so the time it takes will decrease the more DLSite games you add.
+
 ### F95Zone
 
 **Website**: [F95](https://www.f95zone.to)
