@@ -6,6 +6,7 @@ Collection of Extensions I created for [Playnite](https://github.com/JosefNemec/
 - [Metadata Providers](#metadata-providers)
   - [DLSite](#dlsite)
   - [F95Zone](#f95zone)
+  - [VNDB](#vndb)
 - [Troubleshooting](#troubleshooting)
 
 ## Installation
@@ -65,6 +66,35 @@ Copy the entire URL into the Name field, click the _Download Metadata..._ button
 Change any fields you want afterwards and click the _Save_ button in the bottom right corner.
 
 ![how-to-f95-2](images/how-to-f95-2.png)
+
+### VNDB
+
+**Website**: [VNDB](https://vndb.org/)
+
+**Supported Fields**:
+
+- Name
+- Description
+- Cover Image
+- Background Image
+- Release Date
+- Community Score
+- Genres
+- Links
+
+**Usage**:
+
+You can either use the ID (eg: `v11`), Link (eg: `https://vndb.org/v11`) or Name (eg: `Fate/Stay Night`) of the game in the Name field. Click the _Download Metadata..._ button in the bottom left corner and select _VNDB_.
+
+![how-to-vndb-1](images/how-to-vndb-1.png)
+
+You will get a list of search results if you used the Name of the game.
+
+![how-to-vndb-2](images/how-to-vndb-2.png)
+
+Change any fields you want afterwards and click the _Save_ button in the bottom right corner.
+
+![how-to-vndb-3](images/how-to-vndb-3.png)
 
 ## Troubleshooting
 
