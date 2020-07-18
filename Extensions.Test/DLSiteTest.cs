@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
 using DLSiteMetadata;
 using Playnite.SDK;
 using Xunit;
@@ -31,6 +33,31 @@ namespace Extensions.Test
             var game = await DLSiteGame.LoadGame("RJ173356", _logger);
             TestGame(game);
         }
+
+        [Fact]
+        public void TestGenres()
+        {
+            if(File.Exists("genres.json"))
+                File.Delete("genres.json");
+
+            var genre = new DLSiteGenre(60) {JPN = "女性視点"};
+            var eng = DLSiteGenres.ConvertTo(genre, _logger, false);
+            Assert.True(!string.IsNullOrEmpty(eng));
+            Assert.True(eng.Equals("Woman's Viewpoint", StringComparison.OrdinalIgnoreCase));
+
+            genre.ENG = eng;
+            DLSiteGenres.AddGenres(new []{genre});
+
+            var res = DLSiteGenres.TryGetGenre(60, out var cachedGenre);
+            Assert.True(res);
+            Assert.NotNull(cachedGenre);
+            Assert.Equal(genre, cachedGenre);
+
+            DLSiteGenres.SaveGenres("");
+
+            var count = DLSiteGenres.LoadGenres("");
+            Assert.Equal(1, count);
+        } 
 
         private static void TestGame(DLSiteGame game)
         {
