@@ -1,6 +1,6 @@
 # Extensions for Playnite
 
-Collection of Extensions I created for [Playnite](https://github.com/JosefNemec/Playnite).
+Collection of Extensions I created for [Playnite](https://github.com/JosefNemec/Playnite). Links to forum posts: [F95Zone Forum Post](https://f95zone.to/threads/dlsite-and-f95zone-extensions-for-playnite.56493/), [Playnite Forum Post](https://playnite.link/forum/thread-335.html).
 
 - [Installation](#installation)
 - [Metadata Providers](#metadata-providers)
@@ -44,9 +44,9 @@ Change any fields you want afterwards and click the _Save_ button in the bottom 
 
 **JPN to ENG**:
 
-Not every game on DLSite has a page in English. In this case you can end up having the same genres twice, in English and in Japanese. To circumvent this, I added an optional feature for converting JPN genres to ENG. They fortunately have an ID system meaning that eg ID `60` is the same in JPN as it is ENG, that being `女性視点` and `Woman's Viewpoint` respectively.
+Not every game on DLSite has a page in English. In this case you can end up having the same genres twice: in English and in Japanese. To circumvent this, I added an optional feature for converting JPN genres to ENG. They fortunately have an ID system meaning that eg ID `60` is the same in JPN as it is ENG, that being `女性視点` and `Woman's Viewpoint` respectively.
 
-Loading Metadata for a game can take a bit longer if you have this feature installed because it has to connect to DLSite for every genre it doesn't know the translation of. The translation ofc gets cached so the time it takes will decrease the more DLSite games you add.
+Loading Metadata for a game can take a bit longer if you have this feature installed because it has to connect to DLSite for every genre it doesn't know the translation of. The translation of course gets cached so the time it takes will decrease the more DLSite games you add.
 
 ### F95Zone
 
