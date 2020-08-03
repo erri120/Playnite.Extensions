@@ -20,6 +20,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Files", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XUnityAutoTranslatorEmulator", "XUnityAutoTranslatorEmulator\XUnityAutoTranslatorEmulator.csproj", "{80E7D08A-7A44-4170-909F-3472335EAFCA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XUnityAutoTranslatorEmulator.Test", "XUnityAutoTranslatorEmulator.Test\XUnityAutoTranslatorEmulator.Test.csproj", "{5EA39B5E-73D5-4822-B59E-A7300CDB6C73}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +50,14 @@ Global
 		{5567B42E-FC5D-4845-94C6-8285329A1C40}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5567B42E-FC5D-4845-94C6-8285329A1C40}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5567B42E-FC5D-4845-94C6-8285329A1C40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80E7D08A-7A44-4170-909F-3472335EAFCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80E7D08A-7A44-4170-909F-3472335EAFCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80E7D08A-7A44-4170-909F-3472335EAFCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80E7D08A-7A44-4170-909F-3472335EAFCA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5EA39B5E-73D5-4822-B59E-A7300CDB6C73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EA39B5E-73D5-4822-B59E-A7300CDB6C73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EA39B5E-73D5-4822-B59E-A7300CDB6C73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EA39B5E-73D5-4822-B59E-A7300CDB6C73}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
