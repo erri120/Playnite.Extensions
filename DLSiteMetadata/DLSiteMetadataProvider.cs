@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Extensions.Common;
+using Playnite.SDK;
+using Playnite.SDK.Metadata;
+using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Extensions.Common;
-using Playnite.SDK;
-using Playnite.SDK.Metadata;
-using Playnite.SDK.Models;
 
 namespace DLSiteMetadata
 {
@@ -39,14 +39,14 @@ namespace DLSiteMetadata
             {
                 var dlSiteLink = game.Links.FirstOrDefault(x =>
                     x.Name.Equals("DLSite", StringComparison.InvariantCultureIgnoreCase));
-                if(dlSiteLink == null)
+                if (dlSiteLink == null)
                     return list;
                 name = dlSiteLink.Url;
             }
 
             var id = name;
 
-            IDCheck:
+        IDCheck:
             if (!id.StartsWith("RJ", StringComparison.InvariantCultureIgnoreCase)
                 && !id.StartsWith("RE", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -84,10 +84,10 @@ namespace DLSiteMetadata
 
             list.Add(MetadataField.Links);
 
-            if(!_game.Name.IsEmpty())
+            if (!_game.Name.IsEmpty())
                 list.Add(MetadataField.Name);
-            
-            if(!_game.Circle.IsEmpty())
+
+            if (!_game.Circle.IsEmpty())
             {
                 list.Add(MetadataField.Developers);
                 list.Add(MetadataField.Publishers);
@@ -96,16 +96,16 @@ namespace DLSiteMetadata
             if (!_game.Description.IsEmpty())
                 list.Add(MetadataField.Description);
 
-            if(!_game.Release.IsEmpty())
+            if (!_game.Release.IsEmpty())
                 list.Add(MetadataField.ReleaseDate);
 
-            if(_game.Genres != null && _game.Genres.Count > 0)
+            if (_game.Genres != null && _game.Genres.Count > 0)
                 list.Add(MetadataField.Genres);
 
-            if(_game.ImageURLs != null && _game.ImageURLs.Count > 0)
+            if (_game.ImageURLs != null && _game.ImageURLs.Count > 0)
             {
                 list.Add(MetadataField.CoverImage);
-                if(_game.ImageURLs.Count > 1)
+                if (_game.ImageURLs.Count > 1)
                     list.Add(MetadataField.BackgroundImage);
             }
 
@@ -117,7 +117,7 @@ namespace DLSiteMetadata
 
         public override string GetName()
         {
-            return !AvailableFields.Contains(MetadataField.Name) 
+            return !AvailableFields.Contains(MetadataField.Name)
                 ? base.GetName()
                 : _game.Name;
         }
@@ -126,7 +126,7 @@ namespace DLSiteMetadata
         {
             return !AvailableFields.Contains(MetadataField.Developers)
                 ? base.GetDevelopers()
-                : new List<string> {_game.Circle};
+                : new List<string> { _game.Circle };
         }
 
         public override List<string> GetPublishers()
@@ -148,14 +148,14 @@ namespace DLSiteMetadata
             if (!AvailableFields.Contains(MetadataField.ReleaseDate))
                 return base.GetReleaseDate();
 
-            return DateTime.TryParse(_game.Release, out var date) 
-                ? date 
+            return DateTime.TryParse(_game.Release, out var date)
+                ? date
                 : base.GetReleaseDate();
         }
 
         public override List<string> GetGenres()
         {
-            return !AvailableFields.Contains(MetadataField.Genres) 
+            return !AvailableFields.Contains(MetadataField.Genres)
                 ? base.GetGenres()
                 : _game.Genres.Select(x => x.ENG).ToList();
         }
@@ -180,14 +180,16 @@ namespace DLSiteMetadata
         {
             if (!AvailableFields.Contains(MetadataField.BackgroundImage)) return base.GetBackgroundImage();
 
-            List<ImageFileOption> options = _game.ImageURLs
+            // Inserted Collage function here
+
+            List<ImageFileOption> options = Extensions.Common.Utils.CollageImage(_game.ImageURLs)
                 .Select(x => new ImageFileOption(x))
                 .ToList();
 
             var option = _plugin.PlayniteApi.Dialogs.ChooseImageFile(options, "Select Background Image");
             if (option == null)
                 return base.GetBackgroundImage();
-            
+
             var file = new MetadataFile(option.Path);
             return file;
         }
@@ -201,7 +203,7 @@ namespace DLSiteMetadata
                 new Link("DLSite", _game.DLSiteLink)
             };
 
-            if(!_game.CircleLink.IsEmpty() && !_game.Circle.IsEmpty())
+            if (!_game.CircleLink.IsEmpty() && !_game.Circle.IsEmpty())
                 list.Add(new Link(_game.Circle, _game.CircleLink));
 
             return list;

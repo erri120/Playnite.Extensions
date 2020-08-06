@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
 using Newtonsoft.Json;
 using Playnite.SDK;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Linq;
+using System.Web;
 
 namespace Extensions.Common
 {
@@ -95,6 +97,344 @@ namespace Extensions.Common
         public static string DecodeInnerText(this HtmlNode node)
         {
             return HttpUtility.HtmlDecode(node?.InnerText);
+        }
+
+        public static List<string> CollageImage(    List<string> ImageURLs,
+                                                    bool UsePattern1 = true, 
+                                                    bool UsePattern2 = true, 
+                                                    bool UsePattern3 = true,
+                                                    bool SkipFirst = true )
+        {
+            if (ImageURLs.Count > 1)
+            {
+                Tuple<int, int> GoalResolution = new Tuple<int, int>(1920, 1080);
+                List<int> x_Size = new List<int>();
+                List<int> y_Size = new List<int>();
+
+                List<Bitmap> BitmapList = new List<Bitmap>();
+
+                try
+                {
+                    foreach (string url in ImageURLs)
+                    {
+
+                        System.Net.WebRequest request =
+                            System.Net.WebRequest.Create(url);
+                        System.Net.WebResponse response = request.GetResponse();
+                        System.IO.Stream responseStream = response.GetResponseStream();
+
+                        Bitmap bitmapImage = new Bitmap(responseStream);
+
+                        x_Size.Add(bitmapImage.Width);
+                        y_Size.Add(bitmapImage.Height);
+                        BitmapList.Add(bitmapImage);
+
+                    }
+
+                    x_Size.Sort();
+                    y_Size.Sort();
+
+                    Rectangle TileTemplate = new Rectangle(0, 0, x_Size[0], y_Size[0]);
+
+                    Tuple<int, int> ImageSlots = new Tuple<int, int>(
+                        Convert.ToInt32(    // X Slots
+                            Math.Ceiling(
+                                Convert.ToDecimal(GoalResolution.Item1)
+                                / Convert.ToDecimal(TileTemplate.Width)
+                            )),
+                        Convert.ToInt32(    // Y Slots
+                            Math.Ceiling(
+                                Convert.ToDecimal(GoalResolution.Item2)
+                                / Convert.ToDecimal(TileTemplate.Height)
+                            )));
+
+                    if (UsePattern1)
+                    {
+                        Bitmap canvas = new Bitmap(
+                            ImageSlots.Item1 * TileTemplate.Width,
+                            ImageSlots.Item2 * TileTemplate.Height);
+
+                        using (Graphics canvasGraphic = Graphics.FromImage(canvas))
+                        {
+                            Point CurrentSlot = new Point(0, 0);
+                            int CurrentImage = 0;
+                            int TotalImages = BitmapList.Count - 1; // Indexing to 0
+
+                            while (CurrentSlot.Y < ImageSlots.Item2)
+                            {
+                                while (CurrentSlot.X < ImageSlots.Item1)
+                                {
+                                    TileTemplate.X = TileTemplate.Width * CurrentSlot.X;
+                                    TileTemplate.Y = TileTemplate.Height * CurrentSlot.Y;
+
+                                    canvasGraphic.DrawImage(BitmapList[CurrentImage], TileTemplate);
+
+                                    CurrentSlot.X++;
+
+                                    if (CurrentImage == TotalImages)
+                                    {
+                                        CurrentImage = 0;
+                                    }
+                                    else
+                                    {
+                                        CurrentImage++;
+                                    }
+                                }
+
+                                CurrentSlot.Y++;
+                                CurrentSlot.X = 0;
+                            }
+
+                            string fileName = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".png";
+
+                            canvas.Save(fileName, ImageFormat.Png);
+                            canvas.Dispose();
+
+                            ImageURLs.Add(fileName);
+                        }
+                    }
+
+                    if (UsePattern2)
+                    {
+                        Bitmap canvas = new Bitmap(
+                            ImageSlots.Item1 * TileTemplate.Width,
+                            ImageSlots.Item2 * TileTemplate.Height);
+
+                        int Modifier = 1;
+
+                        using (Graphics canvasGraphic = Graphics.FromImage(canvas))
+                        {
+                            Point CurrentSlot = new Point(0, 0);
+                            int CurrentImage = 0;
+                            int TotalImages = BitmapList.Count - 1; // Indexing to 0
+
+                            while (CurrentSlot.Y < ImageSlots.Item2)
+                            {
+                                while (CurrentSlot.X < ImageSlots.Item1)
+                                {
+                                    TileTemplate.X = TileTemplate.Width * CurrentSlot.X;
+                                    TileTemplate.Y = TileTemplate.Height * CurrentSlot.Y;
+
+                                    canvasGraphic.DrawImage(BitmapList[CurrentImage], TileTemplate);
+
+                                    CurrentSlot.X++;
+
+                                    if (CurrentImage == TotalImages)
+                                    {
+                                        Modifier = -1;
+                                    }
+                                    else if (CurrentImage == 0)
+                                    {
+                                        Modifier = 1;
+                                    }
+
+                                    CurrentImage += Modifier;
+                                }
+
+                                CurrentSlot.Y++;
+                                CurrentSlot.X = 0;
+                            }
+
+                            string fileName = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".png";
+
+                            canvas.Save(fileName, ImageFormat.Png);
+                            canvas.Dispose();
+
+                            ImageURLs.Add(fileName);
+                        }
+                    }
+
+                    if (UsePattern3)
+                    {
+                        Bitmap canvas = new Bitmap(
+                            ImageSlots.Item1 * TileTemplate.Width,
+                            ImageSlots.Item2 * TileTemplate.Height);
+
+                        using (Graphics canvasGraphic = Graphics.FromImage(canvas))
+                        {
+                            Point CurrentSlot = new Point(0, 0);
+                            int TotalImages = BitmapList.Count - 1; // Indexing to 0
+                            Random rnd = new Random();
+
+                            while (CurrentSlot.Y < ImageSlots.Item2)
+                            {
+                                while (CurrentSlot.X < ImageSlots.Item1)
+                                {
+                                    TileTemplate.X = TileTemplate.Width * CurrentSlot.X;
+                                    TileTemplate.Y = TileTemplate.Height * CurrentSlot.Y;
+
+                                    canvasGraphic.DrawImage(BitmapList[rnd.Next(BitmapList.Count)], TileTemplate);
+
+                                    CurrentSlot.X++;
+
+                                }
+
+                                CurrentSlot.Y++;
+                                CurrentSlot.X = 0;
+                            }
+
+                            string fileName = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".png";
+
+                            canvas.Save(fileName, ImageFormat.Png);
+                            canvas.Dispose();
+
+                            ImageURLs.Add(fileName);
+                        }
+                    }
+
+                    if (SkipFirst & (ImageURLs.Count > 2))
+                    {
+                        BitmapList.RemoveAt(0);
+
+                        if (UsePattern1)
+                        {
+                            Bitmap canvas = new Bitmap(
+                                ImageSlots.Item1 * TileTemplate.Width,
+                                ImageSlots.Item2 * TileTemplate.Height);
+
+                            using (Graphics canvasGraphic = Graphics.FromImage(canvas))
+                            {
+                                Point CurrentSlot = new Point(0, 0);
+                                int CurrentImage = 0;
+                                int TotalImages = BitmapList.Count - 1; // Indexing to 0
+
+                                while (CurrentSlot.Y < ImageSlots.Item2)
+                                {
+                                    while (CurrentSlot.X < ImageSlots.Item1)
+                                    {
+                                        TileTemplate.X = TileTemplate.Width * CurrentSlot.X;
+                                        TileTemplate.Y = TileTemplate.Height * CurrentSlot.Y;
+
+                                        canvasGraphic.DrawImage(BitmapList[CurrentImage], TileTemplate);
+
+                                        CurrentSlot.X++;
+
+                                        if (CurrentImage == TotalImages)
+                                        {
+                                            CurrentImage = 0;
+                                        }
+                                        else
+                                        {
+                                            CurrentImage++;
+                                        }
+                                    }
+
+                                    CurrentSlot.Y++;
+                                    CurrentSlot.X = 0;
+                                }
+
+                                string fileName = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".png";
+
+                                canvas.Save(fileName, ImageFormat.Png);
+                                canvas.Dispose();
+
+                                ImageURLs.Add(fileName);
+                            }
+                        }
+
+                        if (UsePattern2)
+                        {
+                            Bitmap canvas = new Bitmap(
+                                ImageSlots.Item1 * TileTemplate.Width,
+                                ImageSlots.Item2 * TileTemplate.Height);
+
+                            int Modifier = 1;
+
+                            using (Graphics canvasGraphic = Graphics.FromImage(canvas))
+                            {
+                                Point CurrentSlot = new Point(0, 0);
+                                int CurrentImage = 0;
+                                int TotalImages = BitmapList.Count - 1; // Indexing to 0
+
+                                while (CurrentSlot.Y < ImageSlots.Item2)
+                                {
+                                    while (CurrentSlot.X < ImageSlots.Item1)
+                                    {
+                                        TileTemplate.X = TileTemplate.Width * CurrentSlot.X;
+                                        TileTemplate.Y = TileTemplate.Height * CurrentSlot.Y;
+
+                                        canvasGraphic.DrawImage(BitmapList[CurrentImage], TileTemplate);
+
+                                        CurrentSlot.X++;
+
+                                        if (CurrentImage == TotalImages)
+                                        {
+                                            Modifier = -1;
+                                        }
+                                        else if (CurrentImage == 0)
+                                        {
+                                            Modifier = 1;
+                                        }
+
+                                        CurrentImage += Modifier;
+                                    }
+
+                                    CurrentSlot.Y++;
+                                    CurrentSlot.X = 0;
+                                }
+
+                                string fileName = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".png";
+
+                                canvas.Save(fileName, ImageFormat.Png);
+                                canvas.Dispose();
+
+                                ImageURLs.Add(fileName);
+                            }
+                        }
+
+                        if (UsePattern3)
+                        {
+                            Bitmap canvas = new Bitmap(
+                                ImageSlots.Item1 * TileTemplate.Width,
+                                ImageSlots.Item2 * TileTemplate.Height);
+
+                            using (Graphics canvasGraphic = Graphics.FromImage(canvas))
+                            {
+                                Point CurrentSlot = new Point(0, 0);
+                                int TotalImages = BitmapList.Count - 1; // Indexing to 0
+                                Random rnd = new Random();
+
+                                while (CurrentSlot.Y < ImageSlots.Item2)
+                                {
+                                    while (CurrentSlot.X < ImageSlots.Item1)
+                                    {
+                                        TileTemplate.X = TileTemplate.Width * CurrentSlot.X;
+                                        TileTemplate.Y = TileTemplate.Height * CurrentSlot.Y;
+
+                                        canvasGraphic.DrawImage(BitmapList[rnd.Next(BitmapList.Count)], TileTemplate);
+
+                                        CurrentSlot.X++;
+
+                                    }
+
+                                    CurrentSlot.Y++;
+                                    CurrentSlot.X = 0;
+                                }
+
+                                string fileName = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".png";
+
+                                canvas.Save(fileName, ImageFormat.Png);
+                                canvas.Dispose();
+
+                                ImageURLs.Add(fileName);
+                            }
+                        }
+                    }
+
+                    
+                }
+                finally
+                {
+                    foreach (Bitmap bitmap in BitmapList)
+                    {
+                        bitmap.Dispose();
+                    }
+                }
+
+            }
+
+            return ImageURLs;
+
         }
     }
 }
