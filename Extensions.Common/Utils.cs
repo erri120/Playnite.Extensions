@@ -5,11 +5,14 @@ using System.Web;
 using HtmlAgilityPack;
 using Newtonsoft.Json;
 using Playnite.SDK;
+using Playnite.SDK.Models;
 
 namespace Extensions.Common
 {
     public static class Utils
     {
+        #region JSON Stuff
+
         private static JsonSerializerSettings GenericJsonSettings => new JsonSerializerSettings
         {
             NullValueHandling = NullValueHandling.Ignore,
@@ -24,6 +27,14 @@ namespace Extensions.Common
         public static T FromJson<T>(this string data)
         {
             return JsonConvert.DeserializeObject<T>(data, GenericJsonSettings);
+        }
+
+        #endregion
+
+        public static bool TryGetLink(this Game game, string name, out Link link)
+        {
+            link = game.Links.FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            return link != null;
         }
 
         public static bool IsEmpty(this string s)

@@ -5,15 +5,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using Extensions.Common;
 
 namespace DLSiteMetadata
 {
-    public class DLSiteMetadata : MetadataPlugin
+    public class DLSiteMetadata : AMetadataPlugin<DLSiteGame>
     {
-        private static readonly ILogger Logger = LogManager.GetLogger();
-
-        internal ILogger GetLogger => Logger;
-
         private DLSiteMetadataSettings Settings { get; }
 
         public override Guid Id { get; } = Guid.Parse("6bff51a5-ad52-4474-af76-f8e410b66e20");
@@ -26,12 +23,9 @@ namespace DLSiteMetadata
             MetadataField.Publishers,
             MetadataField.BackgroundImage,
             MetadataField.CoverImage,
-            //MetadataField.CommunityScore,
             MetadataField.Genres,
-            //MetadataField.Icon,
             MetadataField.Links,
             MetadataField.ReleaseDate,
-            // Include addition fields if supported by the metadata source
         };
 
         public override string Name => "DLSite";
@@ -48,9 +42,9 @@ namespace DLSiteMetadata
             });
         }
 
-        public override OnDemandMetadataProvider GetMetadataProvider(MetadataRequestOptions options)
+        protected override AMetadataProvider<DLSiteGame> GetProvider()
         {
-            return new DLSiteMetadataProvider(options, this);
+            return new DLSiteMetadataProvider();
         }
 
         public override ISettings GetSettings(bool firstRunSettings)

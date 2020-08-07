@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using DLSiteMetadata;
+using JetBrains.Annotations;
 using Playnite.SDK;
 using Xunit;
 using Xunit.Abstractions;
@@ -22,7 +23,9 @@ namespace Extensions.Test
         public async Task TestLoadENGGame()
         {
             //https://www.dlsite.com/ecchi-eng/work/=/product_id/RE234198.html
-            var game = await DLSiteGame.LoadGame("RE234198", _logger);
+            using var provider = new DLSiteMetadataProvider();
+            provider.SetTestMode(_logger, "RE234198");
+            var game = await provider.LoadGame();
             TestGame(game);
         }
 
@@ -30,7 +33,9 @@ namespace Extensions.Test
         public async Task TestLoadJPNGame()
         {
             //https://www.dlsite.com/maniax/work/=/product_id/RJ173356.html
-            var game = await DLSiteGame.LoadGame("RJ173356", _logger);
+            using var provider = new DLSiteMetadataProvider();
+            provider.SetTestMode(_logger, "RJ173356");
+            var game = await provider.LoadGame();
             TestGame(game);
         }
 
@@ -59,14 +64,15 @@ namespace Extensions.Test
             Assert.Equal(1, count);
         } 
 
+        [AssertionMethod]
         private static void TestGame(DLSiteGame game)
         {
             Assert.NotNull(game);
-            Assert.NotNull(game.DLSiteLink);
+            Assert.NotNull(game.Link);
             Assert.NotNull(game.Name);
             Assert.NotNull(game.Description);
             Assert.NotNull(game.Circle);
-            Assert.NotNull(game.CircleLink);
+            Assert.NotNull(game.Circle);
             Assert.NotNull(game.Genres);
             Assert.NotEmpty(game.Genres);
             Assert.NotNull(game.ImageURLs);
