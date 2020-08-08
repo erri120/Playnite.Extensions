@@ -5,7 +5,7 @@ using Playnite.SDK.Plugins;
 
 namespace Extensions.Common
 {
-    public abstract class AMetadataPlugin<T> : MetadataPlugin where T : AGame
+    public abstract class AMetadataPlugin<T> : MetadataPlugin where T : AGame, new()
     {
         public ILogger Logger { get; } = LogManager.GetLogger();
 
@@ -22,22 +22,6 @@ namespace Extensions.Common
             provider.Plugin = this;
 
             return provider;
-        }
-    }
-
-    public class DummyPlugin<TGame> : AMetadataPlugin<TGame> 
-        where TGame : AGame
-    {
-        public DummyPlugin() : base(null)
-        {
-        }
-
-        public override Guid Id => Guid.Empty;
-        public override string Name => "Dummy Plugin";
-        public override List<MetadataField> SupportedFields { get; }
-        protected override AMetadataProvider<TGame> GetProvider()
-        {
-            throw new NotImplementedException();
         }
     }
 }

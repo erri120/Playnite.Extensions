@@ -23,9 +23,8 @@ namespace Extensions.Test
         public async Task TestLoadENGGame()
         {
             //https://www.dlsite.com/ecchi-eng/work/=/product_id/RE234198.html
-            using var provider = new DLSiteMetadataProvider();
-            provider.SetTestMode(_logger, "RE234198");
-            var game = await provider.LoadGame();
+            var game = new DLSiteGame(_logger, "RE234198");
+            await game.LoadGame();
             TestGame(game);
         }
 
@@ -33,9 +32,8 @@ namespace Extensions.Test
         public async Task TestLoadJPNGame()
         {
             //https://www.dlsite.com/maniax/work/=/product_id/RJ173356.html
-            using var provider = new DLSiteMetadataProvider();
-            provider.SetTestMode(_logger, "RJ173356");
-            var game = await provider.LoadGame();
+            var game = new DLSiteGame(_logger, "RJ173356");
+            await game.LoadGame();
             TestGame(game);
         }
 
@@ -77,6 +75,7 @@ namespace Extensions.Test
             Assert.NotEmpty(game.Genres);
             Assert.NotNull(game.ImageURLs);
             Assert.NotEmpty(game.ImageURLs);
+            Assert.NotEqual(DateTime.MinValue, game.Release);
         }
     }
 }

@@ -1,30 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using HtmlAgilityPack;
-using Playnite.SDK;
 using Playnite.SDK.Metadata;
 using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
 
 namespace Extensions.Common
 {
-    public abstract class AMetadataProvider<TGame> : OnDemandMetadataProvider where TGame : AGame
+    public abstract class AMetadataProvider<TGame> : OnDemandMetadataProvider where TGame : AGame, new()
     {
         public AMetadataPlugin<TGame> Plugin { get; set; }
         public MetadataRequestOptions Options { get; set; }
 
-        private bool _isTestMode;
-        private ILogger TestLogger { get; set; }
+        private AGame Game { get; set; }
 
-        protected ILogger Logger => _isTestMode ? TestLogger : Plugin.Logger;
-        private TGame Game { get; set; }
-
-        public abstract Task<TGame> LoadGame();
         protected abstract string GetID();
 
         private string _id;
-        protected string ID
+        private string ID
         {
             get
             {
@@ -34,34 +26,6 @@ namespace Extensions.Common
                 _id = GetID();
                 return _id;
             }
-        }
-
-        public void SetTestMode(ILogger testLogger, string id)
-        {
-            Plugin = new DummyPlugin<TGame>();
-            Options = new MetadataRequestOptions(new Game(id), false);
-            _isTestMode = true;
-            TestLogger = testLogger;
-        }
-
-        protected bool TryGetInnerText(HtmlNode baseNode, string xpath, string name, out string innerText)
-        {
-            return baseNode.TryGetInnerText(xpath, Logger, name, ID, out innerText);
-        }
-
-        protected bool IsNullOrEmpty(HtmlNodeCollection collection, string name)
-        {
-            return collection.IsNullOrEmpty(Logger, name, ID);
-        }
-
-        protected bool IsNull(HtmlNode node, string name)
-        {
-            return node.IsNull(Logger, name, ID);
-        }
-
-        protected bool IsEmpty(string s, string name)
-        {
-            return s.IsEmpty(Logger, name, ID);
         }
 
         #region Overrides
@@ -75,7 +39,13 @@ namespace Extensions.Common
 
                 try
                 {
-                    Game = LoadGame().Result;
+                    var game = new TGame
+                    {
+                        ID = ID,
+                        Logger = Plugin.Logger
+                    };
+                    var res = game.LoadGame().Result;
+                    Game = res;
                 }
                 catch (Exception e)
                 {
@@ -89,7 +59,7 @@ namespace Extensions.Common
         public override MetadataFile GetBackgroundImage()
         {
             return AvailableFields.Contains(MetadataField.BackgroundImage)
-                ? Game.GetBackgroundImage()
+                ? Game.GetBackgroundImage(Plugin.PlayniteApi.Dialogs)
                 : base.GetBackgroundImage();
         }
 
@@ -103,7 +73,7 @@ namespace Extensions.Common
         public override MetadataFile GetCoverImage()
         {
             return AvailableFields.Contains(MetadataField.CoverImage)
-                ? Game.GetCoverImage()
+                ? Game.GetCoverImage(Plugin.PlayniteApi.Dialogs)
                 : base.GetCoverImage();
         }
 

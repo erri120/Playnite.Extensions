@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using HtmlAgilityPack;
 using Playnite.SDK;
 using Playnite.SDK.Metadata;
 using Playnite.SDK.Models;
@@ -9,7 +11,18 @@ namespace Extensions.Common
 {
     public abstract class AGame
     {
-        public IPlayniteAPI PlayniteAPI { get; set; }
+        public ILogger Logger { get; set; }
+        public string ID { get; set; }
+
+        protected AGame() { }
+
+        protected AGame(ILogger logger, string id)
+        {
+            Logger = logger;
+            ID = id;
+        }
+
+        public abstract Task<AGame> LoadGame();
 
         public readonly List<MetadataField> AvailableFields = new List<MetadataField>();
 
@@ -27,9 +40,9 @@ namespace Extensions.Common
 
         public abstract string Link { get; set; }
 
-        public abstract MetadataFile GetBackgroundImage();
+        public abstract MetadataFile GetCoverImage(IDialogsFactory dialogsAPI);
+        public abstract MetadataFile GetBackgroundImage(IDialogsFactory dialogsAPI);
         public abstract DateTime GetReleaseDate();
-        public abstract MetadataFile GetCoverImage();
         public abstract List<string> GetGenres();
         public abstract int GetCommunityScore();
         public abstract List<Link> GetLinks();
@@ -39,5 +52,25 @@ namespace Extensions.Common
         public abstract MetadataFile GetIcon();
         public abstract List<string> GetPublishers();
         public abstract List<string> GetTags();
+
+        protected bool TryGetInnerText(HtmlNode baseNode, string xpath, string name, out string innerText)
+        {
+            return baseNode.TryGetInnerText(xpath, Logger, name, ID, out innerText);
+        }
+
+        protected bool IsNullOrEmpty(HtmlNodeCollection collection, string name)
+        {
+            return collection.IsNullOrEmpty(Logger, name, ID);
+        }
+
+        protected bool IsNull(HtmlNode node, string name)
+        {
+            return node.IsNull(Logger, name, ID);
+        }
+
+        protected bool IsEmpty(string s, string name)
+        {
+            return s.IsEmpty(Logger, name, ID);
+        }
     }
 }
