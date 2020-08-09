@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Extensions.Common;
 using F95ZoneMetadata;
 using Playnite.SDK;
 using Xunit;
@@ -17,22 +20,33 @@ namespace Extensions.Test
         }
 
         [Fact]
-        public async Task TestLoadGame()
+        public void TestLoadGames()
         {
-            var game = await F95ZoneGame.LoadGame(
-                "https://f95zone.to/threads/alien-quest-eve-v1-01-grimhelm.6016/", _logger);
+            var games = new List<string>
+            {
+                "amity-park-v0-7-3-gzone.4262",
+                "the-mating-season-v1-02-akabur.13777",
+                "poke-abby-hd-oxopotion.1068",
+                "evenicle-v1-04-alicesoft.14403",
+                "four-elements-trainer-v0-8-7d-mity.730"
+            };
 
-            Assert.NotNull(game);
-            Assert.NotNull(game.Name);
-            Assert.NotNull(game.Overview);
-            Assert.NotNull(game.Developer);
-            Assert.NotNull(game.LabelList);
-            Assert.NotEmpty(game.LabelList);
-            Assert.NotNull(game.Genres);
-            Assert.NotEmpty(game.Genres);
-            Assert.NotNull(game.CoverImageURL);
-            Assert.NotNull(game.PreviewImageURLs);
-            Assert.NotEmpty(game.PreviewImageURLs);
+            games.Do(x =>
+            {
+                var game = new F95ZoneGame(_logger, x);
+                var res = game.LoadGame().Result;
+                Assert.NotNull(res);
+
+                Assert.NotNull(game.Name);
+                Assert.NotNull(game.Description);
+                Assert.NotNull(game.Link);
+                Assert.NotNull(game.Developer);
+                Assert.NotEmpty(game.Labels);
+                Assert.NotEmpty(game.Genres);
+                Assert.NotEmpty(game.Images);
+                Assert.NotEqual(DateTime.MinValue, game.ReleaseDate);
+                Assert.NotEqual(-1.0, game.Rating);
+            });
         }
     }
 }

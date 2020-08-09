@@ -107,5 +107,10 @@ namespace Extensions.Common
         {
             return HttpUtility.HtmlDecode(node?.InnerText);
         }
+
+        public static string DecodeString(this string s)
+        {
+            return HttpUtility.HtmlDecode(s);
+        }
     }
 }

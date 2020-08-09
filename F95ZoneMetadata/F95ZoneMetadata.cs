@@ -3,14 +3,12 @@ using Playnite.SDK.Plugins;
 using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
+using Extensions.Common;
 
 namespace F95ZoneMetadata
 {
-    public class F95ZoneMetadata : MetadataPlugin
+    public class F95ZoneMetadata : AMetadataPlugin<F95ZoneGame>
     {
-        private static readonly ILogger Logger = LogManager.GetLogger();
-        internal ILogger GetLogger => Logger;
-
         private F95ZoneMetadataSettings Settings { get; }
 
         public override Guid Id { get; } = Guid.Parse("a21b4484-858d-4786-9ce9-de17b3628ef2");
@@ -22,8 +20,12 @@ namespace F95ZoneMetadata
             MetadataField.BackgroundImage,
             MetadataField.CoverImage,
             MetadataField.Developers,
+            MetadataField.Publishers,
             MetadataField.Genres,
-            MetadataField.Tags
+            MetadataField.Tags,
+            MetadataField.Links,
+            MetadataField.ReleaseDate,
+            MetadataField.CommunityScore
         };
 
         public override string Name => "F95Zone";
@@ -33,9 +35,9 @@ namespace F95ZoneMetadata
             Settings = new F95ZoneMetadataSettings(this);
         }
 
-        public override OnDemandMetadataProvider GetMetadataProvider(MetadataRequestOptions options)
+        protected override AMetadataProvider<F95ZoneGame> GetProvider()
         {
-            return new F95ZoneMetadataProvider(options, this);
+            return new F95ZoneMetadataProvider();
         }
 
         public override ISettings GetSettings(bool firstRunSettings)

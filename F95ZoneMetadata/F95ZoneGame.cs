@@ -1,163 +1,408 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using Extensions.Common;
 using HtmlAgilityPack;
 using Playnite.SDK;
+using Playnite.SDK.Metadata;
+using Playnite.SDK.Models;
+using Playnite.SDK.Plugins;
 
 namespace F95ZoneMetadata
 {
-    public class F95ZoneGame
+    public class F95ZoneGame : AGame
     {
-        public string F95Link { get; private set; }
-        public string Name { get; private set; }
-        public string Overview { get; private set; }
+        public override string Name { get; set; }
+        public override string Description { get; set; }
+        public override string Link { get; set; }
+
         public string Developer { get; private set; }
 
-        //public string Updated { get; set; }
-        public List<string> LabelList { get; private set; }
-        //public List<string> OSList { get; set; }
-        //public List<Link> StoreLinks { get; set; }
-
-        public string CoverImageURL { get; private set; }
-        public List<string> PreviewImageURLs { get; private set; }
-
+        public List<string> Labels { get; private set; }
         public List<string> Genres { get; private set; }
 
-        public static string Root => "https://f95zone.to/threads/";
+        public List<Uri> Images { get; private set; }
 
-        public static async Task<F95ZoneGame> LoadGame(string url, ILogger logger)
+        public DateTime ReleaseDate { get; private set; }
+        public double Rating { get; private set; } = -1.0;
+
+        public F95ZoneGame() { }
+        public F95ZoneGame(ILogger logger, string id) : base(logger, id) { }
+
+        public override async Task<AGame> LoadGame()
         {
-            var web = new HtmlWeb();
-            var document = await web.LoadFromWebAsync(url);
-            if (document == null)
-                return null;
+            Link = $"https://f95zone.to/threads/{ID}";
 
-            var game = new F95ZoneGame
-            {
-                F95Link = url
-            };
+            var web = new HtmlWeb();
+            var document = await web.LoadFromWebAsync(Link);
+            if (document == null)
+                throw new Exception($"Could not load from {Link}");
 
             var node = document.DocumentNode;
-            var bodyNode = node.SelectSingleNode("//div[@class='uix_contentWrapper']/div[@class='p-body-main  ']/div[@class='p-body-content']");
-            if (bodyNode.IsNull(logger, "Body", url))
+
+            var headerNode = node.SelectSingleNode("//div[@class='pageContent']/div[@class='uix_headerInner']");
+            if (IsNull(headerNode, "Header"))
                 return null;
 
-            var headerNode =
-                bodyNode.SelectSingleNode(
-                    "//div[@class='pageContent']/div[@class='uix_headerInner']");
-            if (headerNode.IsNull(logger, "Header", url))
+            var titleNode = headerNode.SelectSingleNode("div[@class='p-title ']/h1[@class='p-title-value']");
+            if (IsNull(titleNode, "Title"))
                 return null;
 
-            var labels = headerNode.SelectNodes("div[@class='p-title ']/h1[@class='p-title-value']/a[@class='labelLink']");
-            if (!labels.IsNullOrEmpty(logger, "Labels", url))
+            #region Labels
+
+            var labels = titleNode.SelectNodes("a[@class='labelLink']");
+            if (!IsNullOrEmpty(labels, "Labels"))
             {
-                game.LabelList = labels.Select(x => 
-                    !x.TryGetInnerText("span", logger, "Label", url, out var label) 
-                        ? null 
-                        : label)
-                    .NotNull().ToList();
+                List<string> temp = labels.Select(x =>
+                {
+                    if (!TryGetInnerText(x, "span", "Label Text", out var labelText))
+                        return null;
+
+                    var start = 0;
+                    var length = labelText.Length;
+
+                    if (labelText[0] == '[')
+                    {
+                        start = 1;
+                        length--;
+                    }
+
+                    if (labelText[labelText.Length - 1] == ']')
+                        length--;
+
+                    return labelText.Substring(start, length);
+                }).NotNull().ToList();
+
+                if (temp.Count > 0)
+                {
+                    Labels = temp;
+                    AvailableFields.Add(MetadataField.Tags);
+                }
             }
 
-            if (headerNode.TryGetInnerText(
-                "div[@class='p-title ']/h1[@class='p-title-value']",
-                logger, "Title", url, out var id))
+            #endregion
+
+            #region Name
+
+            var name = titleNode.DecodeInnerText();
+            if (!IsEmpty(name, "Name"))
             {
-                if(game.LabelList == null)
-                    game.Name = id;
-                else
+                if (Labels != null && Labels.Count > 0)
                 {
-                    game.LabelList = game.LabelList.Select(label =>
+                    var last = Labels.Last();
+                    var i = name.IndexOf(last, StringComparison.OrdinalIgnoreCase);
+                    name = name.Substring(i + last.Length + 1).TrimStart();
+                }
+
+                var lastStartingBracket = name.LastIndexOf('[');
+                var lastClosingBracket = name.LastIndexOf(']');
+
+                if (lastStartingBracket != -1 && lastClosingBracket != -1)
+                {
+                    Developer = name.Substring(lastStartingBracket + 1, lastClosingBracket - lastStartingBracket - 1);
+                    AvailableFields.Add(MetadataField.Developers);
+                    AvailableFields.Add(MetadataField.Publishers);
+                }
+
+                Name = name.Substring(0, lastStartingBracket).Trim();
+                AvailableFields.Add(MetadataField.Name);
+            }
+
+            #endregion
+
+            #region Tags
+
+            var tags = headerNode.SelectNodes("div[@class='p-description']/ul[@class='listInline listInline--bullet']/li[@class='groupedTags']/a[@class='tagItem']");
+            if (!IsNullOrEmpty(tags, "Tags"))
+            {
+                List<string> temp = tags.Select(x => x.DecodeInnerText()).NotNull().ToList();
+
+                if (temp.Count > 0)
+                {
+                    Genres = temp;
+                    AvailableFields.Add(MetadataField.Genres);
+                }
+            }
+
+            #endregion
+
+            #region Release Date
+
+            var dateNode =
+                headerNode.SelectSingleNode(
+                    "div[@class='p-description']/ul[@class='listInline listInline--bullet']/li[2]");
+            if (!IsNull(dateNode, "Date"))
+            {
+                var timeNode = dateNode.SelectSingleNode("a[@class='u-concealed']/time");
+                if (!IsNull(timeNode, "Date Time"))
+                {
+                    var sDateTime = timeNode.GetValue("datetime");
+                    if (!sDateTime.IsEmpty())
                     {
-                        if (id.Contains(label))
-                            id = id.Replace(label, "");
+                        if (DateTime.TryParse(sDateTime, out var dateTime))
+                        {
+                            ReleaseDate = dateTime;
+                            AvailableFields.Add(MetadataField.ReleaseDate);
+                        }
+                    }
+                }
+            }
 
-                        if (label.StartsWith("["))
-                            label = label.Substring(1, label.Length - 1);
+            #endregion
 
-                        if (label.EndsWith("]"))
-                            label = label.Substring(0, label.Length - 1);
+            #region Ratings
 
-                        return label;
-                    }).ToList();
+            var ratingNode =
+                node.SelectSingleNode(
+                    "//div[@class='pageContent']/div[@class='uix_headerInner--opposite']/div[@class='p-title-pageAction']/span[@class='ratingStarsRow ']/span[@class='ratingStars bratr-rating ']");
+            if (!IsNull(ratingNode, "Rating"))
+            {
+                var sRating = ratingNode.GetValue("title");
+                if (!sRating.IsEmpty())
+                {
+                    if (sRating.EndsWith("star(s)"))
+                        sRating = sRating.Replace("star(s)", "").Trim();
 
-                    id = id.Trim();
+                    if (double.TryParse(sRating, out var rating))
+                    {
+                        Rating = rating;
+                        AvailableFields.Add(MetadataField.CommunityScore);
+                    }
+                }
+            }
 
-                    var lastStartingBracket = id.LastIndexOf('[');
-                    var lastClosingBracket = id.LastIndexOf(']');
+            #endregion
+
+            #region Cover Image
+
+            var coverImageNode = headerNode.ParentNode.ParentNode;
+            if (!IsNull(coverImageNode, "Cover Image"))
+            {
+                var style = coverImageNode.GetValue("style").DecodeString();
+                if (!style.IsEmpty())
+                {
+                    var lastStartingBracket = style.LastIndexOf('(');
+                    var lastClosingBracket = style.LastIndexOf(')');
 
                     if (lastStartingBracket != -1 && lastClosingBracket != -1)
                     {
-                        var dev = id.Substring(lastStartingBracket+1, lastClosingBracket-lastStartingBracket-1);
-                        game.Developer = dev;
+                        //+2, -2 because ('URL') -> URL
+                        var sCoverImage = style.Substring(lastStartingBracket + 2, lastClosingBracket - lastStartingBracket - 2);
+                        if (Uri.TryCreate(sCoverImage, UriKind.Absolute, out var coverImage))
+                        {
+                            if (Images == null)
+                                Images = new List<Uri>();
+                            Images.Add(coverImage);
+                            AvailableFields.Add(MetadataField.CoverImage);
+                            AvailableFields.Add(MetadataField.BackgroundImage);
+                        }
                     }
-
-                    id = id.Substring(0, lastStartingBracket).Trim();
-                    game.Name = id;
                 }
             }
-            else
-            {
-                return null;
-            }
 
-            var tags = headerNode.SelectNodes(
-                "div[@class='p-description']/ul/li[@class='groupedTags']/a[@class='tagItem']");
-            if (!tags.IsNullOrEmpty(logger, "Tags", id))
+            #endregion
+
+            #region Body
+
+            var bodyNode = node.SelectSingleNode("//div[@class='p-body-pageContent']/div[@class='block block--messages']/div[@class='block-container lbContainer']/div[@class='block-body js-replyNewMessageContainer']/article/div[@class='message-inner']/div[@class='message-cell message-cell--main']/div/div[@class='message-content js-messageContent']/div/article/div[@class='bbWrapper']");
+            if (!IsNull(bodyNode, "Body"))
             {
-                game.Genres = tags.Select(x =>
+                #region Images
+
+                var imageNodes = bodyNode.SelectNodes(bodyNode.XPath+"//img[@class='bbImage ']");
+                if (!IsNullOrEmpty(imageNodes, "Body - Images"))
                 {
-                    var innerText = x.DecodeInnerText();
-                    return innerText.IsEmpty(logger, "Tag", id)
-                        ? null
-                        : innerText;
-                    /*var ti = new CultureInfo("en-US").TextInfo;
-                    if (innerText.IsEmpty(logger, "Tag", id))
-                        return null;
+                    List<Uri> temp = imageNodes.Select(x =>
+                    {
+                        var parent = x.ParentNode;
+                        if (!parent.Name.Equals("a", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var src = x.GetValue("src");
+                            if (src.IsEmpty())
+                                return null;
 
-                    if (innerText == "2dcg")
-                        return "2DCG";
-                    if (innerText == "3dcg")
-                        return "3DCG";
+                            return !Uri.TryCreate(src, UriKind.Absolute, out var uriResult)
+                                ? null
+                                : uriResult;
+                        }
+                        else
+                        {
+                            var href = parent.GetValue("href");
+                            if (href.IsEmpty())
+                                return null;
 
-                    return ti.ToTitleCase(innerText);*/
-                }).NotNull().ToList();
-            }
+                            return !Uri.TryCreate(href, UriKind.Absolute, out var uriResult)
+                                ? null
+                                : uriResult;
+                        }
+                    }).NotNull().ToList();
 
-            var contentNode = bodyNode.SelectSingleNode("//div[@class='message-inner']/div[@class='message-cell message-cell--main']/div[@class='message-main uix_messageContent js-quickEditTarget']/div/div/article[@class='message-body js-selectToQuote']/div[@class='bbWrapper']");
-            if (contentNode.IsNull(logger, "Content", id))
-                return null;
-
-            var topNode = contentNode.SelectSingleNode("div");
-            if (!topNode.IsNull(logger, "Top", id))
-            {
-                var coverImageNode = topNode.SelectSingleNode("a");
-                if (!coverImageNode.IsNull(logger, "Cover Image", id))
-                {
-                    var href = coverImageNode.GetValue("href");
-                    if (!href.IsEmpty(logger, "Cover Image", id))
-                        game.CoverImageURL = href;
+                    if (temp.Count > 0)
+                    {
+                        if (Images == null)
+                            Images = temp;
+                        else
+                            Images.AddRange(temp);
+                        if (!AvailableFields.Contains(MetadataField.CoverImage))
+                            AvailableFields.Add(MetadataField.CoverImage);
+                        if (!AvailableFields.Contains(MetadataField.BackgroundImage))
+                            AvailableFields.Add(MetadataField.BackgroundImage);
+                    }
                 }
 
-                topNode.RemoveChild(coverImageNode);
-                game.Overview = HttpUtility.HtmlDecode(topNode.InnerHtml);
-            }
+                #endregion
 
-            var previewImages = contentNode.SelectNodes("//img[@class='bbImage ']");
-            if (!previewImages.IsNullOrEmpty(logger, "Preview Images", id))
-            {
-                game.PreviewImageURLs = previewImages.Select(x =>
+                #region Description
+
+                var innerText = bodyNode.InnerText.DecodeString();
+
+                var overviewList = new List<string>
                 {
-                    var a = x.ParentNode;
-                    var href = a.GetValue("href");
-                    return href.IsEmpty(logger, "Preview Image href", id) 
-                        ? null 
-                        : href;
-                }).NotNull().ToList();
+                    "Overview",
+                    "About this game"
+                };
+
+                Tuple<int, string> selectedOverview = overviewList.Select(x =>
+                {
+                    var y = $"{x}:";
+                    var index = innerText.IndexOf(y, StringComparison.OrdinalIgnoreCase);
+                    if (index == -1)
+                    {
+                        y = x;
+                        index = innerText.IndexOf(y, StringComparison.OrdinalIgnoreCase);
+                    }
+                    return Tuple.Create(index, y);
+                }).FirstOrDefault(x => x.Item1 != -1);
+
+                if (selectedOverview != null)
+                {
+                    var description = innerText.Substring(selectedOverview.Item1+ selectedOverview.Item2.Length);
+                    var linksInfoIndex = description.IndexOf("You must be registered to see the links", StringComparison.OrdinalIgnoreCase);
+                    description = description.Substring(0, linksInfoIndex);
+
+                    var infoList = new List<string>
+                    {
+                        "Thread Updated",
+                        "Updated",
+                        "Release Date",
+                        "Developer / Publisher",
+                        "Developer",
+                        "Publisher",
+                        "Censorship",
+                        "Version",
+                        "Operating System",
+                        "Platform",
+                        "Language",
+                        "Alternative version",
+                        "Sidestory",
+                        "Same Series",
+                        "Prequel",
+                        "Sequel",
+                        "Changelog",
+                        "Genre",
+                        "Cheat",
+                        "OS",
+                    };
+
+                    infoList.Select(x => $"{x}:").Do(x =>
+                    {
+                        var index = description.IndexOf(x, StringComparison.OrdinalIgnoreCase);
+                        if (index == -1)
+                            return;
+
+                        description = description.Substring(0, index);
+                    });
+
+                    description = description.Trim();
+                    if (!description.IsEmpty())
+                    {
+                        Description = description;
+                        AvailableFields.Add(MetadataField.Description);
+                    }
+                }
+
+                #endregion
             }
 
-            return game;
+            #endregion
+
+            return this;
         }
+
+        public override List<string> GetGenres()
+        {
+            return Genres;
+        }
+
+        public override List<string> GetTags()
+        {
+            return Labels;
+        }
+
+        public override MetadataFile GetCoverImage(IDialogsFactory dialogsAPI)
+        {
+            List<ImageFileOption> options = Images.Select(x => new ImageFileOption(x.AbsoluteUri)).ToList();
+            var option = dialogsAPI.ChooseImageFile(options, "Select Cover Image");
+            return option == null ? null : new MetadataFile(option.Path);
+        }
+
+        public override MetadataFile GetBackgroundImage(IDialogsFactory dialogsAPI)
+        {
+            List<ImageFileOption> options = Images.Select(x => new ImageFileOption(x.AbsoluteUri)).ToList();
+            var option = dialogsAPI.ChooseImageFile(options, "Select Background Image");
+            return option == null ? null : new MetadataFile(option.Path);
+        }
+
+        public override DateTime GetReleaseDate()
+        {
+            return ReleaseDate;
+        }
+
+        public override List<Link> GetLinks()
+        {
+            return new List<Link>
+            {
+                new Link("F95Zone", Link)
+            };
+        }
+
+        public override List<string> GetDevelopers()
+        {
+            return new List<string> { Developer };
+        }
+
+        public override List<string> GetPublishers()
+        {
+            return new List<string> { Developer };
+        }
+
+        public override int GetCommunityScore()
+        {
+            //F95 ratings go from 0.0 to 5.0 (Star based)
+            //Playnite ratings go from 0 to 100
+            return (int)(Rating / 5.0 * 100);
+        }
+
+        #region Not Implemented
+
+        public override int GetCriticScore()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override List<string> GetFeatures()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override MetadataFile GetIcon()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }

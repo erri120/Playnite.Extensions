@@ -24,7 +24,7 @@ namespace Extensions.Common
 
         public abstract Task<AGame> LoadGame();
 
-        public readonly List<MetadataField> AvailableFields = new List<MetadataField>();
+        public readonly List<MetadataField> AvailableFields = new List<MetadataField> {MetadataField.Links};
 
         public abstract string Name { get; set; }
         public virtual string GetName()

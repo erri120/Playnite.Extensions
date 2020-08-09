@@ -1,154 +1,46 @@
-﻿using Playnite.SDK.Plugins;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Text.RegularExpressions;
 using Extensions.Common;
-using Playnite.SDK;
-using Playnite.SDK.Metadata;
-using Playnite.SDK.Models;
 
 namespace F95ZoneMetadata
 {
-    public class F95ZoneMetadataProvider : OnDemandMetadataProvider
+    public class F95ZoneMetadataProvider : AMetadataProvider<F95ZoneGame>
     {
-        private readonly MetadataRequestOptions _options;
-        private readonly F95ZoneMetadata _plugin;
-        private ILogger Logger => _plugin.GetLogger;
+        private static readonly Regex URLRegex = new Regex(@"https:\/\/f95zone.to\/threads\/(?<id>[\w-]*.\d*)\/?");
 
-        private List<MetadataField> _availableFields;
-        public override List<MetadataField> AvailableFields => _availableFields ?? (_availableFields = GetAvailableFields());
-
-        private F95ZoneGame _game;
-
-        public F95ZoneMetadataProvider(MetadataRequestOptions options, F95ZoneMetadata plugin)
+        protected override string GetID()
         {
-            _options = options;
-            _plugin = plugin;
-        }
+            var playniteGame = Options.GameData;
 
-        private List<MetadataField> GetAvailableFields()
-        {
-            var game = _options.GameData;
-            var list = new List<MetadataField>();
-
-            var name = game.Name;
+            var name = playniteGame.Name;
 
             if (name.IsEmpty())
             {
-                var link = game.Links.FirstOrDefault(x =>
-                    x.Name.Equals("F95Zone", StringComparison.InvariantCultureIgnoreCase));
-                if (link == null)
-                    return list;
+                if (!playniteGame.TryGetLink("F95Zone", out var link))
+                    throw new Exception("Name must not be empty!");
                 name = link.Url;
             }
 
-            if (!name.StartsWith(F95ZoneGame.Root))
+            var match = URLRegex.Match(name);
+            if (!match.Success)
             {
-                var link = game.Links.FirstOrDefault(x =>
-                    x.Name.Equals("F95Zone", StringComparison.InvariantCultureIgnoreCase));
-                if (link == null)
-                    return list;
+                if (!playniteGame.TryGetLink("F95Zone", out var link))
+                    throw new Exception("Name must not be empty!");
                 name = link.Url;
+
+                match = URLRegex.Match(name);
+                if(!match.Success)
+                    throw new Exception($"{name} is not a valid link!");
             }
 
-            _game = F95ZoneGame.LoadGame(name, Logger).Result;
-            if(_game == null)
-            {
-                throw new Exception($"Game for {name} is null!");
-            }
+            if(!match.Groups["id"].Success)
+                throw new Exception($"Could not group match id for {name}");
 
-            list.Add(MetadataField.Links);
+            var id = match.Groups["id"].Value;
+            if(id.IsEmpty())
+                throw new Exception($"ID for {name} is empty!");
 
-            if (!_game.Name.IsEmpty())
-                list.Add(MetadataField.Name);
-
-            if (!_game.Developer.IsEmpty())
-                list.Add(MetadataField.Developers);
-
-            if (!_game.Overview.IsEmpty())
-                list.Add(MetadataField.Description);
-
-            if (_game.Genres != null && _game.Genres.Count > 0)
-                list.Add(MetadataField.Genres);
-
-            if(_game.LabelList != null && _game.LabelList.Count > 0)
-                list.Add(MetadataField.Tags);
-
-            if(!_game.CoverImageURL.IsEmpty())
-                list.Add(MetadataField.CoverImage);
-
-            if(_game.PreviewImageURLs != null && _game.PreviewImageURLs.Count > 0)
-                list.Add(MetadataField.BackgroundImage);
-
-            return list;
-        }
-
-        public override string GetName()
-        {
-            return AvailableFields.Contains(MetadataField.Name)
-                ? _game.Name
-                : base.GetName();
-        }
-
-        public override List<string> GetDevelopers()
-        {
-            return AvailableFields.Contains(MetadataField.Developers)
-                ? new List<string> {_game.Developer}
-                : base.GetDevelopers();
-        }
-
-        public override string GetDescription()
-        {
-            return AvailableFields.Contains(MetadataField.Description)
-                ? _game.Overview
-                : base.GetDescription();
-        }
-
-        public override List<string> GetGenres()
-        {
-            return AvailableFields.Contains(MetadataField.Genres)
-                ? _game.Genres
-                : base.GetGenres();
-        }
-
-        public override List<string> GetTags()
-        {
-            return AvailableFields.Contains(MetadataField.Tags)
-                ? _game.LabelList
-                : base.GetTags();
-        }
-
-        public override List<Link> GetLinks()
-        {
-            return AvailableFields.Contains(MetadataField.Links)
-                ? new List<Link> { new Link("F95Zone", _game.F95Link) }
-                : base.GetLinks();
-        }
-
-        public override MetadataFile GetCoverImage()
-        {
-            if (!AvailableFields.Contains(MetadataField.CoverImage))
-                return base.GetCoverImage();
-
-            var file = new MetadataFile(_game.CoverImageURL);
-            return file;
-        }
-
-        public override MetadataFile GetBackgroundImage()
-        {
-            if (!AvailableFields.Contains(MetadataField.BackgroundImage))
-                return base.GetBackgroundImage();
-
-            List<ImageFileOption> options = _game.PreviewImageURLs
-                .Select(x => new ImageFileOption(x))
-                .ToList();
-
-            var option = _plugin.PlayniteApi.Dialogs.ChooseImageFile(options, "Select Background Image");
-            if (option == null)
-                return base.GetBackgroundImage();
-
-            var file = new MetadataFile(option.Path);
-            return file;
+            return id;
         }
     }
 }
