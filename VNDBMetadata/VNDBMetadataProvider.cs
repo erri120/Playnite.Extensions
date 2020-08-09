@@ -225,6 +225,21 @@ namespace VNDBMetadata
             }
 
             var result = sb.ToString();
+
+            //from
+            //[spoiler]TEXT[/spoiler]
+            //to
+            //<b>SPOILER:</b>
+            //<p style="font-style: italic;">
+            //TEXT
+            //</p>
+
+            if (result.Contains("[spoiler]") && result.Contains("[/spoiler]"))
+            {
+                result = result.Replace("[spoiler]", "<b>SPOILER:</b><p style=\"font-style: italic;\">");
+                result = result.Replace("[/spoiler]", "</p>");
+            }
+
             return result;
         }
 
