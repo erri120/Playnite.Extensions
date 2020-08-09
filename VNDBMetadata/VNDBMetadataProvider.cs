@@ -260,7 +260,9 @@ namespace VNDBMetadata
                 .ToList();
             
             var image = _plugin.PlayniteApi.Dialogs.ChooseImageFile(options, "Select a Background Image");
-            return new MetadataFile(image.Path);
+            return image == null 
+                ? base.GetBackgroundImage() 
+                : new MetadataFile(image.Path);
         }
 
         public override List<Link> GetLinks()
