@@ -92,10 +92,4 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>xcopy $(ProjectDir)$(OutDir)*$(TargetExt) M:\Games\Playnite\Extensions\$(TargetName)\ /Y
-xcopy $(ProjectDir)$(OutDir)*.pdb M:\Games\Playnite\Extensions\$(TargetName)\ /Y
-xcopy $(ProjectDir)$(OutDir)extension.yaml M:\Games\Playnite\Extensions\$(TargetName)\ /Y
-xcopy $(ProjectDir)$(OutDir)icon.png M:\Games\Playnite\Extensions\$(TargetName)\ /Y</PostBuildEvent>
-  </PropertyGroup>
 </Project>
