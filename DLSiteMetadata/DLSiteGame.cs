@@ -18,10 +18,10 @@ namespace DLSiteMetadata
         public override string Description { get; set; }
         public override string Link { get; set; }
 
-        public Link Circle { get; set; }
-        public List<string> ImageURLs { get; set; }
-        public DateTime Release { get; set; }
-        public List<DLSiteGenre> Genres { get; set; }
+        public Link Circle { get; private set; }
+        public List<string> ImageURLs { get; private set; }
+        public DateTime Release { get; private set; }
+        public List<DLSiteGenre> Genres { get; private set; }
 
         public DLSiteGame() { }
         public DLSiteGame(ILogger logger, string id) : base(logger, id) { }
@@ -50,6 +50,7 @@ namespace DLSiteMetadata
             {
                 Name = name;
                 AvailableFields.Add(MetadataField.Name);
+                LogFound("Name", Name);
             }
 
             #endregion
@@ -72,6 +73,7 @@ namespace DLSiteMetadata
                     ImageURLs = images;
                     AvailableFields.Add(MetadataField.BackgroundImage);
                     AvailableFields.Add(MetadataField.CoverImage);
+                    LogFound("Images", ImageURLs);
                 }
             }
 
@@ -87,6 +89,7 @@ namespace DLSiteMetadata
                 {
                     Description = HttpUtility.HtmlDecode(sDescription);
                     AvailableFields.Add(MetadataField.Description);
+                    LogFound("Description", null);
                 }
             }
 
@@ -110,6 +113,7 @@ namespace DLSiteMetadata
                         Circle = new Link(sCircle, sCircleLink);
                         AvailableFields.Add(MetadataField.Developers);
                         AvailableFields.Add(MetadataField.Publishers);
+                        LogFound("Circle", $"{Circle.Name}: {Circle.Url}");
                     }
                 }
             }
@@ -160,51 +164,51 @@ namespace DLSiteMetadata
                 if (key == Consts.GetGenreTranslation(isEnglish))
                 {
                     var genreNodes = td.SelectNodes("div[@class='main_genre']/a");
-                    if (!IsNullOrEmpty(genreNodes, "Genres"))
+                    if (IsNullOrEmpty(genreNodes, "Genres")) return;
+                    
+                    List<DLSiteGenre> genres = genreNodes.Select(genreNode =>
                     {
-                        List<DLSiteGenre> genres = genreNodes.Select(genreNode =>
+                        var genreUrl = genreNode.GetValue("href");
+                        var genreID = isEnglish ? DLSiteGenre.GetENGID(genreUrl) : DLSiteGenre.GetJPNID(genreUrl);
+                        if (genreID == -1)
                         {
-                            var genreUrl = genreNode.GetValue("href");
-                            var genreID = isEnglish ? DLSiteGenre.GetENGID(genreUrl) : DLSiteGenre.GetJPNID(genreUrl);
-                            if (genreID == -1)
+                            Logger.Error($"Could not get ID from {genreUrl}");
+                            return null;
+                        }
+
+                        if (DLSiteGenres.TryGetGenre(genreID, out var cachedGenre))
+                        {
+                            if (cachedGenre.ENG != null)
+                                return cachedGenre;
+                        }
+
+                        var genre = new DLSiteGenre(genreID);
+                        var genreName = genreNode.DecodeInnerText();
+                        if (isEnglish)
+                        {
+                            genre.ENG = genreName;
+                        }
+                        else
+                        {
+                            genre.JPN = genreName;
+                            var resultConvert = DLSiteGenres.ConvertTo(genre, Logger, false);
+                            if (string.IsNullOrEmpty(resultConvert))
                             {
-                                Logger.Error($"Could not get ID from {genreUrl}");
+                                Logger.Error($"Unable to convert {genreName} to English genre!");
                                 return null;
                             }
 
-                            if (DLSiteGenres.TryGetGenre(genreID, out var cachedGenre))
-                            {
-                                if (cachedGenre.ENG != null)
-                                    return cachedGenre;
-                            }
+                            genre.ENG = resultConvert;
+                        }
 
-                            var genre = new DLSiteGenre(genreID);
-                            var genreName = genreNode.DecodeInnerText();
-                            if (isEnglish)
-                            {
-                                genre.ENG = genreName;
-                            }
-                            else
-                            {
-                                genre.JPN = genreName;
-                                var resultConvert = DLSiteGenres.ConvertTo(genre, Logger, isEnglish);
-                                if (string.IsNullOrEmpty(resultConvert))
-                                {
-                                    Logger.Error($"Unable to convert {genreName} to English genre!");
-                                    return null;
-                                }
+                        return genre;
+                    }).NotNull().ToList();
 
-                                genre.ENG = resultConvert;
-                            }
+                    if (genres.Count <= 0) return;
 
-                            return genre;
-                        }).NotNull().ToList();
-
-                        if (genres.Count <= 0) return;
-
-                        Genres = genres;
-                        AvailableFields.Add(MetadataField.Genres);
-                    }
+                    Genres = genres;
+                    AvailableFields.Add(MetadataField.Genres);
+                    LogFound("Genres", Genres);
 
                     return;
                 }

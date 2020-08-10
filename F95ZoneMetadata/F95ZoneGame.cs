@@ -80,6 +80,7 @@ namespace F95ZoneMetadata
                 {
                     Labels = temp;
                     AvailableFields.Add(MetadataField.Tags);
+                    LogFound("Labels", Labels);
                 }
             }
 
@@ -109,11 +110,12 @@ namespace F95ZoneMetadata
 
                 Name = name.Substring(0, lastStartingBracket).Trim();
                 AvailableFields.Add(MetadataField.Name);
+                LogFound("Name", Name);
             }
 
             #endregion
 
-            #region Tags
+            #region Genres
 
             var tags = headerNode.SelectNodes("div[@class='p-description']/ul[@class='listInline listInline--bullet']/li[@class='groupedTags']/a[@class='tagItem']");
             if (!IsNullOrEmpty(tags, "Tags"))
@@ -124,6 +126,7 @@ namespace F95ZoneMetadata
                 {
                     Genres = temp;
                     AvailableFields.Add(MetadataField.Genres);
+                    LogFound("Genres", Genres);
                 }
             }
 
@@ -146,6 +149,7 @@ namespace F95ZoneMetadata
                         {
                             ReleaseDate = dateTime;
                             AvailableFields.Add(MetadataField.ReleaseDate);
+                            LogFound("Release Date", sDateTime);
                         }
                     }
                 }
@@ -170,6 +174,7 @@ namespace F95ZoneMetadata
                     {
                         Rating = rating;
                         AvailableFields.Add(MetadataField.CommunityScore);
+                        LogFound("Ratings", sRating);
                     }
                 }
             }
@@ -198,6 +203,7 @@ namespace F95ZoneMetadata
                             Images.Add(coverImage);
                             AvailableFields.Add(MetadataField.CoverImage);
                             AvailableFields.Add(MetadataField.BackgroundImage);
+                            LogFound("Cover Image", null);
                         }
                     }
                 }
@@ -208,7 +214,7 @@ namespace F95ZoneMetadata
             #region Body
 
             var bodyNode = node.SelectSingleNode("//div[@class='p-body-pageContent']/div[@class='block block--messages']/div[@class='block-container lbContainer']/div[@class='block-body js-replyNewMessageContainer']/article/div[@class='message-inner']/div[@class='message-cell message-cell--main']/div/div[@class='message-content js-messageContent']/div/article/div[@class='bbWrapper']");
-            if (!IsNull(bodyNode, "Body"))
+            if (IsNull(bodyNode, "Body")) return this;
             {
                 #region Images
 
@@ -250,6 +256,8 @@ namespace F95ZoneMetadata
                             AvailableFields.Add(MetadataField.CoverImage);
                         if (!AvailableFields.Contains(MetadataField.BackgroundImage))
                             AvailableFields.Add(MetadataField.BackgroundImage);
+                        
+                        LogFound("Images", Images);
                     }
                 }
 
@@ -269,15 +277,14 @@ namespace F95ZoneMetadata
                 {
                     var y = $"{x}:";
                     var index = innerText.IndexOf(y, StringComparison.OrdinalIgnoreCase);
-                    if (index == -1)
-                    {
-                        y = x;
-                        index = innerText.IndexOf(y, StringComparison.OrdinalIgnoreCase);
-                    }
+                    if (index != -1) return Tuple.Create(index, y);
+                    
+                    y = x;
+                    index = innerText.IndexOf(y, StringComparison.OrdinalIgnoreCase);
                     return Tuple.Create(index, y);
                 }).FirstOrDefault(x => x.Item1 != -1);
 
-                if (selectedOverview != null)
+                if (selectedOverview == null) return this;
                 {
                     var description = innerText.Substring(selectedOverview.Item1+ selectedOverview.Item2.Length);
                     var linksInfoIndex = description.IndexOf("You must be registered to see the links", StringComparison.OrdinalIgnoreCase);
@@ -317,11 +324,11 @@ namespace F95ZoneMetadata
                     });
 
                     description = description.Trim();
-                    if (!description.IsEmpty())
-                    {
-                        Description = description;
-                        AvailableFields.Add(MetadataField.Description);
-                    }
+                    if (description.IsEmpty()) return this;
+                    
+                    Description = description;
+                    AvailableFields.Add(MetadataField.Description);
+                    LogFound("Description", null);
                 }
 
                 #endregion

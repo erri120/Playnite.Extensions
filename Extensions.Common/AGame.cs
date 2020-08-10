@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using JetBrains.Annotations;
 using Playnite.SDK;
 using Playnite.SDK.Metadata;
 using Playnite.SDK.Models;
@@ -71,6 +72,16 @@ namespace Extensions.Common
         protected bool IsEmpty(string s, string name)
         {
             return s.IsEmpty(Logger, name, ID);
+        }
+
+        protected void LogFound(string name, [CanBeNull] string value)
+        {
+            Logger.Debug(value == null ? $"Found {name} for {ID}" : $"Found {name} \"{value}\" for {ID}");
+        }
+
+        protected void LogFound<T>(string name, IList<T> value)
+        {
+            Logger.Debug($"Found {value.Count} {name} for {ID}");
         }
     }
 }
