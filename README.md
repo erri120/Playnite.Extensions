@@ -1,5 +1,7 @@
 # Extensions for Playnite
 
+[![Build Status](https://dev.azure.com/erri120/Playnite.Extensions/_apis/build/status/erri120.Playnite.Extensions?branchName=master)](https://dev.azure.com/erri120/Playnite.Extensions/_build/latest?definitionId=7&branchName=master)
+
 Collection of Extensions I created for [Playnite](https://github.com/JosefNemec/Playnite). Links to forum posts: [F95Zone Forum Post](https://f95zone.to/threads/dlsite-and-f95zone-extensions-for-playnite.56493/), [Playnite Forum Post](https://playnite.link/forum/thread-335.html).
 
 - [Installation](#installation)
@@ -7,7 +9,7 @@ Collection of Extensions I created for [Playnite](https://github.com/JosefNemec/
   - [DLSite](#dlsite)
   - [F95Zone](#f95zone)
   - [VNDB](#vndb)
-  - [Jastusa](#jastusa)
+- [Jastusa](#jastusa)
 - [Troubleshooting](#troubleshooting)
 
 ## Installation
