@@ -19,6 +19,7 @@
     <ProjectReference Include="..\DLSiteMetadata\DLSiteMetadata.csproj" />
     <ProjectReference Include="..\Extensions.Common\Extensions.Common.csproj" />
     <ProjectReference Include="..\F95ZoneMetadata\F95ZoneMetadata.csproj" />
+    <ProjectReference Include="..\JastusaMetadata\JastusaMetadata.csproj" />
     <ProjectReference Include="..\VNDBMetadata\VNDBMetadata.csproj" />
   </ItemGroup>
 
