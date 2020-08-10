@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.0
+
+- Reworked F95Zone Metadata Provider with better Descriptions, Community Ratings and more stability changes.
+- Lots of fixes and backend changes
+
 ## 1.3.0
 
 - Added JPN to ENG translation option for DLSite genres
