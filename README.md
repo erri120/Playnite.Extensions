@@ -7,6 +7,7 @@ Collection of Extensions I created for [Playnite](https://github.com/JosefNemec/
   - [DLSite](#dlsite)
   - [F95Zone](#f95zone)
   - [VNDB](#vndb)
+  - [Jastusa](#jastusa)
 - [Troubleshooting](#troubleshooting)
 
 ## Installation
@@ -104,6 +105,31 @@ You will get a list of search results if you used the Name of the game.
 Change any fields you want afterwards and click the _Save_ button in the bottom right corner.
 
 ![how-to-vndb-3](images/how-to-vndb-3.png)
+
+## Jastusa
+
+**Website**: [Jastusa](https://jastusa.com)
+
+**Supported Fields**:
+
+- Name
+- Description
+- Developers
+- Publishers
+- Links
+- Cover Image
+- Background Images
+- Release Date
+
+**Usage**:
+
+Copy the entire URL into the Name field, click the _Download Metadata..._ button in the bottom left corner and select _Jastusa_.
+
+![how-to-jastusa-1](images/how-to-jastusa-1.png)
+
+Change any fields you want afterwards and click the _Save_ button in the bottom right corner.
+
+![how-to-jastusa-2](images/how-to-jastusa-2.png)
 
 ## Troubleshooting
 

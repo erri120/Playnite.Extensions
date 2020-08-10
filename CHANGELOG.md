@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.0
+
+- Added Jastusa Metadata Provider
+
 ## 1.4.0
 
 - Reworked F95Zone Metadata Provider with better Descriptions, Community Ratings and more stability changes.
