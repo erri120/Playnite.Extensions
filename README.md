@@ -9,7 +9,7 @@ Collection of Extensions I created for [Playnite](https://github.com/JosefNemec/
   - [DLSite](#dlsite)
   - [F95Zone](#f95zone)
   - [VNDB](#vndb)
-- [Jastusa](#jastusa)
+  - [Jastusa](#jastusa)
 - [Troubleshooting](#troubleshooting)
 
 ## Installation
@@ -108,7 +108,7 @@ Change any fields you want afterwards and click the _Save_ button in the bottom 
 
 ![how-to-vndb-3](images/how-to-vndb-3.png)
 
-## Jastusa
+### Jastusa
 
 **Website**: [Jastusa](https://jastusa.com)
 
