@@ -15,6 +15,9 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+- checkout: self
+  clean: true
+  
 - task: NuGetToolInstaller@1
 
 - task: NuGetCommand@2
@@ -31,3 +34,18 @@ steps:
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.BinariesDirectory)'
+    includeRootFolder: false
+    archiveType: '7z'
+    sevenZipCompression: 'normal'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    replaceExistingArchive: true
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'Extensions.7z'
+    publishLocation: 'Container'
