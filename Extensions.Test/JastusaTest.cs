@@ -16,6 +16,8 @@
 // */
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using JastusaMetadata;
 using Playnite.SDK;
@@ -37,19 +39,27 @@ namespace Extensions.Test
         [Fact]
         public async Task LoadGameTest()
         {
-            //https://jastusa.com/saya-no-uta-the-song-of-saya
-            var game = new JastusaGame{ID = "saya-no-uta-the-song-of-saya", Logger = _logger};
-            var res = await game.LoadGame();
+            var games = new List<string>
+            {
+                "saya-no-uta-the-song-of-saya",
+                "the-curse-of-kubel",
+                "aokana-four-rhythms-across-the-blue"
+            };
+
+            foreach (var game in games.Select(item => new JastusaGame{ID = item, Logger = _logger}))
+            {
+                var res = await game.LoadGame();
             
-            Assert.NotNull(res);
-            Assert.NotNull(game.Name);
-            Assert.NotEmpty(game.Images);
-            Assert.NotNull(game.Description);
-            Assert.NotNull(game.CoverImage);
-            Assert.NotNull(game.Studio);
-            Assert.NotNull(game.Publisher);
-            Assert.NotEmpty(game.AdditionalLinks);
-            Assert.NotEqual(DateTime.MinValue, game.ReleaseDate);
+                Assert.NotNull(res);
+                Assert.NotNull(game.Name);
+                Assert.NotEmpty(game.Images);
+                Assert.NotNull(game.Description);
+                Assert.NotNull(game.CoverImage);
+                Assert.NotNull(game.Studio);
+                Assert.NotNull(game.Publisher);
+                Assert.NotEmpty(game.AdditionalLinks);
+                Assert.NotEqual(DateTime.MinValue, game.ReleaseDate);
+            }
         }
     }
 }

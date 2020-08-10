@@ -35,11 +35,20 @@ namespace JastusaMetadata
                 name = jastusaLink.Url;
             }
             
-            //https://jastusa.com/saya-no-uta-the-song-of-saya
+            //they have weird links where this:
+            //https://jastusa.com/games/genre/romance/kozue-s-strange-journey
+            //is also https://jastusa.com/kozue-s-strange-journey
+            //and https://jastusa.com/games/kozue-s-strange-journey
+            
             if(!name.StartsWith(Consts.Root, StringComparison.CurrentCultureIgnoreCase))
                 throw new Exception($"Name must start with {Consts.Root}!");
 
-            var id = name.Substring(Consts.Root.Length);
+            if (name.EndsWith("/"))
+                name = name.Substring(0, name.Length - 1);
+            
+            var lastSlash = name.LastIndexOf('/');
+            var id = name.Substring(lastSlash);
+
             return id;
         }
     }
