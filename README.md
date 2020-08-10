@@ -23,14 +23,14 @@ Collection of Extensions I created for [Playnite](https://github.com/JosefNemec/
 **Supported Fields**:
 
 - Name
+- Description
 - Developers
 - Publishers
-- Description
-- Release Date
-- Genres
+- Background Images
 - Cover Image
-- Background Image
+- Genres
 - Links
+- Release Date
 
 **Usage**:
 
@@ -55,13 +55,16 @@ Loading Metadata for a game can take a bit longer if you have this feature insta
 **Supported Fields**:
 
 - Name
-- Developers
 - Description
+- Background Images
+- Cover Image
+- Developers
+- Publishers
 - Genres
 - Tags
-- Cover Image
-- Background Image
-- Links (not really)
+- Links
+- Release Date
+- Community Score
 
 **Usage**:
 
