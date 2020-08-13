@@ -7,7 +7,7 @@ echo %outputFolder%
 
 set len=6
 set obj[0]=DLSiteMetadata
-set obj[1]=ExtensionsUpdater
+set obj[1]=ExtensionUpdater
 set obj[2]=F95ZoneMetadata
 set obj[3]=JastusaMetadata
 set obj[4]=VNDBMetadata

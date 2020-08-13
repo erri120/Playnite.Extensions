@@ -4,3 +4,6 @@ Version: 1.4.0
 Module: DLSiteMetadata.dll
 Type: MetadataProvider
 Icon: icon.png
+UpdaterConfig:
+  GitHubUser: erri120
+  GitHubRepo: Playnite.Extensions

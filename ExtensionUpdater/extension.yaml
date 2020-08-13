@@ -1,8 +1,8 @@
-﻿Name: F95Zone Metadata Provider
+﻿Name: Extension Updater
 Author: erri120
 Version: 1.4.0
-Module: F95ZoneMetadata.dll
-Type: MetadataProvider
+Module: ExtensionUpdater.dll
+Type: GenericPlugin
 Icon: icon.png
 UpdaterConfig:
   GitHubUser: erri120
