@@ -1,29 +1,15 @@
-#Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process
+$A = "DLSiteMetadata", "ExtensionUpdater","F95ZoneMetadata","JastusaMetadata","VNDBMetadata", "ExtensionUpdater"
+      
+$configuration = "$(buildConfiguration)"
+$output = "$(Build.ArtifactStagingDirectory)"
 
-#eg: .\xcopy-files.ps1 "M:\Projects\Playnite.Extensions\DLSiteMetadata\bin\Debug" "M:\Games\Playnite\Extensions\DLSiteMetadata"
-
-$argsCount = $args.Count
-if($args.Count -lt 2 -or $args.Count -gt 3){
-    Write-Error "Script got called with $argsCount arguments, required: 3"
-    exit
+foreach($element in $A) {
+    $currentPath = "$(Build.SourcesDirectory)"
+    $inputPath = $currentPath+"\"+$element+"\bin\"+$configuration
+    xcopy.exe $inputPath\*.dll $output\$element\ /Y /c
+    xcopy.exe $inputPath\*.pdb $output\$element\ /Y /c
+    xcopy.exe $inputPath\extension.yaml $output\$element\ /Y /c
+    xcopy.exe $inputPath\icon.png $output\$element\ /Y /c
 }
 
-if($args.Count -eq 3){
-    $debug = $args[2]
-    if($debug -ne "debug") {
-        Write-Error "Unknown second argument: $debug. If you want to enable debug output use debug"
-        exit
-    }
-    $DebugPreference = "Continue"
-    Write-Debug "Debug output enabled"
-}
-
-$inputFolder = $args[0]
-$outputFolder = $args[1]
-Write-Debug "Input: $inputFolder"
-Write-Debug "Output: $outputFolder"
-
-xcopy.exe $inputFolder\*.dll $outputFolder /Y
-xcopy.exe $inputFolder\*.pdb $outputFolder /Y
-xcopy.exe $inputFolder\extension.yaml $outputFolder /Y
-xcopy.exe $inputFolder\icon.png $outputFolder /Y
+exit 0
