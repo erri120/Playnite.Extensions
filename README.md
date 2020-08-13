@@ -10,6 +10,8 @@ Collection of Extensions I created for [Playnite](https://github.com/JosefNemec/
   - [F95Zone](#f95zone)
   - [VNDB](#vndb)
   - [Jastusa](#jastusa)
+- [Other Extensions](#other-extensions)
+  - [Extensions Updater](#extensions-updater)
 - [Troubleshooting](#troubleshooting)
 
 ## Installation
@@ -132,6 +134,22 @@ Copy the entire URL into the Name field, click the _Download Metadata..._ button
 Change any fields you want afterwards and click the _Save_ button in the bottom right corner.
 
 ![how-to-jastusa-2](images/how-to-jastusa-2.png)
+
+## Other Extensions
+
+### Extensions Updater
+
+This is a generic plugin which can check if your extension needs an update. It does this by looking in your `extension.yaml` file for a new setting:
+
+```yaml
+UpdaterConfig:
+  GitHubUser: erri120
+  GitHubRepo: Playnite.Extensions
+```
+
+The GitHub API is used to fetch the releases from `https://api.github.com/repos/{user}/{repo}/releases` (eg: `https://api.github.com/repos/erri120/Playnite.Extensions/releases`) and then it will try to find out if a new release is available. The plugin will use the version defined in your `extension.yaml` and the tag defined in your GitHub release. If you use _normal_ versioning (eg: `1.2.3` or `v1.2.3`) then we can just call `Version.TryParse` and compare the resulting versions. If this does not work then we will just check if the strings are different using `sCurrentVersion.Equals(sLatestVersion, StringComparison.OrdinalIgnoreCase)`.
+
+The user will get a notification if an update is available and the GitHub release site for the latest release will open if they click the notification.
 
 ## Troubleshooting
 
