@@ -39,7 +39,7 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      $A = "DLSiteMetadata", "ExtensionUpdater","F95ZoneMetadata","JastusaMetadata","VNDBMetadata", "ExtensionUpdater"
+      $A = "DLSiteMetadata", "ExtensionUpdater","F95ZoneMetadata","JastusaMetadata","VNDBMetadata", "ExtensionUpdater", "ScreenshotPlugin"
       
       $configuration = "$(buildConfiguration)"
       $output = "$(Build.ArtifactStagingDirectory)"

@@ -1,7 +1,7 @@
-﻿Name: Extension Updater
+﻿Name: Screenshot Plugin
 Author: erri120
 Version: 1.5.0
-Module: ExtensionUpdater.dll
+Module: ScreenshotPlugin.dll
 Type: GenericPlugin
 #Icon: icon.png
 UpdaterConfig:
