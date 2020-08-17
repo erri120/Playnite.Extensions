@@ -24,14 +24,15 @@ using System.Text;
 using System.Windows.Forms;
 using System.Windows.Input;
 using Extensions.Common;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Playnite.SDK;
 
-namespace ScreenshotPlugin.Hotkey
+namespace ScreenshotPlugin
 {
     //partially from https://tyrrrz.me/blog/wndproc-in-wpf
 
-    public static partial class PInvoke
+    public static partial class NativeFunctions
     {
         [DllImport("kernel32.dll", SetLastError=true, CharSet=CharSet.Auto)]
         public static extern ushort GlobalAddAtom(string lpString);
@@ -131,8 +132,10 @@ namespace ScreenshotPlugin.Hotkey
             _logger = logger;
         }
 
-        public void RegisterHotkey(Hotkey hotkey)
+        public void RegisterHotkey([CanBeNull] Hotkey hotkey)
         {
+            if (hotkey == null) return;
+
             if (hotkey.Status == HotkeyStatus.Registered)
             {
                 _logger.Warn($"Hotkey {hotkey.DebugString()} is already registered!");
@@ -149,7 +152,7 @@ namespace ScreenshotPlugin.Hotkey
             if (hotkey.ID == 0)
             {
                 var guid = Guid.NewGuid().ToString("N");
-                hotkey.ID = PInvoke.GlobalAddAtom(guid);
+                hotkey.ID = NativeFunctions.GlobalAddAtom(guid);
 
                 if (hotkey.ID == 0)
                 {
@@ -160,9 +163,9 @@ namespace ScreenshotPlugin.Hotkey
             }
 
             var vk = KeyInterop.VirtualKeyFromKey(hotkey.KeyCode);
-            if (!PInvoke.RegisterHotKey(_sponge.Handle, hotkey.ID, hotkey.KeyModifiers, vk))
+            if (!NativeFunctions.RegisterHotKey(_sponge.Handle, hotkey.ID, hotkey.KeyModifiers, vk))
             {
-                PInvoke.GlobalDeleteAtom(hotkey.ID);
+                NativeFunctions.GlobalDeleteAtom(hotkey.ID);
                 hotkey.ID = 0;
                 hotkey.Status = HotkeyStatus.Failed;
                 _logger.Error($"Could not register hotkey {hotkey.DebugString()}");
@@ -174,8 +177,10 @@ namespace ScreenshotPlugin.Hotkey
             _logger.Info($"Registered hotkey {hotkey.DebugString()}");
         }
 
-        public void UnregisterHotkey(Hotkey hotkey)
+        public void UnregisterHotkey([CanBeNull] Hotkey hotkey)
         {
+            if (hotkey == null) return;
+            
             if (hotkey.ID == 0)
             {
                 hotkey.Status = HotkeyStatus.Failed;
@@ -183,12 +188,13 @@ namespace ScreenshotPlugin.Hotkey
                 return;
             }
 
-            if (PInvoke.UnregisterHotKey(_sponge.Handle, hotkey.ID))
+            if (NativeFunctions.UnregisterHotKey(_sponge.Handle, hotkey.ID))
             {
-                PInvoke.GlobalDeleteAtom(hotkey.ID);
+                NativeFunctions.GlobalDeleteAtom(hotkey.ID);
                 hotkey.ID = 0;
                 hotkey.Status = HotkeyStatus.NotConfigured;
                 _logger.Info($"Unregistered hotkey {hotkey.DebugString()}");
+                _hotkeys.Remove(hotkey);
                 return;
             }
 

@@ -16,11 +16,16 @@
 // */
 
 using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Windows.Controls;
 using JetBrains.Annotations;
 using Playnite.SDK;
+using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
-using ScreenshotPlugin.Hotkey;
+using ScreenshotPlugin.ShareX;
 
 namespace ScreenshotPlugin
 {
@@ -40,16 +45,107 @@ namespace ScreenshotPlugin
             _logger = playniteAPI.CreateLogger();
             _globalHotkeyService = new GlobalHotkeyService(_logger);
             _settings = new ScreenshotPluginSettings(this);
+
+            _globalHotkeyService.HotkeyPress += GlobalHotkeyServiceOnHotkeyPress;
+        }
+
+        [CanBeNull]
+        private Game _currentlyRunningGame;
+        
+        private void GlobalHotkeyServiceOnHotkeyPress(Hotkey hotkey)
+        {
+            try
+            {
+                Bitmap bitmap;
+                var screenshot = new Screenshot();
+                string region;
+
+                if (hotkey == _settings.CaptureFullscreenHotkey)
+                {
+                    bitmap = screenshot.CaptureFullscreen();
+                    region = "fullscreen";
+                } else if (hotkey == _settings.CaptureActiveMonitorHotkey)
+                {
+                    bitmap = screenshot.CaptureActiveMonitor();
+                    region = "active monitor";
+                } else if (hotkey == _settings.CaptureActiveWindowHotkey)
+                {
+                    bitmap = screenshot.CaptureActiveWindow();
+                    region = "active window";
+                }
+                else
+                {
+                    _logger.Error($"Unknown hotkey: {hotkey.DebugString()}");
+                    return;
+                }
+
+                if (bitmap == null)
+                {
+                    _logger.Error($"Unable to capture {region} with hotkey {hotkey.DebugString()}");
+                    return;
+                }
+
+                var fileName = DateTime.Now.ToString("yyyy-MM-ddThh-mm-ss");
+                var folder = _currentlyRunningGame == null
+                    ? _settings.ScreenshotsPath
+                    : Path.Combine(_settings.ScreenshotsPath, _currentlyRunningGame.GameId);
+                
+                if (!Directory.Exists(folder))
+                    Directory.CreateDirectory(folder);
+                
+                var path = Path.Combine(folder, fileName + ".png");
+
+                bitmap.Save(path, ImageFormat.Png);
+                //bitmap.Dispose();
+
+                _playniteAPI.Notifications.Add(new NotificationMessage(fileName, $"Saved new screenshot to {path}", NotificationType.Info,
+                    () =>
+                    {
+                        try
+                        {
+                            Process.Start(path);
+                        }
+                        catch (Exception)
+                        {
+                            //ignored
+                        }
+                    }));
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e, $"Exception while handling hotkey {hotkey.DebugString()}\n");
+            }
+        }
+
+        public override void OnGameStarted(Game game)
+        {
+            _currentlyRunningGame = game;
+        }
+
+        public override void OnGameStopped(Game game, long ellapsedSeconds)
+        {
+            _currentlyRunningGame = null;
         }
 
         public override void OnApplicationStarted()
         {
+            UpdateHotkeys(null, _settings);
         }
 
-        public override void OnApplicationStopped()
+        public void UpdateHotkeys([CanBeNull] ScreenshotPluginSettings before, ScreenshotPluginSettings after)
         {
+            if (before != null)
+            {
+                _globalHotkeyService.UnregisterHotkey(before.CaptureFullscreenHotkey);
+                _globalHotkeyService.UnregisterHotkey(before.CaptureActiveMonitorHotkey);
+                _globalHotkeyService.UnregisterHotkey(before.CaptureActiveWindowHotkey);
+            }
+            
+            _globalHotkeyService.RegisterHotkey(after.CaptureFullscreenHotkey);
+            _globalHotkeyService.RegisterHotkey(after.CaptureActiveMonitorHotkey);
+            _globalHotkeyService.RegisterHotkey(after.CaptureActiveWindowHotkey);
         }
-
+        
         public override ISettings GetSettings(bool firstRunSettings)
         {
             return _settings;

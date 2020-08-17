@@ -18,7 +18,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace ScreenshotPlugin.Hotkey
+namespace ScreenshotPlugin
 {
     public sealed class SpongeWindow : NativeWindow
     {

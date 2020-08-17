@@ -1,5 +1,4 @@
-﻿using System.Text;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 
 namespace ScreenshotPlugin
@@ -7,14 +6,14 @@ namespace ScreenshotPlugin
     public partial class HotkeySelectionControl
     {
         public static readonly DependencyProperty HotkeyProperty =
-            DependencyProperty.Register(nameof(Hotkey), typeof(Hotkey.Hotkey),
+            DependencyProperty.Register(nameof(Hotkey), typeof(Hotkey),
                 typeof(HotkeySelectionControl),
-                new FrameworkPropertyMetadata(default(Hotkey.Hotkey),
+                new FrameworkPropertyMetadata(default(Hotkey),
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
-        public Hotkey.Hotkey Hotkey
+        public Hotkey Hotkey
         {
-            get => (Hotkey.Hotkey) GetValue(HotkeyProperty);
+            get => (Hotkey) GetValue(HotkeyProperty);
             set => SetValue(HotkeyProperty, value);
         }
 
@@ -65,7 +64,7 @@ namespace ScreenshotPlugin
             }
 
             // Update the value
-            Hotkey = new Hotkey.Hotkey
+            Hotkey = new Hotkey
             {
                 KeyCode = key,
                 KeyModifiers = modifiers

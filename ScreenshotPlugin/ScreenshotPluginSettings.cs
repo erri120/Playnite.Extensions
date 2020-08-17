@@ -16,10 +16,12 @@
 // */
 
 using System.Collections.Generic;
+using System.Drawing.Imaging;
+using System.IO;
+using Extensions.Common;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Playnite.SDK;
-using ScreenshotPlugin.Hotkey;
 
 namespace ScreenshotPlugin
 {
@@ -27,10 +29,12 @@ namespace ScreenshotPlugin
     {
         private readonly ScreenshotExtensionPlugin _plugin;
         
-        public bool NoGameScreenshots { get; set; }
-        public string FullscreenScreenshotsPath { get; set; }
-        public Hotkey.Hotkey FullscreenWPFHotkey { get; set; }
-        public Hotkey.Hotkey ActiveWindowWPFHotkey { get; set; }
+        //public bool SaveToGame { get; set; }
+        //public bool SaveToFolder { get; set; }
+        public string ScreenshotsPath { get; set; }
+        public Hotkey CaptureActiveMonitorHotkey { get; set; }
+        public Hotkey CaptureActiveWindowHotkey { get; set; }
+        public Hotkey CaptureFullscreenHotkey { get; set; }
 
         [UsedImplicitly]
         public ScreenshotPluginSettings() { }
@@ -38,23 +42,44 @@ namespace ScreenshotPlugin
         public ScreenshotPluginSettings(ScreenshotExtensionPlugin plugin)
         {
             _plugin = plugin;
-            
+
             var savedSettings = plugin.LoadPluginSettings<ScreenshotPluginSettings>();
 
-            if (savedSettings == null) return;
-            NoGameScreenshots = savedSettings.NoGameScreenshots;
-            FullscreenScreenshotsPath = savedSettings.FullscreenScreenshotsPath;
-            FullscreenWPFHotkey = savedSettings.FullscreenWPFHotkey;
-            ActiveWindowWPFHotkey = savedSettings.ActiveWindowWPFHotkey;
+            if (savedSettings != null)
+            {
+                //SaveToGame = savedSettings.SaveToGame;
+                //SaveToFolder = savedSettings.SaveToFolder;
+                ScreenshotsPath = savedSettings.ScreenshotsPath;
+                CaptureActiveMonitorHotkey = savedSettings.CaptureActiveMonitorHotkey;
+                CaptureActiveWindowHotkey = savedSettings.CaptureActiveWindowHotkey;
+                CaptureFullscreenHotkey = savedSettings.CaptureFullscreenHotkey;
+            }
+
+            if (ScreenshotsPath.IsEmpty())
+            {
+                ScreenshotsPath = Path.Combine(_plugin.PlayniteApi.Paths.ExtensionsDataPath, _plugin.Id.ToString());
+            }
         }
+
+        private ScreenshotPluginSettings _before;
         
         public void BeginEdit()
         {
+            _before = new ScreenshotPluginSettings
+            {
+                CaptureActiveWindowHotkey = CaptureActiveWindowHotkey,
+                CaptureActiveMonitorHotkey = CaptureActiveMonitorHotkey,
+                CaptureFullscreenHotkey = CaptureFullscreenHotkey
+            };
         }
 
         public void EndEdit()
         {
             _plugin.SavePluginSettings(this);
+            _plugin.UpdateHotkeys(_before, this);
+
+            if (!Directory.Exists(ScreenshotsPath))
+                Directory.CreateDirectory(ScreenshotsPath);
         }
 
         public void CancelEdit()
@@ -64,7 +89,34 @@ namespace ScreenshotPlugin
         public bool VerifySettings(out List<string> errors)
         {
             errors = new List<string>();
-            return true;
+
+            /*if (SaveToFolder && ScreenshotsPath.IsEmpty())
+            {
+                errors.Add("Screenshots Folder Path must not be empty if you want to save the screenshots to a folder!");
+            }*/
+
+            if (ScreenshotsPath.IsEmpty())
+            {
+                errors.Add("Screenshots Folder Path must not be empty!");
+            }
+            
+            var hotkeys = new HashSet<Hotkey>(new HotkeyComparer());
+            if (!hotkeys.Add(CaptureFullscreenHotkey))
+            {
+                errors.Add("Duplicate hotkeys are not allowed!");
+            }
+
+            if (!hotkeys.Add(CaptureActiveMonitorHotkey))
+            {
+                errors.Add("Duplicate hotkeys are not allowed!");
+            }
+
+            if (!hotkeys.Add(CaptureActiveWindowHotkey))
+            {
+                errors.Add("Duplicate hotkeys are not allowed!");
+            }
+            
+            return errors.Count <= 0;
         }
     }
 }

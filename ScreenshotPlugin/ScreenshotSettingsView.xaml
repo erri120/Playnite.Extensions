@@ -8,12 +8,16 @@
              d:DataContext="{d:DesignInstance local:ScreenshotPluginSettings}"
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel Margin="16 16">
-        <CheckBox IsChecked="{Binding NoGameScreenshots}" Margin="0 8" x:Name="NoGameScreenshots">Take Screenshots without playing a game</CheckBox>
-        <Label Margin="0 8 0 2" Target="{Binding ElementName=NoGameScreenshotsPath}">Screenshots Folder Path for non-game screenshots</Label>
-        <TextBox Text="{Binding FullscreenScreenshotsPath}" ToolTip="Screenshots taken while not running a game while be saved to this location. Only needed if the checkbox above is ticked." x:Name="NoGameScreenshotsPath"/>
-        <Label Margin="0 8 0 2" Target="{Binding ElementName=FullscreenHotkey}">Entire Screen Screenshot Hotkey</Label>
-        <local:HotkeySelectionControl x:Name="FullscreenHotkey" Hotkey="{Binding FullscreenWPFHotkey}"/>
-        <Label Margin="0 8 0 2" Target="{Binding ElementName=ActiveWindowHotkey}">Active Window Screenshot Hotkey</Label>
-        <local:HotkeySelectionControl x:Name="ActiveWindowHotkey" Hotkey="{Binding ActiveWindowWPFHotkey}"/>
+        <Label Margin="0 8 0 2" Target="{Binding ElementName=ScreenshotsPathTextBox}">Screenshots Folder Path</Label>
+        <TextBox x:Name="ScreenshotsPathTextBox" Text="{Binding ScreenshotsPath}"/>
+        
+        <Label Margin="0 8 0 2" Target="{Binding ElementName=FullscreenHotkeyControl}">Capture Fullscreen Hotkey</Label>
+        <local:HotkeySelectionControl x:Name="FullscreenHotkeyControl" Hotkey="{Binding CaptureFullscreenHotkey}"/>
+        
+        <Label Margin="0 8 0 2" Target="{Binding ElementName=ActiveMonitorHotkeyControl}">Capture active Monitor Hotkey</Label>
+        <local:HotkeySelectionControl x:Name="ActiveMonitorHotkeyControl" Hotkey="{Binding CaptureActiveMonitorHotkey}"/>
+        
+        <Label Margin="0 8 0 2" Target="{Binding ElementName=ActiveWindowHotkeyControl}">Capture active Window Hotkey</Label>
+        <local:HotkeySelectionControl x:Name="ActiveWindowHotkeyControl" Hotkey="{Binding CaptureActiveWindowHotkey}"/>
     </StackPanel>
 </UserControl>
