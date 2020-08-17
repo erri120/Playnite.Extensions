@@ -16,18 +16,19 @@
 // */
 
 using System;
-using System.Drawing.Imaging;
+using JetBrains.Annotations;
 using Playnite.SDK;
-using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
-using ScreenshotPlugin.ShareX;
+using ScreenshotPlugin.Hotkey;
 
 namespace ScreenshotPlugin
 {
+    [UsedImplicitly]
     public class ScreenshotPlugin : Plugin
     {
         private readonly IPlayniteAPI _playniteAPI;
         private readonly ILogger _logger;
+        private readonly GlobalHotkeyService _globalHotkeyService;
         
         public override Guid Id { get; } = Guid.Parse("2ace02d2-1f1d-4d11-b430-63d7613eaa1f");
 
@@ -35,6 +36,7 @@ namespace ScreenshotPlugin
         {
             _playniteAPI = playniteAPI;
             _logger = playniteAPI.CreateLogger();
+            _globalHotkeyService = new GlobalHotkeyService(_logger);
         }
 
         public override void OnApplicationStarted()
@@ -45,12 +47,9 @@ namespace ScreenshotPlugin
         {
         }
 
-        public override void OnGameStarted(Game game)
+        public override void Dispose()
         {
-        }
-
-        public override void OnGameStopped(Game game, long ellapsedSeconds)
-        {
+            _globalHotkeyService.Dispose();
         }
     }
 }
