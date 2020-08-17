@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="ScreenshotPlugin.ScreenshotSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:ScreenshotPlugin"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:ScreenshotPluginSettings}"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <StackPanel Margin="16 16">
+        <CheckBox IsChecked="{Binding NoGameScreenshots}" Margin="0 8" x:Name="NoGameScreenshots">Take Screenshots without playing a game</CheckBox>
+        <Label Margin="0 8 0 2" Target="{Binding ElementName=NoGameScreenshotsPath}">Screenshots Folder Path for non-game screenshots</Label>
+        <TextBox Text="{Binding FullscreenScreenshotsPath}" ToolTip="Screenshots taken while not running a game while be saved to this location. Only needed if the checkbox above is ticked." x:Name="NoGameScreenshotsPath"/>
+        <Label Margin="0 8 0 2" Target="{Binding ElementName=FullscreenHotkey}">Entire Screen Screenshot Hotkey</Label>
+        <local:HotkeySelectionControl x:Name="FullscreenHotkey" Hotkey="{Binding FullscreenWPFHotkey}"/>
+        <Label Margin="0 8 0 2" Target="{Binding ElementName=ActiveWindowHotkey}">Active Window Screenshot Hotkey</Label>
+        <local:HotkeySelectionControl x:Name="ActiveWindowHotkey" Hotkey="{Binding ActiveWindowWPFHotkey}"/>
+    </StackPanel>
+</UserControl>

@@ -20,8 +20,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows.Forms;
+using System.Windows.Input;
 using Extensions.Common;
+using Newtonsoft.Json;
 using Playnite.SDK;
 
 namespace ScreenshotPlugin.Hotkey
@@ -30,25 +33,12 @@ namespace ScreenshotPlugin.Hotkey
 
     public static partial class PInvoke
     {
-        [Flags]
-        public enum KeyModifiers
-        {
-            None = 0,
-            Alt = 1,
-            Control = 2,
-            Shift = 4,
-            // Either WINDOWS key was held down. These keys are labeled with the Windows logo.
-            // Keyboard shortcuts that involve the WINDOWS key are reserved for use by the
-            // operating system.
-            Windows = 8
-        }
-        
         [DllImport("kernel32.dll", SetLastError=true, CharSet=CharSet.Auto)]
         public static extern ushort GlobalAddAtom(string lpString);
         [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
         public static extern ushort GlobalDeleteAtom(ushort nAtom);
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern bool RegisterHotKey(IntPtr hWnd, int id, KeyModifiers fsModifiers, Keys vk);
+        public static extern bool RegisterHotKey(IntPtr hWnd, int id, ModifierKeys fsModifiers, int vk);
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool UnregisterHotKey(IntPtr hWnd, int id);
@@ -66,16 +56,38 @@ namespace ScreenshotPlugin.Hotkey
     
     public class Hotkey
     {
+        [JsonIgnore]
         public ushort ID { get; set; }
-        public Keys KeyCode { get; set; } = Keys.None;
+        [JsonProperty]
+        public Key KeyCode { get; set; } = Key.None;
+        [JsonProperty]
         public HotkeyStatus Status { get; set; } = HotkeyStatus.NotConfigured;
-        public PInvoke.KeyModifiers KeyModifiers { get; set; } = PInvoke.KeyModifiers.None;
-        
-        public bool IsValidHotkey => KeyCode != Keys.None;
+        [JsonProperty]
+        public ModifierKeys KeyModifiers { get; set; } = ModifierKeys.None;
+        [JsonIgnore]
+        public bool IsValidHotkey => KeyCode != Key.None;
 
+        public string DebugString()
+        {
+            return $"{(ID == 0 ? "" : $"ID: {ID} ")}Keys: \"{ToString()}\" Status: {Enum.GetName(typeof(HotkeyStatus), Status)}";
+        }
+        
         public override string ToString()
         {
-            return $"{(ID == 0 ? "" : $"ID: {ID} ")}KeyCode: {KeyCode} Status: {Enum.GetName(typeof(HotkeyStatus), Status)}";
+            var str = new StringBuilder();
+
+            if (KeyModifiers.HasFlag(ModifierKeys.Control))
+                str.Append("Ctrl + ");
+            if (KeyModifiers.HasFlag(ModifierKeys.Shift))
+                str.Append("Shift + ");
+            if (KeyModifiers.HasFlag(ModifierKeys.Alt))
+                str.Append("Alt + ");
+            if (KeyModifiers.HasFlag(ModifierKeys.Windows))
+                str.Append("Win + ");
+
+            str.Append(KeyCode);
+
+            return str.ToString();
         }
     }
 
@@ -123,13 +135,13 @@ namespace ScreenshotPlugin.Hotkey
         {
             if (hotkey.Status == HotkeyStatus.Registered)
             {
-                _logger.Warn($"Hotkey {hotkey} is already registered!");
+                _logger.Warn($"Hotkey {hotkey.DebugString()} is already registered!");
                 return;
             }
 
             if (!hotkey.IsValidHotkey)
             {
-                _logger.Warn($"Hotkey {hotkey} is not valid!");
+                _logger.Warn($"Hotkey {hotkey.DebugString()} is not valid!");
                 hotkey.Status = HotkeyStatus.NotConfigured;
                 return;
             }
@@ -142,23 +154,24 @@ namespace ScreenshotPlugin.Hotkey
                 if (hotkey.ID == 0)
                 {
                     hotkey.Status = HotkeyStatus.Failed;
-                    _logger.Error($"Could not generate unique ID for Hotkey {hotkey}");
+                    _logger.Error($"Could not generate unique ID for Hotkey {hotkey.DebugString()}");
                     return;
                 }
             }
 
-            if (!PInvoke.RegisterHotKey(_sponge.Handle, hotkey.ID, hotkey.KeyModifiers, hotkey.KeyCode))
+            var vk = KeyInterop.VirtualKeyFromKey(hotkey.KeyCode);
+            if (!PInvoke.RegisterHotKey(_sponge.Handle, hotkey.ID, hotkey.KeyModifiers, vk))
             {
                 PInvoke.GlobalDeleteAtom(hotkey.ID);
                 hotkey.ID = 0;
                 hotkey.Status = HotkeyStatus.Failed;
-                _logger.Error($"Could not register hotkey {hotkey}");
+                _logger.Error($"Could not register hotkey {hotkey.DebugString()}");
                 return;
             }
 
             hotkey.Status = HotkeyStatus.Registered;
             _hotkeys.Add(hotkey);
-            _logger.Info($"Registered hotkey {hotkey}");
+            _logger.Info($"Registered hotkey {hotkey.DebugString()}");
         }
 
         public void UnregisterHotkey(Hotkey hotkey)
@@ -166,7 +179,7 @@ namespace ScreenshotPlugin.Hotkey
             if (hotkey.ID == 0)
             {
                 hotkey.Status = HotkeyStatus.Failed;
-                _logger.Error($"Unable to unregister hotkey {hotkey}, ID is 0!");
+                _logger.Error($"Unable to unregister hotkey {hotkey.DebugString()}, ID is 0!");
                 return;
             }
 
@@ -175,12 +188,12 @@ namespace ScreenshotPlugin.Hotkey
                 PInvoke.GlobalDeleteAtom(hotkey.ID);
                 hotkey.ID = 0;
                 hotkey.Status = HotkeyStatus.NotConfigured;
-                _logger.Info($"Unregistered hotkey {hotkey}");
+                _logger.Info($"Unregistered hotkey {hotkey.DebugString()}");
                 return;
             }
 
             hotkey.Status = HotkeyStatus.Failed;
-            _logger.Error($"Unable to unregister hotkey {hotkey}");
+            _logger.Error($"Unable to unregister hotkey {hotkey.DebugString()}");
         }
 
         private void UnregisterAllHotkeys()
@@ -198,19 +211,21 @@ namespace ScreenshotPlugin.Hotkey
             var hotkey = _hotkeys.FirstOrDefault(x => x.ID == id);
             if (hotkey == null)
                 return;
-            
-            var key = (Keys)(((int)m.LParam >> 16) & 0xFFFF);
-            var modifiers = (PInvoke.KeyModifiers)((int)m.LParam & 0xFFFF);
+
+            var key = KeyInterop.KeyFromVirtualKey(((int)m.LParam >> 16) & 0xFFFF);
+            var modifiers = (ModifierKeys) ((int)m.LParam & 0xFFFF);
+            //var key = (Keys)(((int)m.LParam >> 16) & 0xFFFF);
+            //var modifiers = (PInvoke.KeyModifiers)((int)m.LParam & 0xFFFF);
 
             if (hotkey.KeyCode != key)
             {
-                _logger.Error($"Hotkey {hotkey} got pressed but key in message is {key}!");
+                _logger.Error($"Hotkey {hotkey.DebugString()} got pressed but key in message is {key}!");
                 return;
             }
 
             if (hotkey.KeyModifiers != modifiers)
             {
-                _logger.Error($"Hotkey {hotkey} got pressed but modifiers are {modifiers}");
+                _logger.Error($"Hotkey {hotkey.DebugString()} got pressed but modifiers are {modifiers}");
                 return;
             }
 

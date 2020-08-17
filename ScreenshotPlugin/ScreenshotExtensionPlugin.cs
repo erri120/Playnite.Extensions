@@ -16,6 +16,7 @@
 // */
 
 using System;
+using System.Windows.Controls;
 using JetBrains.Annotations;
 using Playnite.SDK;
 using Playnite.SDK.Plugins;
@@ -24,19 +25,21 @@ using ScreenshotPlugin.Hotkey;
 namespace ScreenshotPlugin
 {
     [UsedImplicitly]
-    public class ScreenshotPlugin : Plugin
+    public class ScreenshotExtensionPlugin : Plugin
     {
         private readonly IPlayniteAPI _playniteAPI;
         private readonly ILogger _logger;
         private readonly GlobalHotkeyService _globalHotkeyService;
+        private readonly ScreenshotPluginSettings _settings;
         
         public override Guid Id { get; } = Guid.Parse("2ace02d2-1f1d-4d11-b430-63d7613eaa1f");
 
-        public ScreenshotPlugin(IPlayniteAPI playniteAPI) : base(playniteAPI)
+        public ScreenshotExtensionPlugin(IPlayniteAPI playniteAPI) : base(playniteAPI)
         {
             _playniteAPI = playniteAPI;
             _logger = playniteAPI.CreateLogger();
             _globalHotkeyService = new GlobalHotkeyService(_logger);
+            _settings = new ScreenshotPluginSettings(this);
         }
 
         public override void OnApplicationStarted()
@@ -45,6 +48,16 @@ namespace ScreenshotPlugin
 
         public override void OnApplicationStopped()
         {
+        }
+
+        public override ISettings GetSettings(bool firstRunSettings)
+        {
+            return _settings;
+        }
+
+        public override UserControl GetSettingsView(bool firstRunView)
+        {
+            return new ScreenshotSettingsView();
         }
 
         public override void Dispose()
