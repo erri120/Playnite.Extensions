@@ -15,42 +15,47 @@
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 // */
 
-using System;
-using System.Drawing.Imaging;
-using Playnite.SDK;
-using Playnite.SDK.Models;
-using Playnite.SDK.Plugins;
-using ScreenshotPlugin.ShareX;
+using System.Drawing;
+using PInvoke;
 
 namespace ScreenshotPlugin
 {
-    public class ScreenshotPlugin : Plugin
+    public static class NativeUtils
     {
-        private readonly IPlayniteAPI _playniteAPI;
-        private readonly ILogger _logger;
+        public static int GetX(this RECT r)
+        {
+            return r.left;
+        }
+
+        public static int GetY(this RECT r)
+        {
+            return r.top;
+        }
         
-        public override Guid Id { get; } = Guid.Parse("2ace02d2-1f1d-4d11-b430-63d7613eaa1f");
-
-        public ScreenshotPlugin(IPlayniteAPI playniteAPI) : base(playniteAPI)
+        public static int GetWidth(this RECT r)
         {
-            _playniteAPI = playniteAPI;
-            _logger = playniteAPI.CreateLogger();
+            return r.right - r.left;
         }
 
-        public override void OnApplicationStarted()
+        public static int GetHeight(this RECT r)
         {
+            return r.bottom - r.top;
+        }
+        
+        public static Rectangle ToRectangle(this RECT r)
+        {
+            return new Rectangle(r.left, r.top, r.GetWidth(), r.GetHeight());
         }
 
-        public override void OnApplicationStopped()
+        public static RECT ToRECT(this Rectangle r)
         {
-        }
-
-        public override void OnGameStarted(Game game)
-        {
-        }
-
-        public override void OnGameStopped(Game game, long ellapsedSeconds)
-        {
+            return new RECT
+            {
+                left = r.Left,
+                top = r.Top,
+                bottom = r.Bottom,
+                right = r.Right
+            };
         }
     }
 }
