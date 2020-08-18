@@ -6,9 +6,11 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using Extensions.Common;
+using JetBrains.Annotations;
 
 namespace DLSiteMetadata
 {
+    [UsedImplicitly]
     public class DLSiteMetadata : AMetadataPlugin<DLSiteGame>
     {
         private DLSiteMetadataSettings Settings { get; }

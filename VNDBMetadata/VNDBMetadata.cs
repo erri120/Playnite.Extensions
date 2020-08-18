@@ -5,9 +5,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using JetBrains.Annotations;
 
 namespace VNDBMetadata
 {
+    [UsedImplicitly]
     public class VNDBMetadata : MetadataPlugin
     {
         private static readonly ILogger Logger = LogManager.GetLogger();

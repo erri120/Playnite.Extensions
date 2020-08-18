@@ -18,11 +18,13 @@
 using System;
 using System.Collections.Generic;
 using Extensions.Common;
+using JetBrains.Annotations;
 using Playnite.SDK;
 using Playnite.SDK.Plugins;
 
 namespace JastusaMetadata
 {
+    [UsedImplicitly]
     public class JastusaMetadata : AMetadataPlugin<JastusaGame>
     {
         public override Guid Id { get; } = Guid.Parse("21376a20-384c-4036-ad91-51f15e3a1db7");

@@ -23,11 +23,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Extensions.Common;
+using JetBrains.Annotations;
 using Playnite.SDK;
 using Playnite.SDK.Plugins;
 
 namespace ExtensionUpdater
 {
+    [UsedImplicitly]
     public class ExtensionUpdaterPlugin : Plugin
     {
         private readonly IPlayniteAPI _playniteAPI;

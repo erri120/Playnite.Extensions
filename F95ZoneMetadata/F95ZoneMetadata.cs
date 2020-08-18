@@ -4,9 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
 using Extensions.Common;
+using JetBrains.Annotations;
 
 namespace F95ZoneMetadata
 {
+    [UsedImplicitly]
     public class F95ZoneMetadata : AMetadataPlugin<F95ZoneGame>
     {
         private F95ZoneMetadataSettings Settings { get; }
