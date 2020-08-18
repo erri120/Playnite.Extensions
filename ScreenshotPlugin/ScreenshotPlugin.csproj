@@ -48,7 +48,9 @@
       <DependentUpon>HotkeySelectionControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Hotkey\GlobalHotkeyService.cs" />
+    <Compile Include="Hotkey\Hotkey.cs" />
     <Compile Include="Hotkey\SpongeWindow.cs" />
+    <Compile Include="NativeFunctions.cs" />
     <Compile Include="NativeUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScreenshotExtensionPlugin.cs" />

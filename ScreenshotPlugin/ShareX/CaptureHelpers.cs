@@ -29,27 +29,29 @@ namespace ScreenshotPlugin.ShareX
 {
     public static class CaptureHelpers
     {
-        public static readonly Version OSVersion = Environment.OSVersion.Version;
+        private static readonly Version OSVersion = Environment.OSVersion.Version;
+        
+        private static bool IsWindowsVistaOrGreater()
+        {
+            return OSVersion.Major >= 6;
+        }
+        
+        private static bool IsWindows10OrGreater(int build = -1)
+        {
+            return OSVersion.Major >= 10 && OSVersion.Build >= build;
+        }
         
         public static Rectangle GetScreenBounds()
         {
             return SystemInformation.VirtualScreen;
         }
-        
-        public static bool IsWindowsVistaOrGreater()
+
+        private static bool IsDWMEnabled()
         {
-            return OSVersion.Major >= 6;
+            return IsWindowsVistaOrGreater() && NativeFunctions.DwmIsCompositionEnabled();
         }
-        
-        [DllImport("dwmapi.dll", PreserveSig = false)]
-        public static extern bool DwmIsCompositionEnabled();
-        
-        public static bool IsDWMEnabled()
-        {
-            return IsWindowsVistaOrGreater() && DwmIsCompositionEnabled();
-        }
-        
-        public static Point GetCursorPosition()
+
+        private static Point GetCursorPosition()
         {
             if (User32.GetCursorPos(out var point))
             {
@@ -64,25 +66,16 @@ namespace ScreenshotPlugin.ShareX
             return Screen.FromPoint(GetCursorPosition()).Bounds;
         }
         
-        [DllImport("dwmapi.dll")]
-        public static extern int DwmGetWindowAttribute(IntPtr hwnd, DwmApi.DWMWINDOWATTRIBUTE dwAttribute, out RECT pvAttribute, int cbAttribute);
-
-        public static bool GetExtendedFrameBounds(IntPtr handle, out Rectangle rectangle)
+        private static bool GetExtendedFrameBounds(IntPtr handle, out Rectangle rectangle)
         {
-            //int result = PInvoke.DwmApi.DwmGetWindowAttribute(handle, (int)PInvoke.DwmApi.DWMWINDOWATTRIBUTE.DWMWA_EXTENDED_FRAME_BOUNDS, out rect, Marshal.SizeOf(typeof(RECT)));
-            var result = DwmGetWindowAttribute(handle, DwmApi.DWMWINDOWATTRIBUTE.DWMWA_EXTENDED_FRAME_BOUNDS,
+            var result = NativeFunctions.DwmGetWindowAttribute(handle, DwmApi.DWMWINDOWATTRIBUTE.DWMWA_EXTENDED_FRAME_BOUNDS,
                 out var rect, Marshal.SizeOf(typeof(RECT)));
             
             rectangle = rect.ToRectangle();
             return result == 0;
         }
-        
-        public static bool IsWindows10OrGreater(int build = -1)
-        {
-            return OSVersion.Major >= 10 && OSVersion.Build >= build;
-        }
-        
-        public static bool GetBorderSize(IntPtr handle, out Size size)
+
+        private static bool GetBorderSize(IntPtr handle, out Size size)
         {
             var wi = new User32.WINDOWINFO();
 
@@ -92,8 +85,8 @@ namespace ScreenshotPlugin.ShareX
 
             return result;
         }
-        
-        public static Rectangle MaximizedWindowFix(IntPtr handle, Rectangle windowRect)
+
+        private static Rectangle MaximizedWindowFix(IntPtr handle, Rectangle windowRect)
         {
             if (GetBorderSize(handle, out var size))
             {
@@ -109,9 +102,7 @@ namespace ScreenshotPlugin.ShareX
 
             if (IsDWMEnabled())
             {
-                Rectangle tempRect;
-
-                if (GetExtendedFrameBounds(handle, out tempRect))
+                if (GetExtendedFrameBounds(handle, out var tempRect))
                 {
                     rect = tempRect;
                 }

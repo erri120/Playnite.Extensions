@@ -22,22 +22,12 @@ namespace ScreenshotPlugin
 {
     public static class NativeUtils
     {
-        public static int GetX(this RECT r)
-        {
-            return r.left;
-        }
-
-        public static int GetY(this RECT r)
-        {
-            return r.top;
-        }
-        
-        public static int GetWidth(this RECT r)
+        private static int GetWidth(this RECT r)
         {
             return r.right - r.left;
         }
 
-        public static int GetHeight(this RECT r)
+        private static int GetHeight(this RECT r)
         {
             return r.bottom - r.top;
         }
@@ -45,17 +35,6 @@ namespace ScreenshotPlugin
         public static Rectangle ToRectangle(this RECT r)
         {
             return new Rectangle(r.left, r.top, r.GetWidth(), r.GetHeight());
-        }
-
-        public static RECT ToRECT(this Rectangle r)
-        {
-            return new RECT
-            {
-                left = r.Left,
-                top = r.Top,
-                bottom = r.Bottom,
-                right = r.Right
-            };
         }
     }
 }

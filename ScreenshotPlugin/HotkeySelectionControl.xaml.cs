@@ -20,7 +20,6 @@ namespace ScreenshotPlugin
         public HotkeySelectionControl()
         {
             InitializeComponent();
-            //DataContext = this;
         }
         
         private void HotkeyTextBox_PreviewKeyDown(object sender, KeyEventArgs e)

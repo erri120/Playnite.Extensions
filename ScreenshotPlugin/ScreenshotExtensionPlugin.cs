@@ -56,21 +56,23 @@ namespace ScreenshotPlugin
         {
             try
             {
+                if (_currentlyRunningGame == null && _settings.OnlyGameScreenshots)
+                    return;
+
                 Bitmap bitmap;
-                var screenshot = new Screenshot();
                 string region;
 
                 if (hotkey == _settings.CaptureFullscreenHotkey)
                 {
-                    bitmap = screenshot.CaptureFullscreen();
+                    bitmap = Screenshot.CaptureFullscreen();
                     region = "fullscreen";
                 } else if (hotkey == _settings.CaptureActiveMonitorHotkey)
                 {
-                    bitmap = screenshot.CaptureActiveMonitor();
+                    bitmap = Screenshot.CaptureActiveMonitor();
                     region = "active monitor";
                 } else if (hotkey == _settings.CaptureActiveWindowHotkey)
                 {
-                    bitmap = screenshot.CaptureActiveWindow();
+                    bitmap = Screenshot.CaptureActiveWindow();
                     region = "active window";
                 }
                 else
@@ -105,9 +107,9 @@ namespace ScreenshotPlugin
                         {
                             Process.Start(path);
                         }
-                        catch (Exception)
+                        catch (Exception inner)
                         {
-                            //ignored
+                            _logger.Error(inner, $"Exception while opening {path}");
                         }
                     }));
             }

@@ -17,102 +17,18 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows.Forms;
 using System.Windows.Input;
 using Extensions.Common;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 using Playnite.SDK;
 
 namespace ScreenshotPlugin
 {
     //partially from https://tyrrrz.me/blog/wndproc-in-wpf
 
-    public static partial class NativeFunctions
-    {
-        [DllImport("kernel32.dll", SetLastError=true, CharSet=CharSet.Auto)]
-        public static extern ushort GlobalAddAtom(string lpString);
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
-        public static extern ushort GlobalDeleteAtom(ushort nAtom);
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern bool RegisterHotKey(IntPtr hWnd, int id, ModifierKeys fsModifiers, int vk);
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-    }
-    
-    public enum HotkeyStatus
-    {
-        [Description("Registered")]
-        Registered,
-        [Description("Failed")]
-        Failed,
-        [Description("Not Configured")]
-        NotConfigured
-    }
-    
-    public class Hotkey
-    {
-        [JsonIgnore]
-        public ushort ID { get; set; }
-        [JsonProperty]
-        public Key KeyCode { get; set; } = Key.None;
-        [JsonProperty]
-        public HotkeyStatus Status { get; set; } = HotkeyStatus.NotConfigured;
-        [JsonProperty]
-        public ModifierKeys KeyModifiers { get; set; } = ModifierKeys.None;
-        [JsonIgnore]
-        public bool IsValidHotkey => KeyCode != Key.None;
-
-        public string DebugString()
-        {
-            return $"{(ID == 0 ? "" : $"ID: {ID} ")}Keys: \"{ToString()}\" Status: {Enum.GetName(typeof(HotkeyStatus), Status)}";
-        }
-        
-        public override string ToString()
-        {
-            var str = new StringBuilder();
-
-            if (KeyModifiers.HasFlag(ModifierKeys.Control))
-                str.Append("Ctrl + ");
-            if (KeyModifiers.HasFlag(ModifierKeys.Shift))
-                str.Append("Shift + ");
-            if (KeyModifiers.HasFlag(ModifierKeys.Alt))
-                str.Append("Alt + ");
-            if (KeyModifiers.HasFlag(ModifierKeys.Windows))
-                str.Append("Win + ");
-
-            str.Append(KeyCode);
-
-            return str.ToString();
-        }
-    }
-
-    public class HotkeyComparer : IEqualityComparer<Hotkey>
-    {
-        public bool Equals(Hotkey x, Hotkey y)
-        {
-            if (x == null) return false;
-            if (y == null) return false;
-            return x.ID == y.ID && x.KeyCode == y.KeyCode && x.Status == y.Status;
-        }
-
-        public int GetHashCode(Hotkey obj)
-        {
-            unchecked
-            {
-                var hashCode = (int) obj.ID;
-                hashCode = (hashCode * 397) ^ (int) obj.KeyCode;
-                hashCode = (hashCode * 397) ^ (int) obj.Status;
-                return hashCode;
-            }
-        }
-    }
-    
     public class GlobalHotkeyService : IDisposable
     {
         private readonly SpongeWindow _sponge;

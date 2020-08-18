@@ -16,11 +16,9 @@
 // */
 
 using System.Collections.Generic;
-using System.Drawing.Imaging;
 using System.IO;
 using Extensions.Common;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 using Playnite.SDK;
 
 namespace ScreenshotPlugin
@@ -31,6 +29,7 @@ namespace ScreenshotPlugin
         
         //public bool SaveToGame { get; set; }
         //public bool SaveToFolder { get; set; }
+        public bool OnlyGameScreenshots { get; set; }
         public string ScreenshotsPath { get; set; }
         public Hotkey CaptureActiveMonitorHotkey { get; set; }
         public Hotkey CaptureActiveWindowHotkey { get; set; }
@@ -49,6 +48,7 @@ namespace ScreenshotPlugin
             {
                 //SaveToGame = savedSettings.SaveToGame;
                 //SaveToFolder = savedSettings.SaveToFolder;
+                OnlyGameScreenshots = savedSettings.OnlyGameScreenshots;
                 ScreenshotsPath = savedSettings.ScreenshotsPath;
                 CaptureActiveMonitorHotkey = savedSettings.CaptureActiveMonitorHotkey;
                 CaptureActiveWindowHotkey = savedSettings.CaptureActiveWindowHotkey;
@@ -89,11 +89,6 @@ namespace ScreenshotPlugin
         public bool VerifySettings(out List<string> errors)
         {
             errors = new List<string>();
-
-            /*if (SaveToFolder && ScreenshotsPath.IsEmpty())
-            {
-                errors.Add("Screenshots Folder Path must not be empty if you want to save the screenshots to a folder!");
-            }*/
 
             if (ScreenshotsPath.IsEmpty())
             {

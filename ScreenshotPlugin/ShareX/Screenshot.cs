@@ -25,17 +25,17 @@ using JetBrains.Annotations;
 
 namespace ScreenshotPlugin.ShareX
 {
-    public class Screenshot
+    public static class Screenshot
     {
-        public bool CaptureClientArea { get; set; } = false;
+        /*public bool CaptureClientArea { get; set; } = false;
         public bool RemoveOutsideScreenArea { get; set; } = true;
         public bool CaptureShadow { get; set; } = false;
-        public int ShadowOffset { get; set; } = 20;
+        public int ShadowOffset { get; set; } = 20;*/
 
         [CanBeNull]
-        public Bitmap CaptureRectangle(Rectangle rect)
+        private static Bitmap CaptureRectangle(Rectangle rect)
         {
-            if (!RemoveOutsideScreenArea) return CaptureRectangleNative(rect);
+            //if (!RemoveOutsideScreenArea) return CaptureRectangleNative(rect);
             
             var bounds = CaptureHelpers.GetScreenBounds();
             rect = Rectangle.Intersect(bounds, rect);
@@ -44,7 +44,7 @@ namespace ScreenshotPlugin.ShareX
         }
         
         [CanBeNull]
-        public Bitmap CaptureFullscreen()
+        public static Bitmap CaptureFullscreen()
         {
             var bounds = CaptureHelpers.GetScreenBounds();
 
@@ -52,12 +52,12 @@ namespace ScreenshotPlugin.ShareX
         }
 
         [CanBeNull]
-        private Bitmap CaptureWindow(IntPtr handle)
+        private static Bitmap CaptureWindow(IntPtr handle)
         {
             if (handle.ToInt32() <= 0) return null;
-            Rectangle rect = default;
+            var rect = CaptureHelpers.GetWindowRectangle(handle);
 
-            if (CaptureClientArea)
+            /*if (CaptureClientArea)
             {
                 if (PInvoke.User32.GetClientRect(handle, out var r))
                     rect = r.ToRectangle();
@@ -65,14 +65,14 @@ namespace ScreenshotPlugin.ShareX
             else
             {
                 rect = CaptureHelpers.GetWindowRectangle(handle);
-            }
+            }*/
 
             return CaptureRectangle(rect);
 
         }
 
         [CanBeNull]
-        public Bitmap CaptureActiveWindow()
+        public static Bitmap CaptureActiveWindow()
         {
             var handle = PInvoke.User32.GetForegroundWindow();
 
@@ -80,7 +80,7 @@ namespace ScreenshotPlugin.ShareX
         }
 
         [CanBeNull]
-        public Bitmap CaptureActiveMonitor()
+        public static Bitmap CaptureActiveMonitor()
         {
             var bounds = CaptureHelpers.GetActiveScreenBounds();
 

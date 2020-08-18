@@ -8,6 +8,8 @@
              d:DataContext="{d:DesignInstance local:ScreenshotPluginSettings}"
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel Margin="16 16">
+        <CheckBox IsChecked="{Binding OnlyGameScreenshots}" ToolTip="Un-ticking this means you could create a screenshot of everything if Playnite and this Extension is running.">Only take Screenshots when in a game</CheckBox>
+        
         <Label Margin="0 8 0 2" Target="{Binding ElementName=ScreenshotsPathTextBox}">Screenshots Folder Path</Label>
         <TextBox x:Name="ScreenshotsPathTextBox" Text="{Binding ScreenshotsPath}"/>
         
