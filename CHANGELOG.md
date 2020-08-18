@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.0
+
+- Added Screenshot Plugin
+
 ## 1.5.0
 
 - Added Jastusa Metadata Provider
