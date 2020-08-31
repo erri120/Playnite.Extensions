@@ -1,6 +1,6 @@
 ﻿Name: VNDB Metadata Provider
 Author: erri120
-Version: 1.6.0
+Version: 1.6.1
 Module: VNDBMetadata.dll
 Type: MetadataProvider
 Icon: icon.png
