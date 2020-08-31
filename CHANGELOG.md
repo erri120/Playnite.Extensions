@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.1
+
+- Fixed Playnite crash when an `HttpException` occurred
+
 ## 1.6.0
 
 - Added Screenshot Plugin
