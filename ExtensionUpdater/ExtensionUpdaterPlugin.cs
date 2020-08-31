@@ -42,7 +42,7 @@ namespace ExtensionUpdater
         {
             _playniteAPI = playniteAPI;
             _logger = playniteAPI.CreateLogger();
-            
+
             var applicationPath = _playniteAPI.Paths.ApplicationPath;
             var extensionsPath = Path.Combine(applicationPath, "Extensions");
             if (!Directory.Exists(extensionsPath))
@@ -112,9 +112,18 @@ namespace ExtensionUpdater
                     var repo = group.Key;
                     _logger.Info($"Found: {repo}");
 
-                    List<GitHubRelease> releases =
-                        await GitHub.GetGitHubReleases(repo);
+                    List<GitHubRelease> releases;
 
+                    try
+                    {
+                        releases = await GitHub.GetGitHubReleases(repo);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error(e, $"Exception while loading releases for {repo}");
+                        return;
+                    }
+                    
                     if (releases == null || releases.Count == 0)
                     {
                         _logger.Error($"Found no releases for {repo}");
