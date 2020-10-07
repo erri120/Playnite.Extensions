@@ -102,7 +102,7 @@
       <Version>0.6.49</Version>
     </PackageReference>
     <PackageReference Include="PInvoke.UxTheme">
-      <Version>0.6.49</Version>
+      <Version>0.7.78</Version>
     </PackageReference>
     <PackageReference Include="PInvoke.Windows.Core">
       <Version>0.6.49</Version>
