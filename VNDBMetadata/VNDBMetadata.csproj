@@ -81,7 +81,7 @@
       <Version>10.0.1</Version>
     </PackageReference>
     <PackageReference Include="PlayniteSDK">
-      <Version>5.2.0</Version>
+      <Version>5.4.0</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
