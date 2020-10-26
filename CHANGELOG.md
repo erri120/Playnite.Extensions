@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.0
+
+- Updated Playnite SDK to 5.5.0 (for Playnite 8.x)
+- Added Age Ratings Metadata Field to DLSite, F95Zone and Jastusa Metadata Plugins
+- Added Platforms Metadata Field to VNDB Metadata Plugin
+
 ## 1.6.1
 
 - Fixed Playnite crash when an `HttpException` occurred
