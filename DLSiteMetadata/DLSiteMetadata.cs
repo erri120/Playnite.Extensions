@@ -38,7 +38,7 @@ namespace DLSiteMetadata
 
             Task.Run(() =>
             {
-                var dataDir = Path.Combine(api.Paths.ExtensionsDataPath, Id.ToString());
+                var dataDir = GetPluginUserDataPath();
                 var count = DLSiteGenres.LoadGenres(dataDir);
                 Logger.Info($"Loaded {count} DLSite genres");
             });

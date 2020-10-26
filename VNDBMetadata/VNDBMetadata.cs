@@ -39,7 +39,7 @@ namespace VNDBMetadata
 
             Task.Run(async () =>
             {
-                var dataDir = Path.Combine(api.Paths.ExtensionsDataPath, Id.ToString());
+                var dataDir = GetPluginUserDataPath();
                 var res = await VNDBTags.GetLatestDumb(dataDir);
                 if (!res)
                 {
