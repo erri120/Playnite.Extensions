@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Extensions.Common;
 using JastusaMetadata;
 using Playnite.SDK;
 using Xunit;
@@ -59,6 +60,7 @@ namespace Extensions.Test
                 Assert.NotNull(game.Publisher);
                 Assert.NotEmpty(game.AdditionalLinks);
                 Assert.NotEqual(DateTime.MinValue, game.ReleaseDate);
+                Assert.True(game.HasAdultRating);
             }
         }
     }

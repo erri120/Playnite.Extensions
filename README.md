@@ -127,6 +127,7 @@ Change any fields you want afterwards and click the _Save_ button in the bottom 
 - Cover Image
 - Background Images
 - Release Date
+- Age Ratings
 
 **Usage**:
 

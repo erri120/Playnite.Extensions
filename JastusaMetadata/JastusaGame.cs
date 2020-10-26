@@ -43,6 +43,8 @@ namespace JastusaMetadata
         
         public DateTime ReleaseDate { get; private set; }
         
+        public bool HasAdultRating { get; private set; }
+        
         public override async Task<AGame> LoadGame()
         {
             var id = ID;
@@ -225,6 +227,14 @@ namespace JastusaMetadata
                         }
                     }
 
+                    var adultContentNode = gameInfoNode.SelectSingleNode(gameInfoNode.XPath + "//div[@class='rTableRow product-content adult']");
+                    if (!IsNull(adultContentNode, "Adult Content Rating"))
+                    {
+                        HasAdultRating = true;
+                        AvailableFields.Add(MetadataField.AgeRating);
+                        LogFound("Adult Content Rating", null);
+                    }
+
                     #endregion
                 }
 
@@ -319,6 +329,11 @@ namespace JastusaMetadata
             return new List<string> {Publisher.Name};
         }
         
+        public override string GetAgeRating()
+        {
+            return HasAdultRating ? AgeRatingAdult : throw new NotImplementedException();
+        }
+        
         #region Not Implemented
 
         public override int GetCriticScore()
@@ -349,7 +364,22 @@ namespace JastusaMetadata
         {
             throw new NotImplementedException();
         }
-        
+
+        public override string GetSeries()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GetPlatform()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GetRegion()
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }
