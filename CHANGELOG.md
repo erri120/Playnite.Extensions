@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.2
+
+- Updated ExtensionUpdater notifications to be more helpful
+
 ## 1.7.1
 
 - Fixed culture difference when parsing doubles (`4.50` can not be parsed because the culture expects `4,50`)

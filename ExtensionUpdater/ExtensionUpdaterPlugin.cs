@@ -149,7 +149,7 @@ namespace ExtensionUpdater
                             {
                                 if (currentVersion < latestVersion)
                                 {
-                                    _logger.Info($"There is a new version for {config.Name}: {latestVersion}");
+                                    _logger.Info($"There is a new version available for {config.Name}: {latestVersion}");
                                     return new Tuple<PlayniteExtensionConfig, bool>(config, true);
                                 }
 
@@ -182,9 +182,11 @@ namespace ExtensionUpdater
 
                     if (shouldUpdate.Any(x => x.Item2))
                     {
-                        var extensionsNameString = shouldUpdate.Select(x => x.Item1.Name)
-                            .Aggregate((x, y) => $"{x},{y}");
-                        var message = $"The following Extension(s) can be updated: {extensionsNameString}. Click this message to download the release.";
+                        var extensionsNameString = shouldUpdate
+                            .Where(x => x.Item2)
+                            .Select(x => x.Item1.Name)
+                            .Aggregate((x, y) => $"{x}\n-{y}");
+                        var message = $"The following Extension(s) can be updated:\n-{extensionsNameString}\nClick this message to download the release from {repo}.";
 
                         _playniteAPI.Notifications.Add(new NotificationMessage(repo, message, NotificationType.Info,
                             () =>
