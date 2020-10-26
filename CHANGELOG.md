@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.1
+
+- Fixed culture difference when parsing doubles (`4.50` can not be parsed because the culture expects `4,50`)
+
 ## 1.7.0
 
 - Updated Playnite SDK to 5.5.0 (for Playnite 8.x)
