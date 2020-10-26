@@ -4,6 +4,10 @@ Version: 1.6.1
 Module: VNDBMetadata.dll
 Type: MetadataProvider
 Icon: icon.png
+Id: 613c7bba-36e9-437f-858a-3a8478cd489c
+Links:
+  - Name: GitHub
+    Url: https://github.com/erri120/Playnite.Extensions
 UpdaterConfig:
   GitHubUser: erri120
   GitHubRepo: Playnite.Extensions

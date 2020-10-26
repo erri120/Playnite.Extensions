@@ -4,6 +4,10 @@ Version: 1.6.1
 Module: ScreenshotPlugin.dll
 Type: GenericPlugin
 #Icon: icon.png
+Id: 2ace02d2-1f1d-4d11-b430-63d7613eaa1f
+Links:
+    - Name: GitHub
+      Url: https://github.com/erri120/Playnite.Extensions
 UpdaterConfig:
   GitHubUser: erri120
   GitHubRepo: Playnite.Extensions

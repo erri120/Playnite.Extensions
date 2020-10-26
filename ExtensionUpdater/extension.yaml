@@ -1,9 +1,13 @@
 ﻿Name: Extension Updater
 Author: erri120
-Version: 1.6.1
+Version: 1.7.0
 Module: ExtensionUpdater.dll
 Type: GenericPlugin
 #Icon: icon.png
+Id: f4a74d1b-44c0-4ea5-a935-2b994a638236
+Links:
+    - Name: GitHub
+      Url: https://github.com/erri120/Playnite.Extensions
 UpdaterConfig:
   GitHubUser: erri120
   GitHubRepo: Playnite.Extensions

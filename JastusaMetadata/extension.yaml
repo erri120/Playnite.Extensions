@@ -1,9 +1,13 @@
 ﻿Name: Jastusa Metadata Provider
 Author: erri120
-Version: 1.6.1
+Version: 1.7.0
 Module: JastusaMetadata.dll
 Type: MetadataProvider
 Icon: icon.png
+Id: 21376a20-384c-4036-ad91-51f15e3a1db7
+Links:
+    - Name: GitHub
+      Url: https://github.com/erri120/Playnite.Extensions
 UpdaterConfig:
   GitHubUser: erri120
   GitHubRepo: Playnite.Extensions
