@@ -53,6 +53,10 @@ namespace Extensions.Common
         public abstract MetadataFile GetIcon();
         public abstract List<string> GetPublishers();
         public abstract List<string> GetTags();
+        public abstract string GetAgeRating();
+        public abstract string GetSeries();
+        public abstract string GetPlatform();
+        public abstract string GetRegion();
 
         protected bool TryGetInnerText(HtmlNode baseNode, string xpath, string name, out string innerText)
         {

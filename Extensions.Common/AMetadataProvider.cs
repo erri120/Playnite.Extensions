@@ -154,6 +154,34 @@ namespace Extensions.Common
                 : base.GetTags();
         }
 
+        public override string GetAgeRating()
+        {
+            return AvailableFields.Contains(MetadataField.AgeRating)
+                ? Game.GetAgeRating()
+                : base.GetAgeRating();
+        }
+
+        public override string GetSeries()
+        {
+            return AvailableFields.Contains(MetadataField.Series)
+                ? Game.GetSeries()
+                : base.GetSeries();
+        }
+
+        public override string GetPlatform()
+        {
+            return AvailableFields.Contains(MetadataField.Platform)
+                ? Game.GetPlatform()
+                : base.GetPlatform();
+        }
+
+        public override string GetRegion()
+        {
+            return AvailableFields.Contains(MetadataField.Region)
+                ? Game.GetRegion()
+                : base.GetRegion();
+        }
+
         #endregion
     }
 }
