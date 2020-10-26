@@ -72,6 +72,7 @@ Loading Metadata for a game can take a bit longer if you have this feature insta
 - Links
 - Release Date
 - Community Score
+- Age Ratings
 
 **Usage**:
 

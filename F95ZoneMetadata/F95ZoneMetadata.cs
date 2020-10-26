@@ -27,7 +27,8 @@ namespace F95ZoneMetadata
             MetadataField.Tags,
             MetadataField.Links,
             MetadataField.ReleaseDate,
-            MetadataField.CommunityScore
+            MetadataField.CommunityScore,
+            MetadataField.AgeRating
         };
 
         public override string Name => "F95Zone";

@@ -46,6 +46,7 @@ namespace Extensions.Test
                 Assert.NotEmpty(game.Images);
                 Assert.NotEqual(DateTime.MinValue, game.ReleaseDate);
                 Assert.NotEqual(-1.0, game.Rating);
+                Assert.Equal(AGame.AgeRatingAdult, game.GetAgeRating());
             });
         }
     }
