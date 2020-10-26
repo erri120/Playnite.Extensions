@@ -87,5 +87,7 @@ namespace Extensions.Common
         {
             Logger.Debug($"Found {value.Count} {name} for {ID}");
         }
+
+        public const string AgeRatingAdult = "Adult";
     }
 }

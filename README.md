@@ -37,6 +37,7 @@ Collection of Extensions I created for [Playnite](https://github.com/JosefNemec/
 - Genres
 - Links
 - Release Date
+- Age Ratings
 
 **Usage**:
 

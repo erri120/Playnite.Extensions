@@ -28,6 +28,7 @@ namespace DLSiteMetadata
             MetadataField.Genres,
             MetadataField.Links,
             MetadataField.ReleaseDate,
+            MetadataField.AgeRating
         };
 
         public override string Name => "DLSite";

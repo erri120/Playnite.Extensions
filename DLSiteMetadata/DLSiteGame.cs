@@ -343,6 +343,11 @@ namespace DLSiteMetadata
             return GetDevelopers();
         }
 
+        public override string GetAgeRating()
+        {
+            return AgeRatingAdult;
+        }
+        
         #region Not Implemented
 
         public override int GetCommunityScore()
@@ -366,6 +371,21 @@ namespace DLSiteMetadata
         }
 
         public override List<string> GetTags()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GetSeries()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GetPlatform()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GetRegion()
         {
             throw new NotImplementedException();
         }

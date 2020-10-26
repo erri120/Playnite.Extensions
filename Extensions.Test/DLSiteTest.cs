@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using DLSiteMetadata;
+using Extensions.Common;
 using JetBrains.Annotations;
 using Playnite.SDK;
 using Xunit;
@@ -76,6 +77,7 @@ namespace Extensions.Test
             Assert.NotNull(game.ImageURLs);
             Assert.NotEmpty(game.ImageURLs);
             Assert.NotEqual(DateTime.MinValue, game.Release);
+            Assert.Equal(AGame.AgeRatingAdult,game.GetAgeRating());
         }
     }
 }
