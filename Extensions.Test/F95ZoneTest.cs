@@ -49,5 +49,17 @@ namespace Extensions.Test
                 Assert.Equal(AGame.AgeRatingAdult, game.GetAgeRating());
             });
         }
+
+        [Fact]
+        public void TestRatingParsing()
+        {
+            const string s1 = "4.50";
+            const string s2 = "4,50";
+            
+            Assert.True(F95ZoneGame.TryParseRating(s1, out var d1));
+            Assert.False(F95ZoneGame.TryParseRating(s2, out _));
+            
+            Assert.Equal(4.50, d1);
+        }
     }
 }

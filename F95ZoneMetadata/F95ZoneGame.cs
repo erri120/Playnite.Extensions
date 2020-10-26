@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Extensions.Common;
@@ -167,10 +168,7 @@ namespace F95ZoneMetadata
                 var sRating = ratingNode.GetValue("title");
                 if (!sRating.IsEmpty())
                 {
-                    if (sRating.EndsWith("star(s)"))
-                        sRating = sRating.Replace("star(s)", "").Trim();
-
-                    if (double.TryParse(sRating, out var rating))
+                    if (TryParseRating(sRating, out var rating))
                     {
                         Rating = rating;
                         AvailableFields.Add(MetadataField.CommunityScore);
@@ -347,6 +345,14 @@ namespace F95ZoneMetadata
             return this;
         }
 
+        public static bool TryParseRating(string sRating, out double rating)
+        {
+            if (sRating.EndsWith("star(s)"))
+                sRating = sRating.Replace("star(s)", "").Trim();
+
+            return double.TryParse(sRating, NumberStyles.Float, CultureInfo.InvariantCulture, out rating);
+        }
+        
         public override List<string> GetGenres()
         {
             return Genres;
