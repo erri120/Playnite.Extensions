@@ -176,6 +176,14 @@ namespace F95ZoneMetadata
                         AvailableFields.Add(MetadataField.CommunityScore);
                         LogFound("Ratings", sRating);
                     }
+                    else
+                    {
+                        Logger.Debug($"Unable to parse rating \"{sRating}\"");
+                    }
+                }
+                else
+                {
+                    Logger.Debug("Rating Node Value is empty!");
                 }
             }
 
