@@ -111,7 +111,9 @@ namespace VNDBMetadata
                 list.Add(MetadataField.ReleaseDate);
             if (_visualNovel.tags != null && _visualNovel.tags.Count > 0)
                 list.Add(MetadataField.Genres);
-
+            if (_visualNovel.platforms != null && _visualNovel.platforms.Count > 0)
+                list.Add(MetadataField.Platform);
+            
             return list;
         }
 
@@ -335,6 +337,16 @@ namespace VNDBMetadata
             }).NotNull().OrderByDescending(x => x.vns).ToList();
 
             return tags.Take(StaticSettings.MaxTags).Select(x => x.name).ToList();
+        }
+
+        public override string GetPlatform()
+        {
+            if (!AvailableFields.Contains(MetadataField.Platform))
+                return base.GetPlatform();
+
+            return _visualNovel.platforms.Any(x => x.Equals("win", StringComparison.OrdinalIgnoreCase))
+                ? "PC"
+                : base.GetPlatform();
         }
 
         public override void Dispose()

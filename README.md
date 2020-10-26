@@ -98,6 +98,7 @@ Change any fields you want afterwards and click the _Save_ button in the bottom 
 - Community Score
 - Genres
 - Links
+- Platform
 
 **Usage**:
 
