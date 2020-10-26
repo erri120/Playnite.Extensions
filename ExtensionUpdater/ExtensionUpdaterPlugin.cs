@@ -34,7 +34,7 @@ namespace ExtensionUpdater
     {
         private readonly IPlayniteAPI _playniteAPI;
         private readonly ILogger _logger;
-        private readonly string _extensionsDirectory;
+        private readonly List<string> _extensionsDirectories;
         private readonly CancellationTokenSource _source;
         private readonly CancellationToken _token;
 
@@ -43,16 +43,15 @@ namespace ExtensionUpdater
             _playniteAPI = playniteAPI;
             _logger = playniteAPI.CreateLogger();
 
+            _extensionsDirectories = new List<string>();
+            
             var applicationPath = _playniteAPI.Paths.ApplicationPath;
-            var extensionsPath = Path.Combine(applicationPath, "Extensions");
-            if (!Directory.Exists(extensionsPath))
-            {
-                _logger.Error($"Directory {extensionsPath} does not exist!");
-            }
-            else
-            {
-                _extensionsDirectory = extensionsPath;
-            }
+            var applicationExtensionsPath = Path.Combine(applicationPath, "Extensions");
+            _extensionsDirectories.Add(applicationExtensionsPath);
+
+            var configurationPath = _playniteAPI.Paths.ConfigurationPath;
+            var configurationExtensionsPath = Path.Combine(configurationPath, "Extensions");
+            _extensionsDirectories.Add(configurationExtensionsPath);
 
             _source = new CancellationTokenSource();
             _token = _source.Token;
@@ -75,10 +74,8 @@ namespace ExtensionUpdater
         {
             Task.Run(() =>
             {
-                if (_extensionsDirectory == null)
-                {
+                if (_extensionsDirectories.Count == 0)
                     return;
-                }
 
                 if (_playniteAPI.ApplicationInfo.InOfflineMode)
                 {
@@ -86,26 +83,28 @@ namespace ExtensionUpdater
                     return;
                 }
 
-                IEnumerable<IGrouping<string, PlayniteExtensionConfig>> configs = Directory
-                    .EnumerateFiles(_extensionsDirectory, "*.yaml", SearchOption.AllDirectories)
-                    .Select(file =>
-                    {
-                        try
-                        {
-                            var config = YamlUtils.FromYaml<PlayniteExtensionConfig>(file);
-                            return config?.UpdaterConfig == null ? null : config;
-                        }
-                        catch (Exception e)
-                        {
-                            _logger.Error(e, $"Exception while trying to deserialize {file}!\n");
-                        }
+                IEnumerable<IGrouping<string, PlayniteExtensionConfig>> configs = _extensionsDirectories
+                    .Where(Directory.Exists)
+                    .SelectMany(extensionsDirectory =>
+                        Directory.EnumerateFiles(extensionsDirectory, "*.yaml", SearchOption.AllDirectories)
+                            .Select(file =>
+                            {
+                                try
+                                {
+                                    var config = YamlUtils.FromYaml<PlayniteExtensionConfig>(file);
+                                    return config?.UpdaterConfig == null ? null : config;
+                                }
+                                catch (Exception e)
+                                {
+                                    _logger.Error(e, $"Exception while trying to deserialize {file}!\n");
+                                }
 
-                        return null;
-                    }).NotNull().GroupBy(config =>
-                    {
-                        var repo = $"{config.UpdaterConfig.GitHubUser}/{config.UpdaterConfig.GitHubRepo}";
-                        return repo;
-                    });
+                                return null;
+                            }).NotNull().GroupBy(config =>
+                            {
+                                var repo = $"{config.UpdaterConfig.GitHubUser}/{config.UpdaterConfig.GitHubRepo}";
+                                return repo;
+                            }));
 
                 configs.Do(async group =>
                 {

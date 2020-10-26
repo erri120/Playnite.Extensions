@@ -3,6 +3,7 @@
 ## 1.7.2
 
 - Updated ExtensionUpdater notifications to be more helpful
+- ExtensionUpdater can now find Extensions in `%appdata%\Playnite\Extensions`
 
 ## 1.7.1
 
