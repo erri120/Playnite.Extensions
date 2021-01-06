@@ -74,6 +74,10 @@ namespace ExtensionUpdater
         {
             Task.Run(() =>
             {
+                var downloadPath = Path.Combine(GetPluginUserDataPath(), "Temp");
+                if (Directory.Exists(downloadPath))
+                    Directory.Delete(downloadPath, true);
+                Directory.CreateDirectory(downloadPath);
                 if (_extensionsDirectories.Count == 0)
                     return;
 
@@ -191,6 +195,46 @@ namespace ExtensionUpdater
                             () =>
                             {
                                 Process.Start(latest.html_url);
+                                if (latest.assets != null)
+                                {
+                                    var playnitePath = Environment.ExpandEnvironmentVariables(PlayniteApi.Paths.ApplicationPath);
+                                    playnitePath = Path.Combine(playnitePath, "Playnite.DesktopApp.exe");
+                                    var options = new List<GenericItemOption>();
+                                    foreach (var asset in latest.assets)
+                                    {
+                                        var path = Path.Combine(GetPluginUserDataPath(), "Temp", asset.name);
+                                        var ext = Path.GetExtension(asset.name).ToLower();
+                                        if (ext == ".pext" || ext == ".pthm")
+                                        {
+                                            options.Add(new GenericItemOption(asset.name, asset.browser_download_url));
+                                        }
+                                    }
+                                    if (options.Count > 0)
+                                    {
+                                        GenericItemOption selected = options[0];
+                                        if (options.Count > 1)
+                                        {
+                                            selected = PlayniteApi.Dialogs.ChooseItemWithSearch(
+                                                options, 
+                                                query => options.Where(o => query==null || query.Length == 0 || o.Name.ToLower().Contains(query.ToLower())).ToList(),
+                                                null,
+                                                "Multiple extension files found. Select the one you want to install."
+                                            );
+                                        }
+                                        if (selected != null)
+                                        {
+                                            var path = Path.Combine(GetPluginUserDataPath(), "Temp", selected.Name);
+                                            PlayniteApi.Dialogs.ActivateGlobalProgress(args =>
+                                            {
+                                                using (var webclient = new System.Net.WebClient())
+                                                {
+                                                    webclient.DownloadFile(selected.Description, path);
+                                                }
+                                            }, new GlobalProgressOptions($"Dowloading {selected.Name}", false));
+                                            Process.Start(playnitePath, $"--installext {path}");
+                                        }
+                                    }
+                                }
                             }));
                     }
                     else
