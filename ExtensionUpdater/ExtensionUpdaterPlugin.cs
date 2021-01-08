@@ -248,7 +248,7 @@ namespace ExtensionUpdater
                                             }, new GlobalProgressOptions($"Dowloading {selected.Name}", false));
                                             // Open Playnite with installext argument to trigger 
                                             // extension installation
-                                            Process.Start(playnitePath, $"--installext {path}");
+                                            Process.Start("\"" + playnitePath + "\"", $"--installext \"{path}\"");
                                         }
                                     }
                                 }
