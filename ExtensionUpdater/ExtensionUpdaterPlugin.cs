@@ -76,9 +76,15 @@ namespace ExtensionUpdater
             {
                 // Clear temporary dowload folder and re-create it
                 var downloadPath = Path.Combine(GetPluginUserDataPath(), "Temp");
-                if (Directory.Exists(downloadPath))
-                    Directory.Delete(downloadPath, true);
-                Directory.CreateDirectory(downloadPath);
+                if (Directory.Exists(downloadPath)) {
+                    foreach(var file in Directory.EnumerateFiles(downloadPath, "*.pext")) {
+                        File.Delete(file);
+                    }foreach(var file in Directory.EnumerateFiles(downloadPath, "*.pthm")) {
+                        File.Delete(file);
+                    }
+                } else {
+                    Directory.CreateDirectory(downloadPath);
+                }
                 if (_extensionsDirectories.Count == 0)
                     return;
 
