@@ -74,6 +74,18 @@ namespace ExtensionUpdater
         {
             Task.Run(() =>
             {
+                // Clear temporary dowload folder and re-create it
+                var downloadPath = Path.Combine(GetPluginUserDataPath(), "Temp");
+                if (Directory.Exists(downloadPath)) {
+                    foreach(var file in Directory.EnumerateFiles(downloadPath, "*.pext")) {
+                        File.Delete(file);
+                    }
+                    foreach(var file in Directory.EnumerateFiles(downloadPath, "*.pthm")) {
+                        File.Delete(file);
+                    }
+                } else {
+                    Directory.CreateDirectory(downloadPath);
+                }
                 if (_extensionsDirectories.Count == 0)
                     return;
 
@@ -191,6 +203,55 @@ namespace ExtensionUpdater
                             () =>
                             {
                                 Process.Start(latest.html_url);
+                                // Check if there are assets associated with the release
+                                if (latest.assets != null)
+                                {
+                                    var playnitePath = Environment.ExpandEnvironmentVariables(PlayniteApi.Paths.ApplicationPath);
+                                    playnitePath = Path.Combine(playnitePath, "Playnite.DesktopApp.exe");
+                                    var options = new List<GenericItemOption>();
+                                    // Add all .pext and .pthm files as options
+                                    foreach (var asset in latest.assets)
+                                    {
+                                        var path = Path.Combine(GetPluginUserDataPath(), "Temp", asset.name);
+                                        var ext = Path.GetExtension(asset.name).ToLower();
+                                        if (ext == ".pext" || ext == ".pthm")
+                                        {
+                                            options.Add(new GenericItemOption(asset.name, asset.browser_download_url));
+                                        }
+                                    }
+                                    // Only try to dowload and install if any options were found
+                                    if (options.Count > 0)
+                                    {
+                                        GenericItemOption selected = options[0];
+                                        // Let the user select a file to download 
+                                        // if multiple extension files have been found
+                                        if (options.Count > 1)
+                                        {
+                                            selected = PlayniteApi.Dialogs.ChooseItemWithSearch(
+                                                options, 
+                                                query => options.Where(o => query==null || query.Length == 0 || o.Name.ToLower().Contains(query.ToLower())).ToList(),
+                                                null,
+                                                "Multiple extension files found. Select the one you want to install."
+                                            );
+                                        }
+                                        // Download and install selected option
+                                        if (selected != null)
+                                        {
+                                            var path = Path.Combine(GetPluginUserDataPath(), "Temp", selected.Name);
+                                            PlayniteApi.Dialogs.ActivateGlobalProgress(args =>
+                                            {
+                                                using (var webclient = new System.Net.WebClient())
+                                                {
+                                                    // Dowload extension file into temporary folder
+                                                    webclient.DownloadFile(selected.Description, path);
+                                                }
+                                            }, new GlobalProgressOptions($"Dowloading {selected.Name}", false));
+                                            // Open Playnite with installext argument to trigger 
+                                            // extension installation
+                                            Process.Start(playnitePath, $"--installext {path}");
+                                        }
+                                    }
+                                }
                             }));
                     }
                     else
