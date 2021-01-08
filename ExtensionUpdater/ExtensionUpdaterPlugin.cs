@@ -79,7 +79,8 @@ namespace ExtensionUpdater
                 if (Directory.Exists(downloadPath)) {
                     foreach(var file in Directory.EnumerateFiles(downloadPath, "*.pext")) {
                         File.Delete(file);
-                    }foreach(var file in Directory.EnumerateFiles(downloadPath, "*.pthm")) {
+                    }
+                    foreach(var file in Directory.EnumerateFiles(downloadPath, "*.pthm")) {
                         File.Delete(file);
                     }
                 } else {
