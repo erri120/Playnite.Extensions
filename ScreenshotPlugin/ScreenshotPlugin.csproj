@@ -96,7 +96,7 @@
       <Version>0.6.49</Version>
     </PackageReference>
     <PackageReference Include="PInvoke.Kernel32">
-      <Version>0.6.49</Version>
+      <Version>0.7.104</Version>
     </PackageReference>
     <PackageReference Include="PInvoke.User32">
       <Version>0.6.49</Version>
