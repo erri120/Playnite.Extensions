@@ -90,7 +90,7 @@
       <Version>10.0.1</Version>
     </PackageReference>
     <PackageReference Include="PInvoke.DwmApi">
-      <Version>0.6.49</Version>
+      <Version>0.7.104</Version>
     </PackageReference>
     <PackageReference Include="PInvoke.Gdi32">
       <Version>0.6.49</Version>
