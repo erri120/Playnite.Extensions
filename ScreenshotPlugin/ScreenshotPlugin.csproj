@@ -108,7 +108,7 @@
       <Version>0.6.49</Version>
     </PackageReference>
     <PackageReference Include="PInvoke.Windows.ShellScalingApi">
-      <Version>0.6.49</Version>
+      <Version>0.7.104</Version>
     </PackageReference>
     <PackageReference Include="PlayniteSDK">
       <Version>5.5.0</Version>
