@@ -1,5 +1,7 @@
 # Extensions for Playnite
 
+**NOTICE: Development is paused because I'm waiting for Playnite to upgrade to .NET 5 or .NET 6. Playnite is currently still using .NET Framework which is a pain to work with. I will probably continue development on this project once Playnite does upgrade but until then: don't expect anything.**
+
 [![Build Status](https://dev.azure.com/erri120/Playnite.Extensions/_apis/build/status/erri120.Playnite.Extensions?branchName=master)](https://dev.azure.com/erri120/Playnite.Extensions/_build/latest?definitionId=7&branchName=master)
 
 Collection of Extensions I created for [Playnite](https://github.com/JosefNemec/Playnite). Links to forum posts: [F95Zone Forum Post](https://f95zone.to/threads/dlsite-and-f95zone-extensions-for-playnite.56493/), [Playnite Forum Post](https://playnite.link/forum/thread-335.html).
