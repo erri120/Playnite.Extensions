@@ -69,5 +69,16 @@ namespace Extensions.Test
             _helper.WriteLine($"[ERROR]{message}");
             throw exception;
         }
+
+        public void Trace(string message)
+        {
+            _helper.WriteLine($"[TRACE]{message}");
+        }
+
+        public void Trace(Exception exception, string message)
+        {
+            _helper.WriteLine($"[TRACE]{message}");
+            throw exception;
+        }
     }
 }

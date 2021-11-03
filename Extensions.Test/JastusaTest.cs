@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Extensions.Common;
 using JastusaMetadata;
 using Playnite.SDK;
+using Playnite.SDK.Models;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -59,7 +60,7 @@ namespace Extensions.Test
                 Assert.NotNull(game.Studio);
                 Assert.NotNull(game.Publisher);
                 Assert.NotEmpty(game.AdditionalLinks);
-                Assert.NotEqual(DateTime.MinValue, game.ReleaseDate);
+                Assert.NotEqual(new ReleaseDate(DateTime.MinValue), game.ReleaseDate);
                 Assert.True(game.HasAdultRating);
             }
         }

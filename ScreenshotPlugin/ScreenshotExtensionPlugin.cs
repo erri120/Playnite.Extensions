@@ -25,12 +25,13 @@ using JetBrains.Annotations;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
+using Playnite.SDK.Events;
 using ScreenshotPlugin.ShareX;
 
 namespace ScreenshotPlugin
 {
     [UsedImplicitly]
-    public class ScreenshotExtensionPlugin : Plugin
+    public class ScreenshotExtensionPlugin : GenericPlugin
     {
         private readonly IPlayniteAPI _playniteAPI;
         private readonly ILogger _logger;
@@ -42,7 +43,7 @@ namespace ScreenshotPlugin
         public ScreenshotExtensionPlugin(IPlayniteAPI playniteAPI) : base(playniteAPI)
         {
             _playniteAPI = playniteAPI;
-            _logger = playniteAPI.CreateLogger();
+            _logger = LogManager.GetLogger();
             _globalHotkeyService = new GlobalHotkeyService(_logger);
             _settings = new ScreenshotPluginSettings(this);
 
@@ -119,17 +120,17 @@ namespace ScreenshotPlugin
             }
         }
 
-        public override void OnGameStarted(Game game)
+        public override void OnGameStarted(OnGameStartedEventArgs args)
         {
-            _currentlyRunningGame = game;
+            _currentlyRunningGame = args.Game;
         }
 
-        public override void OnGameStopped(Game game, long ellapsedSeconds)
+        public override void OnGameStopped(OnGameStoppedEventArgs args)
         {
             _currentlyRunningGame = null;
         }
 
-        public override void OnApplicationStarted()
+        public override void OnApplicationStarted(OnApplicationStartedEventArgs args)
         {
             UpdateHotkeys(null, _settings);
         }

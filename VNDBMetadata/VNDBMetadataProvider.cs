@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using Extensions.Common;
 using Playnite.SDK;
-using Playnite.SDK.Metadata;
 using Playnite.SDK.Models;
 
 namespace VNDBMetadata
@@ -117,11 +116,11 @@ namespace VNDBMetadata
             return list;
         }
 
-        public override string GetName()
+        public override string GetName(GetMetadataFieldArgs args)
         {
             return AvailableFields.Contains(MetadataField.Name)
                 ? _visualNovel.title
-                : base.GetName();
+                : base.GetName(args);
         }
 
         private static string ToHTML(string vndbDescription)
@@ -245,26 +244,26 @@ namespace VNDBMetadata
             return result;
         }
 
-        public override string GetDescription()
+        public override string GetDescription(GetMetadataFieldArgs args)
         {
             return AvailableFields.Contains(MetadataField.Description)
                 ? ToHTML(_visualNovel.description)
-                : base.GetDescription();
+                : base.GetDescription(args);
         }
 
-        public override MetadataFile GetCoverImage()
+        public override MetadataFile GetCoverImage(GetMetadataFieldArgs args)
         {
             if (!AvailableFields.Contains(MetadataField.CoverImage))
-                return base.GetCoverImage();
+                return base.GetCoverImage(args);
 
             var file = new MetadataFile(_visualNovel.image);
             return file;
         }
 
-        public override MetadataFile GetBackgroundImage()
+        public override MetadataFile GetBackgroundImage(GetMetadataFieldArgs args)
         {
             if (!AvailableFields.Contains(MetadataField.BackgroundImage))
-                return base.GetBackgroundImage();
+                return base.GetBackgroundImage(args);
 
             if (_visualNovel.screens.Count == 1)
             {
@@ -278,14 +277,14 @@ namespace VNDBMetadata
             
             var image = _plugin.PlayniteApi.Dialogs.ChooseImageFile(options, "Select a Background Image");
             return image == null 
-                ? base.GetBackgroundImage() 
+                ? base.GetBackgroundImage(args) 
                 : new MetadataFile(image.Path);
         }
 
-        public override List<Link> GetLinks()
+        public override IEnumerable<Link> GetLinks(GetMetadataFieldArgs args)
         {
             if (!AvailableFields.Contains(MetadataField.Links))
-                return base.GetLinks();
+                return base.GetLinks(args);
 
             var list = new List<Link>
             {
@@ -306,28 +305,28 @@ namespace VNDBMetadata
             return list;
         }
 
-        public override int? GetCommunityScore()
+        public override int? GetCommunityScore(GetMetadataFieldArgs args)
         {
             if (!AvailableFields.Contains(MetadataField.CommunityScore))
-                return base.GetCommunityScore();
+                return base.GetCommunityScore(args);
 
             return (int) (_visualNovel.rating*10);
         }
 
-        public override DateTime? GetReleaseDate()
+        public override ReleaseDate? GetReleaseDate(GetMetadataFieldArgs args)
         {
             if (!AvailableFields.Contains(MetadataField.ReleaseDate))
-                return base.GetReleaseDate();
+                return base.GetReleaseDate(args);
 
             return !DateTime.TryParse(_visualNovel.released, out var date) 
-                ? base.GetReleaseDate() 
-                : date;
+                ? base.GetReleaseDate(args) 
+                : new ReleaseDate(date);
         }
 
-        public override List<string> GetGenres()
+        public override IEnumerable<MetadataProperty> GetGenres(GetMetadataFieldArgs args)
         {
             if (!AvailableFields.Contains(MetadataField.Genres))
-                return base.GetGenres();
+                return base.GetGenres(args);
 
             List<BasicTag> tags = _visualNovel.tags.Select(x =>
             {
@@ -336,17 +335,17 @@ namespace VNDBMetadata
                 return tag;
             }).NotNull().OrderByDescending(x => x.vns).ToList();
 
-            return tags.Take(StaticSettings.MaxTags).Select(x => x.name).ToList();
+            return tags.Take(StaticSettings.MaxTags).Select(x => new MetadataNameProperty(x.name)).ToList();
         }
 
-        public override string GetPlatform()
+        public override IEnumerable<MetadataProperty> GetPlatforms(GetMetadataFieldArgs args)
         {
             if (!AvailableFields.Contains(MetadataField.Platform))
-                return base.GetPlatform();
+                return base.GetPlatforms(args);
 
             return _visualNovel.platforms.Any(x => x.Equals("win", StringComparison.OrdinalIgnoreCase))
-                ? "PC"
-                : base.GetPlatform();
+                ? new List<MetadataNameProperty> { new MetadataNameProperty("PC") }
+                : base.GetPlatforms(args);
         }
 
         public override void Dispose()

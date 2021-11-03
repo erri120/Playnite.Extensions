@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Extensions.Common;
 using HtmlAgilityPack;
 using Playnite.SDK;
-using Playnite.SDK.Metadata;
 using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
 
@@ -20,14 +19,14 @@ namespace F95ZoneMetadata
         public override string Description { get; set; }
         public override string Link { get; set; }
 
-        public string Developer { get; private set; }
+        public MetadataNameProperty Developer { get; private set; }
 
-        public List<string> Labels { get; private set; }
-        public List<string> Genres { get; private set; }
+        public List<MetadataNameProperty> Labels { get; private set; }
+        public List<MetadataNameProperty> Genres { get; private set; }
 
         public List<Uri> Images { get; private set; }
 
-        public DateTime ReleaseDate { get; private set; }
+        public ReleaseDate ReleaseDate { get; private set; }
         public double Rating { get; private set; } = -1.0;
 
         public F95ZoneGame() { }
@@ -57,9 +56,9 @@ namespace F95ZoneMetadata
             var labels = titleNode.SelectNodes("a[@class='labelLink']");
             if (!IsNullOrEmpty(labels, "Labels"))
             {
-                List<string> temp = labels.Select(x =>
+                List<MetadataNameProperty> temp = labels.Select(x =>
                 {
-                    if (!TryGetInnerText(x, "span", "Label Text", out var labelText))
+                    if (!TryGetInnerText(x, "span", "Label Text", out string labelText))
                         return null;
 
                     var start = 0;
@@ -74,7 +73,7 @@ namespace F95ZoneMetadata
                     if (labelText[labelText.Length - 1] == ']')
                         length--;
 
-                    return labelText.Substring(start, length);
+                    return new MetadataNameProperty(labelText.Substring(start, length));
                 }).NotNull().ToList();
 
                 if (temp.Count > 0)
@@ -95,8 +94,8 @@ namespace F95ZoneMetadata
                 if (Labels != null && Labels.Count > 0)
                 {
                     var last = Labels.Last();
-                    var i = name.IndexOf(last, StringComparison.OrdinalIgnoreCase);
-                    name = name.Substring(i + last.Length + 1).TrimStart();
+                    var i = name.IndexOf(last.Name, StringComparison.OrdinalIgnoreCase);
+                    name = name.Substring(i + last.Name.Length + 1).TrimStart();
                 }
 
                 var lastStartingBracket = name.LastIndexOf('[');
@@ -104,7 +103,7 @@ namespace F95ZoneMetadata
 
                 if (lastStartingBracket != -1 && lastClosingBracket != -1)
                 {
-                    Developer = name.Substring(lastStartingBracket + 1, lastClosingBracket - lastStartingBracket - 1);
+                    Developer = new MetadataNameProperty(name.Substring(lastStartingBracket + 1, lastClosingBracket - lastStartingBracket - 1));
                     AvailableFields.Add(MetadataField.Developers);
                     AvailableFields.Add(MetadataField.Publishers);
                 }
@@ -121,7 +120,7 @@ namespace F95ZoneMetadata
             var tags = headerNode.SelectNodes("div[@class='p-description']/ul[@class='listInline listInline--bullet']/li[@class='groupedTags']/a[@class='tagItem']");
             if (!IsNullOrEmpty(tags, "Tags"))
             {
-                List<string> temp = tags.Select(x => x.DecodeInnerText()).NotNull().ToList();
+                List<MetadataNameProperty> temp = tags.Select(x => new MetadataNameProperty(x.DecodeInnerText())).NotNull().ToList();
 
                 if (temp.Count > 0)
                 {
@@ -148,7 +147,7 @@ namespace F95ZoneMetadata
                     {
                         if (DateTime.TryParse(sDateTime, out var dateTime))
                         {
-                            ReleaseDate = dateTime;
+                            ReleaseDate = new ReleaseDate(dateTime);
                             AvailableFields.Add(MetadataField.ReleaseDate);
                             LogFound("Release Date", sDateTime);
                         }
@@ -353,12 +352,12 @@ namespace F95ZoneMetadata
             return double.TryParse(sRating, NumberStyles.Float, CultureInfo.InvariantCulture, out rating);
         }
         
-        public override List<string> GetGenres()
+        public override IEnumerable<MetadataNameProperty> GetGenres()
         {
             return Genres;
         }
 
-        public override List<string> GetTags()
+        public override IEnumerable<MetadataNameProperty> GetTags()
         {
             return Labels;
         }
@@ -377,7 +376,7 @@ namespace F95ZoneMetadata
             return option == null ? null : new MetadataFile(option.Path);
         }
 
-        public override DateTime GetReleaseDate()
+        public override ReleaseDate GetReleaseDate()
         {
             return ReleaseDate;
         }
@@ -390,14 +389,14 @@ namespace F95ZoneMetadata
             };
         }
 
-        public override List<string> GetDevelopers()
+        public override IEnumerable<MetadataNameProperty> GetDevelopers()
         {
-            return new List<string> { Developer };
+            return new List<MetadataNameProperty> { Developer };
         }
 
-        public override List<string> GetPublishers()
+        public override IEnumerable<MetadataNameProperty> GetPublishers()
         {
-            return new List<string> { Developer };
+            return new List<MetadataNameProperty> { Developer };
         }
 
         public override int GetCommunityScore()
@@ -407,9 +406,9 @@ namespace F95ZoneMetadata
             return (int)(Rating / 5.0 * 100);
         }
 
-        public override string GetAgeRating()
+        public override IEnumerable<MetadataNameProperty> GetAgeRatings()
         {
-            return AgeRatingAdult;
+            return new List<MetadataNameProperty> { new MetadataNameProperty(AgeRatingAdult) };
         }
         
         #region Not Implemented
@@ -419,7 +418,7 @@ namespace F95ZoneMetadata
             throw new NotImplementedException();
         }
 
-        public override List<string> GetFeatures()
+        public override IEnumerable<MetadataNameProperty> GetFeatures()
         {
             throw new NotImplementedException();
         }
@@ -429,17 +428,17 @@ namespace F95ZoneMetadata
             throw new NotImplementedException();
         }
 
-        public override string GetSeries()
+        public override IEnumerable<MetadataNameProperty> GetSeries()
         {
             throw new NotImplementedException();
         }
 
-        public override string GetPlatform()
+        public override IEnumerable<MetadataNameProperty> GetPlatforms()
         {
             throw new NotImplementedException();
         }
 
-        public override string GetRegion()
+        public override IEnumerable<MetadataNameProperty> GetRegions()
         {
             throw new NotImplementedException();
         }

@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using HtmlAgilityPack;
 using JetBrains.Annotations;
 using Playnite.SDK;
-using Playnite.SDK.Metadata;
 using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
 
@@ -43,20 +42,20 @@ namespace Extensions.Common
 
         public abstract MetadataFile GetCoverImage(IDialogsFactory dialogsAPI);
         public abstract MetadataFile GetBackgroundImage(IDialogsFactory dialogsAPI);
-        public abstract DateTime GetReleaseDate();
-        public abstract List<string> GetGenres();
+        public abstract ReleaseDate GetReleaseDate();
+        public abstract IEnumerable<MetadataNameProperty> GetGenres();
         public abstract int GetCommunityScore();
         public abstract List<Link> GetLinks();
         public abstract int GetCriticScore();
-        public abstract List<string> GetDevelopers();
-        public abstract List<string> GetFeatures();
+        public abstract IEnumerable<MetadataNameProperty> GetDevelopers();
+        public abstract IEnumerable<MetadataNameProperty> GetFeatures();
         public abstract MetadataFile GetIcon();
-        public abstract List<string> GetPublishers();
-        public abstract List<string> GetTags();
-        public abstract string GetAgeRating();
-        public abstract string GetSeries();
-        public abstract string GetPlatform();
-        public abstract string GetRegion();
+        public abstract IEnumerable<MetadataNameProperty> GetPublishers();
+        public abstract IEnumerable<MetadataNameProperty> GetTags();
+        public abstract IEnumerable<MetadataNameProperty> GetAgeRatings();
+        public abstract IEnumerable<MetadataNameProperty> GetSeries();
+        public abstract IEnumerable<MetadataNameProperty> GetPlatforms();
+        public abstract IEnumerable<MetadataNameProperty> GetRegions();
 
         protected bool TryGetInnerText(HtmlNode baseNode, string xpath, string name, out string innerText)
         {

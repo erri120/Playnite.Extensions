@@ -5,6 +5,7 @@ using DLSiteMetadata;
 using Extensions.Common;
 using JetBrains.Annotations;
 using Playnite.SDK;
+using Playnite.SDK.Models;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -76,8 +77,9 @@ namespace Extensions.Test
             Assert.NotEmpty(game.Genres);
             Assert.NotNull(game.ImageURLs);
             Assert.NotEmpty(game.ImageURLs);
-            Assert.NotEqual(DateTime.MinValue, game.Release);
-            Assert.Equal(AGame.AgeRatingAdult,game.GetAgeRating());
+            Assert.NotEqual(new ReleaseDate(DateTime.MinValue), game.Release);
+            //Assert.Equal(AGame.AgeRatingAdult,game.GetAgeRating());
+            Assert.NotEmpty(game.GetAgeRatings());
         }
     }
 }

@@ -6,7 +6,6 @@ using System.Web;
 using Extensions.Common;
 using HtmlAgilityPack;
 using Playnite.SDK;
-using Playnite.SDK.Metadata;
 using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
 
@@ -20,7 +19,7 @@ namespace DLSiteMetadata
 
         public Link Circle { get; private set; }
         public List<string> ImageURLs { get; private set; }
-        public DateTime Release { get; private set; }
+        public ReleaseDate Release { get; private set; }
         public List<DLSiteGenre> Genres { get; private set; }
 
         public DLSiteGame() { }
@@ -151,7 +150,7 @@ namespace DLSiteMetadata
                     if (!DateTime.TryParse(sDate, out var release))
                         return;
 
-                    Release = release;
+                    Release = new ReleaseDate(release);
                     AvailableFields.Add(MetadataField.ReleaseDate);
 
                     return;
@@ -314,14 +313,14 @@ namespace DLSiteMetadata
             return GetImage(false, dialogsAPI);
         }
 
-        public override DateTime GetReleaseDate()
+        public override ReleaseDate GetReleaseDate()
         {
             return Release;
         }
 
-        public override List<string> GetGenres()
+        public override IEnumerable<MetadataNameProperty> GetGenres()
         {
-            return Genres.Select(x => x.ENG).ToList();
+            return Genres.Select(x => new MetadataNameProperty(x.ENG)).ToList();
         }
 
         public override List<Link> GetLinks()
@@ -333,19 +332,19 @@ namespace DLSiteMetadata
             };
         }
 
-        public override List<string> GetDevelopers()
+        public override IEnumerable<MetadataNameProperty> GetDevelopers()
         {
-            return new List<string> { Circle.Name };
+            return new List<MetadataNameProperty> { new MetadataNameProperty(Circle.Name) };
         }
 
-        public override List<string> GetPublishers()
+        public override IEnumerable<MetadataNameProperty> GetPublishers()
         {
             return GetDevelopers();
         }
 
-        public override string GetAgeRating()
+        public override IEnumerable<MetadataNameProperty> GetAgeRatings()
         {
-            return AgeRatingAdult;
+            return new List<MetadataNameProperty> { new MetadataNameProperty(AgeRatingAdult) };
         }
         
         #region Not Implemented
@@ -360,7 +359,7 @@ namespace DLSiteMetadata
             throw new NotImplementedException();
         }
 
-        public override List<string> GetFeatures()
+        public override IEnumerable<MetadataNameProperty> GetFeatures()
         {
             throw new NotImplementedException();
         }
@@ -370,22 +369,22 @@ namespace DLSiteMetadata
             throw new NotImplementedException();
         }
 
-        public override List<string> GetTags()
+        public override IEnumerable<MetadataNameProperty> GetTags()
         {
             throw new NotImplementedException();
         }
 
-        public override string GetSeries()
+        public override IEnumerable<MetadataNameProperty> GetSeries()
         {
             throw new NotImplementedException();
         }
 
-        public override string GetPlatform()
+        public override IEnumerable<MetadataNameProperty> GetPlatforms()
         {
             throw new NotImplementedException();
         }
 
-        public override string GetRegion()
+        public override IEnumerable<MetadataNameProperty> GetRegions()
         {
             throw new NotImplementedException();
         }
