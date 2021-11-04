@@ -26,11 +26,12 @@ using Extensions.Common;
 using JetBrains.Annotations;
 using Playnite.SDK;
 using Playnite.SDK.Plugins;
+using Playnite.SDK.Events;
 
 namespace ExtensionUpdater
 {
     [UsedImplicitly]
-    public class ExtensionUpdaterPlugin : Plugin
+    public class ExtensionUpdaterPlugin : GenericPlugin
     {
         private readonly IPlayniteAPI _playniteAPI;
         private readonly ILogger _logger;
@@ -41,7 +42,7 @@ namespace ExtensionUpdater
         public ExtensionUpdaterPlugin(IPlayniteAPI playniteAPI) : base(playniteAPI)
         {
             _playniteAPI = playniteAPI;
-            _logger = playniteAPI.CreateLogger();
+            _logger = LogManager.GetLogger();
 
             _extensionsDirectories = new List<string>();
             
@@ -65,12 +66,12 @@ namespace ExtensionUpdater
             base.Dispose();
         }
 
-        public override void OnApplicationStopped()
+        public override void OnApplicationStopped(OnApplicationStoppedEventArgs args)
         {
             _source.Cancel();
         }
 
-        public override void OnApplicationStarted()
+        public override void OnApplicationStarted(OnApplicationStartedEventArgs args)
         {
             Task.Run(() =>
             {
@@ -238,7 +239,7 @@ namespace ExtensionUpdater
                                         if (selected != null)
                                         {
                                             var path = Path.Combine(GetPluginUserDataPath(), "Temp", selected.Name);
-                                            PlayniteApi.Dialogs.ActivateGlobalProgress(args =>
+                                            PlayniteApi.Dialogs.ActivateGlobalProgress(a =>
                                             {
                                                 using (var webclient = new System.Net.WebClient())
                                                 {

@@ -22,7 +22,6 @@ using System.Threading.Tasks;
 using Extensions.Common;
 using HtmlAgilityPack;
 using Playnite.SDK;
-using Playnite.SDK.Metadata;
 using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
 
@@ -33,34 +32,34 @@ namespace JastusaMetadata
         public override string Name { get; set; }
         public override string Description { get; set; }
         public override string Link { get; set; }
-        
+
         public List<string> Images { get; private set; }
         public string CoverImage { get; private set; }
-        
+
         public Link Studio { get; private set; }
         public Link Publisher { get; private set; }
         public List<Link> AdditionalLinks { get; private set; }
-        
-        public DateTime ReleaseDate { get; private set; }
-        
+
+        public ReleaseDate ReleaseDate { get; private set; }
+
         public bool HasAdultRating { get; private set; }
-        
+
         public override async Task<AGame> LoadGame()
         {
             var id = ID;
 
             var url = $"{Consts.Root}{id}";
             Link = url;
-            
+
             var web = new HtmlWeb();
             var document = await web.LoadFromWebAsync(url);
-            if(document == null)
+            if (document == null)
                 throw new Exception($"Could not load from {url}");
 
             var node = document.DocumentNode;
 
             #region Name
-            
+
             var nameNode =
                 node.SelectSingleNode(
                     "//div[@class='product-name mdl-cell mdl-cell--order-0 mdl-cell--12-col']");
@@ -131,7 +130,7 @@ namespace JastusaMetadata
                         LogFound("Description", null);
                     }
                 }
-                
+
                 #endregion
             }
 
@@ -220,7 +219,7 @@ namespace JastusaMetadata
                         {
                             if (DateTime.TryParse(sDate, out var releaseDate))
                             {
-                                ReleaseDate = releaseDate;
+                                ReleaseDate = new ReleaseDate(releaseDate);
                                 AvailableFields.Add(MetadataField.ReleaseDate);
                                 LogFound("Release Date", sDate);
                             }
@@ -276,9 +275,9 @@ namespace JastusaMetadata
 
                 #endregion
             }
-            
+
             #endregion
-            
+
             return this;
         }
 
@@ -293,16 +292,16 @@ namespace JastusaMetadata
             var option = dialogsAPI.ChooseImageFile(options, "Select Background Image");
             if (option == null)
                 return null;
-            
+
             var file = new MetadataFile(option.Path);
             return file;
         }
 
-        public override DateTime GetReleaseDate()
+        public override ReleaseDate GetReleaseDate()
         {
             return ReleaseDate;
         }
-        
+
         public override List<Link> GetLinks()
         {
             var list = new List<Link>
@@ -319,29 +318,29 @@ namespace JastusaMetadata
             return list;
         }
 
-        public override List<string> GetDevelopers()
+        public override IEnumerable<MetadataNameProperty> GetDevelopers()
         {
-            return new List<string> {Studio.Name};
+            return new List<MetadataNameProperty> { new MetadataNameProperty(Studio.Name) };
         }
-        
-        public override List<string> GetPublishers()
+
+        public override IEnumerable<MetadataNameProperty> GetPublishers()
         {
-            return new List<string> {Publisher.Name};
+            return new List<MetadataNameProperty> { new MetadataNameProperty(Publisher.Name) };
         }
-        
-        public override string GetAgeRating()
+
+        public override IEnumerable<MetadataNameProperty> GetAgeRatings()
         {
-            return HasAdultRating ? AgeRatingAdult : throw new NotImplementedException();
+            return HasAdultRating ? new List<MetadataNameProperty> { new MetadataNameProperty(AgeRatingAdult) } : throw new NotImplementedException();
         }
-        
+
         #region Not Implemented
 
         public override int GetCriticScore()
         {
             throw new NotImplementedException();
         }
-        
-        public override List<string> GetGenres()
+
+        public override IEnumerable<MetadataNameProperty> GetGenres()
         {
             throw new NotImplementedException();
         }
@@ -351,7 +350,7 @@ namespace JastusaMetadata
             throw new NotImplementedException();
         }
 
-        public override List<string> GetFeatures()
+        public override IEnumerable<MetadataNameProperty> GetFeatures()
         {
             throw new NotImplementedException();
         }
@@ -360,22 +359,22 @@ namespace JastusaMetadata
         {
             throw new NotImplementedException();
         }
-        public override List<string> GetTags()
+        public override IEnumerable<MetadataNameProperty> GetTags()
         {
             throw new NotImplementedException();
         }
 
-        public override string GetSeries()
+        public override IEnumerable<MetadataNameProperty> GetSeries()
         {
             throw new NotImplementedException();
         }
 
-        public override string GetPlatform()
+        public override IEnumerable<MetadataNameProperty> GetPlatforms()
         {
             throw new NotImplementedException();
         }
 
-        public override string GetRegion()
+        public override IEnumerable<MetadataNameProperty> GetRegions()
         {
             throw new NotImplementedException();
         }
