@@ -117,7 +117,8 @@ namespace F95ZoneMetadata
 
             #region Genres
 
-            var tags = headerNode.SelectNodes("div[@class='p-description']/ul[@class='listInline listInline--bullet']/li[@class='groupedTags']/a[@class='tagItem']");
+            //var tags = headerNode.SelectNodes("div[@class='p-description']/ul[@class='listInline listInline--bullet']/li[@class='groupedTags']/a[@class='tagItem']");
+            var tags = headerNode.SelectNodes("//a[@class='tagItem']");
             if (!IsNullOrEmpty(tags, "Tags"))
             {
                 List<MetadataNameProperty> temp = tags.Select(x => new MetadataNameProperty(x.DecodeInnerText())).NotNull().ToList();
@@ -157,34 +158,35 @@ namespace F95ZoneMetadata
 
             #endregion
 
-            #region Ratings
+            //#region Ratings
 
-            var ratingNode =
-                node.SelectSingleNode(
-                    "//div[@class='pageContent']/div[@class='uix_headerInner--opposite']/div[@class='p-title-pageAction']/span[@class='ratingStarsRow ']/span[@class='ratingStars bratr-rating ']");
-            if (!IsNull(ratingNode, "Rating"))
-            {
-                var sRating = ratingNode.GetValue("title");
-                if (!sRating.IsEmpty())
-                {
-                    if (TryParseRating(sRating, out var rating))
-                    {
-                        Rating = rating;
-                        AvailableFields.Add(MetadataField.CommunityScore);
-                        LogFound("Ratings", sRating);
-                    }
-                    else
-                    {
-                        Logger.Debug($"Unable to parse rating \"{sRating}\"");
-                    }
-                }
-                else
-                {
-                    Logger.Debug("Rating Node Value is empty!");
-                }
-            }
+            ////var ratingNode = node.SelectSingleNode("//div[@class='pageContent']/div[@class='uix_headerInner--opposite']/div[@class='p-title-pageAction']/span[@class='ratingStarsRow ']/span[@class='ratingStars bratr-rating ']");
+            //var ratingNode = node.SelectNodes("//span[@class='ratingStars bratr-rating ']");
+            ////if (!IsNull(ratingNode, "Rating"))
+            //if (!IsNullOrEmpty(ratingNode, "Rating"))
+            //{
+            //    //var sRating = ratingNode.GetValue("title");
+            //    var sRating = ratingNode[0].GetValue("title");
+            //    if (!sRating.IsEmpty())
+            //    {
+            //        if (TryParseRating(sRating, out var rating))
+            //        {
+            //            Rating = rating;
+            //            AvailableFields.Add(MetadataField.CommunityScore);
+            //            LogFound("Ratings", sRating);
+            //        }
+            //        else
+            //        {
+            //            Logger.Debug($"Unable to parse rating \"{sRating}\"");
+            //        }
+            //    }
+            //    else
+            //    {
+            //        Logger.Debug("Rating Node Value is empty!");
+            //    }
+            //}
 
-            #endregion
+            //#endregion
 
             #region Cover Image
 
@@ -218,12 +220,14 @@ namespace F95ZoneMetadata
 
             #region Body
 
-            var bodyNode = node.SelectSingleNode("//div[@class='p-body-pageContent']/div[@class='block block--messages']/div[@class='block-container lbContainer']/div[@class='block-body js-replyNewMessageContainer']/article/div[@class='message-inner']/div[@class='message-cell message-cell--main']/div/div[@class='message-content js-messageContent']/div/article/div[@class='bbWrapper']");
+            //var bodyNode = node.SelectSingleNode("//div[@class='p-body-pageContent']/div[@class='block block--messages']/div[@class='block-container lbContainer']/div[@class='block-body js-replyNewMessageContainer']/article/div[@class='message-inner']/div[@class='message-cell message-cell--main']/div/div[@class='message-content js-messageContent']/div/article/div[@class='bbWrapper']");
+            var bodyNode = node.SelectSingleNode("//div[@class='p-body-pageContent']");
             if (IsNull(bodyNode, "Body")) return this;
             {
                 #region Images
 
-                var imageNodes = bodyNode.SelectNodes(bodyNode.XPath+"//img[@class='bbImage ']");
+                //var imageNodes = bodyNode.SelectNodes(bodyNode.XPath+"//img[@class='bbImage ']");
+                var imageNodes = node.SelectNodes("//img[@class='bbImage ']");
                 if (!IsNullOrEmpty(imageNodes, "Body - Images"))
                 {
                     List<Uri> temp = imageNodes.Select(x =>

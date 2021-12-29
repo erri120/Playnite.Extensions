@@ -25,6 +25,7 @@ namespace Extensions.Test
         {
             var games = new List<string>
             {
+                "atelier-agnes-final-aq-organization.102611",
                 "amity-park-v0-7-3-gzone.4262",
                 "the-mating-season-v1-02-akabur.13777",
                 "poke-abby-hd-oxopotion.1068",
