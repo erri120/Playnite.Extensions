@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net462</TargetFramework>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="AngleSharp" Version="0.16.0" />
+      <PackageReference Include="AngleSharp.Io" Version="0.16.0" />
+      <PackageReference Include="JetBrains.Annotations" Version="2021.3.0" PrivateAssets="all" />
+      <PackageReference Include="PlayniteSDK" Version="6.2.0" />
+      <PackageReference Include="System.Net.Http" Version="4.3.4" />
+      <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <None Update="extension.yaml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="icon.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\Extensions.Common\Extensions.Common.csproj" />
+    </ItemGroup>
+</Project>

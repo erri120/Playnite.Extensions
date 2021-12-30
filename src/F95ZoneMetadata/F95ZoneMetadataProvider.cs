@@ -1,0 +1,197 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using Extensions.Common;
+using Microsoft.Extensions.Logging;
+using Playnite.SDK;
+using Playnite.SDK.Models;
+using Playnite.SDK.Plugins;
+
+namespace F95ZoneMetadata;
+
+public class F95ZoneMetadataProvider : OnDemandMetadataProvider
+{
+    private const string IconUrl = "https://static.f95zone.to/assets/favicon-32x32.png";
+
+    private readonly IPlayniteAPI _playniteAPI;
+    private readonly ILogger<F95ZoneMetadataProvider> _logger;
+
+    private readonly MetadataRequestOptions _options;
+    private Game Game => _options.GameData;
+    private bool IsBackgroundDownload => _options.IsBackgroundDownload;
+
+    // useless
+    public override List<MetadataField> AvailableFields { get; } = new();
+
+    public F95ZoneMetadataProvider(IPlayniteAPI playniteAPI, MetadataRequestOptions options)
+    {
+        _logger = CustomLogger.GetLogger<F95ZoneMetadataProvider>(nameof(F95ZoneMetadataProvider));
+        _playniteAPI = playniteAPI;
+        _options = options;
+    }
+
+    private ScrapperResult? _result;
+    private bool _didRun;
+
+    private static string? GetIdFromLink(string link)
+    {
+        if (!link.StartsWith(Scrapper.DefaultBaseUrl, StringComparison.OrdinalIgnoreCase)) return null;
+
+        var threadId = link.Substring(Scrapper.DefaultBaseUrl.Length);
+        if (threadId.EndsWith("/"))
+            threadId = threadId.Substring(0, threadId.Length - 1);
+
+        var dotIndex = threadId.IndexOf('.');
+        return dotIndex == -1 ? threadId : threadId.Substring(dotIndex + 1);
+    }
+
+    public static string? GetIdFromGame(Game game)
+    {
+        if (game.Name is not null)
+        {
+            {
+                var threadId = GetIdFromLink(game.Name);
+                if (threadId is not null) return threadId;
+            }
+
+            if (game.Name.StartsWith("F95-", StringComparison.OrdinalIgnoreCase))
+            {
+                var threadId = game.Name.Substring(4);
+                return threadId;
+            }
+        }
+
+        var f95Link = game.Links.FirstOrDefault(link => link.Name.Equals("F95Zone", StringComparison.OrdinalIgnoreCase));
+        if (f95Link is not null && !string.IsNullOrWhiteSpace(f95Link.Url))
+        {
+            return GetIdFromLink(f95Link.Url);
+        }
+
+        return null;
+    }
+
+    private ScrapperResult? GetResult(GetMetadataFieldArgs args)
+    {
+        if (_didRun) return _result;
+
+        var id = GetIdFromGame(Game);
+        if (id is null)
+        {
+            _logger.LogError("Unable to get Id from Game");
+            return null;
+        }
+
+        var scrapper = new Scrapper(CustomLogger.GetLogger<Scrapper>(nameof(Scrapper)), new HttpClientHandler());
+
+        var task = scrapper.ScrapPage(id, args.CancelToken);
+        task.Wait(args.CancelToken);
+        _result = task.Result;
+        _didRun = true;
+
+        // TODO: there is no override function for this
+        if (_result?.Version != null)
+        {
+            Game.Version = _result.Version;
+        }
+
+        return _result;
+    }
+
+    public override string GetName(GetMetadataFieldArgs args)
+    {
+        return GetResult(args)?.Name ?? base.GetName(args);
+    }
+
+    public override IEnumerable<MetadataProperty> GetDevelopers(GetMetadataFieldArgs args)
+    {
+        var dev = GetResult(args)?.Developer;
+        if (dev is null) return base.GetDevelopers(args);
+
+        var company = _playniteAPI.Database.Companies.Where(x => x.Name is not null).FirstOrDefault(x => x.Name.Equals(dev, StringComparison.OrdinalIgnoreCase));
+        if (company is not null) return new[] { new MetadataIdProperty(company.Id) };
+        return new[] { new MetadataNameProperty(dev) };
+    }
+
+    public override IEnumerable<Link> GetLinks(GetMetadataFieldArgs args)
+    {
+        var id = GetResult(args)?.Id;
+        return id is null ? base.GetLinks(args) : new[] { new Link("F95Zone", Scrapper.DefaultBaseUrl + id) };
+    }
+
+    public override IEnumerable<MetadataProperty> GetFeatures(GetMetadataFieldArgs args)
+    {
+        var labels = GetResult(args)?.Labels;
+        if (labels is null) return base.GetFeatures(args);
+
+        var features = labels
+            .Select(label => (label, _playniteAPI.Database.Features.Where(x => x.Name is not null).FirstOrDefault(x => x.Name.Equals(label, StringComparison.OrdinalIgnoreCase))))
+            .Select(tuple =>
+            {
+                var (label, feature) = tuple;
+                if (feature is not null) return (MetadataProperty)new MetadataIdProperty(feature.Id);
+                return new MetadataNameProperty(label);
+            })
+            .ToList();
+
+        return features;
+    }
+
+    public override IEnumerable<MetadataProperty> GetTags(GetMetadataFieldArgs args)
+    {
+        var tagNames = GetResult(args)?.Tags;
+        if (tagNames is null) return base.GetTags(args);
+
+        var tags = tagNames
+            .Select(tagName => (tagName, _playniteAPI.Database.Tags.Where(x => x.Name is not null).FirstOrDefault(x => x.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase))))
+            .Select(tuple =>
+            {
+                var (tagName, tag) = tuple;
+                if (tag is not null) return (MetadataProperty) new MetadataIdProperty(tag.Id);
+                return new MetadataNameProperty(tagName);
+            })
+            .ToList();
+
+        return tags;
+    }
+
+    public override int? GetCommunityScore(GetMetadataFieldArgs args)
+    {
+        var rating = GetResult(args)?.Rating;
+        return rating switch
+        {
+            null => base.GetCommunityScore(args),
+            double.NaN => base.GetCommunityScore(args),
+            _ => (int)(rating.Value / 5 * 100)
+        };
+    }
+
+    private MetadataFile SelectImage(GetMetadataFieldArgs args, string caption)
+    {
+        var images = GetResult(args)?.Images;
+        if (images is null) return base.GetCoverImage(args);
+
+        if (IsBackgroundDownload)
+        {
+            return new MetadataFile(images.First());
+        }
+
+        var imageFileOption = _playniteAPI.Dialogs.ChooseImageFile(images.Select(image => new ImageFileOption(image)).ToList(), caption);
+        return imageFileOption == null ? base.GetCoverImage(args) : new MetadataFile(imageFileOption.Path);
+    }
+
+    public override MetadataFile GetCoverImage(GetMetadataFieldArgs args)
+    {
+        return SelectImage(args, "Select Cover Image");
+    }
+
+    public override MetadataFile GetBackgroundImage(GetMetadataFieldArgs args)
+    {
+        return SelectImage(args, "Select Background Image");
+    }
+
+    public override MetadataFile GetIcon(GetMetadataFieldArgs args)
+    {
+        return new MetadataFile(IconUrl);
+    }
+}
