@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using Extensions.Common;
 using Microsoft.Extensions.Logging;
@@ -15,6 +16,7 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
     private const string IconUrl = "https://static.f95zone.to/assets/favicon-32x32.png";
 
     private readonly IPlayniteAPI _playniteAPI;
+    private readonly Settings _settings;
     private readonly ILogger<F95ZoneMetadataProvider> _logger;
 
     private readonly MetadataRequestOptions _options;
@@ -24,11 +26,13 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
     // useless
     public override List<MetadataField> AvailableFields { get; } = new();
 
-    public F95ZoneMetadataProvider(IPlayniteAPI playniteAPI, MetadataRequestOptions options)
+    public F95ZoneMetadataProvider(IPlayniteAPI playniteAPI, Settings settings, MetadataRequestOptions options)
     {
-        _logger = CustomLogger.GetLogger<F95ZoneMetadataProvider>(nameof(F95ZoneMetadataProvider));
         _playniteAPI = playniteAPI;
+        _settings = settings;
         _options = options;
+
+        _logger = CustomLogger.GetLogger<F95ZoneMetadataProvider>(nameof(F95ZoneMetadataProvider));
     }
 
     private ScrapperResult? _result;
@@ -82,7 +86,17 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
             return null;
         }
 
-        var scrapper = new Scrapper(CustomLogger.GetLogger<Scrapper>(nameof(Scrapper)), new HttpClientHandler());
+        var clientHandler = new HttpClientHandler();
+        clientHandler.Properties.Add("User-Agent", "Playnite.Extensions");
+
+        var cookieContainer = _settings.CreateCookieContainer();
+        if (cookieContainer is not null)
+        {
+            clientHandler.UseCookies = true;
+            clientHandler.CookieContainer = _settings.CreateCookieContainer();
+        }
+
+        var scrapper = new Scrapper(CustomLogger.GetLogger<Scrapper>(nameof(Scrapper)), clientHandler);
 
         var task = scrapper.ScrapPage(id, args.CancelToken);
         task.Wait(args.CancelToken);

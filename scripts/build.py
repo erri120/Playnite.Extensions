@@ -44,12 +44,12 @@ def main():
         plugin_path = os.path.join(src_path, plugin)
         validate_path(plugin_path)
 
-        print(f"Building project {plugin}")
-
-        process_result = subprocess.run("dotnet build", shell=True, capture_output=True, check=False, cwd=plugin_path)
-        print(decode_utf8(process_result.stderr))
-        print(decode_utf8(process_result.stdout))
-        process_result.check_returncode()
+#         print(f"Building project {plugin}")
+#
+#         process_result = subprocess.run("dotnet build", shell=True, capture_output=True, check=False, cwd=plugin_path)
+#         print(decode_utf8(process_result.stderr))
+#         print(decode_utf8(process_result.stdout))
+#         process_result.check_returncode()
 
         build_output_path = get_build_output_path(plugin_path)
         plugin_output_path = os.path.join(output_path, plugin)

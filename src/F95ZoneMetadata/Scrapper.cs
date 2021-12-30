@@ -15,6 +15,7 @@ namespace F95ZoneMetadata;
 public class Scrapper
 {
     private const string CoverLinkPrefix = "https://f95zone.to/data/covers";
+    private const string ImageLinkPrefix = "https://attachments.f95zone.to/";
 
     public const string DefaultBaseUrl = "https://f95zone.to/threads/";
     private readonly string _baseUrl;
@@ -109,45 +110,88 @@ public class Scrapper
         }
 
         // Rating
-        var ratingElement = document.GetElementsByClassName("bratr-rating").FirstOrDefault();
-        if (ratingElement is not null)
+        var selectRatingElement = (IHtmlSelectElement?)document.GetElementsByName("rating").FirstOrDefault(elem => elem.TagName.Equals(TagNames.Select, StringComparison.OrdinalIgnoreCase));
+        if (selectRatingElement is not null)
         {
-            var titleAttribute = ratingElement.GetAttribute("title");
-            if (titleAttribute is not null)
+            if (selectRatingElement.Dataset.Any(x => x.Key.Equals("initial-rating", StringComparison.OrdinalIgnoreCase)))
             {
-                if (!GetRating(titleAttribute, out var rating))
+                var kv = selectRatingElement.Dataset.FirstOrDefault(x => x.Key.Equals("initial-rating", StringComparison.OrdinalIgnoreCase));
+                if (double.TryParse(kv.Value, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, null, out var rating))
                 {
-                    _logger.LogWarning("Unable to get convert \"{RatingText}\" to a rating", titleAttribute);
+                    result.Rating = rating;
                 }
                 else
                 {
-                    result.Rating = rating;
+                    _logger.LogWarning("Unable parse \"{Value}\" as double", kv.Value);
                 }
             }
             else
             {
-                _logger.LogWarning("Rating Element does not have a \"title\" Attribute!");
+                _logger.LogWarning("Element with name \"rating\" does not have a data value with the name \"initial-rating\"");
             }
         }
         else
         {
-            _logger.LogWarning("Unable to find Element with class \"bratr-rating\"");
+            _logger.LogWarning("Unable to find Element with name \"rating\" using fallback, make sure you are logged in");
+
+            var ratingElement = document.GetElementsByClassName("bratr-rating").FirstOrDefault();
+            if (ratingElement is not null)
+            {
+                var titleAttribute = ratingElement.GetAttribute("title");
+                if (titleAttribute is not null)
+                {
+                    if (!GetRating(titleAttribute, out var rating))
+                    {
+                        _logger.LogWarning("Unable to get convert \"{RatingText}\" to a rating", titleAttribute);
+                    }
+                    else
+                    {
+                        result.Rating = rating;
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("Rating Element does not have a \"title\" Attribute!");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Unable to find Element with class \"bratr-rating\"");
+            }
         }
 
         // Images
-        var messageContentElements = document.GetElementsByClassName("message-content");
-        if (messageContentElements.Any())
+        var messageBodyElements = document.GetElementsByClassName("message-body");
+        if (messageBodyElements.Any())
         {
-            var mainMessage = messageContentElements.First();
+            var mainMessage = messageBodyElements.First();
 
-            // images link to the thumbnail and are wrapped in anchor elements that point to the original image
-            var images = mainMessage.GetElementsByTagName(TagNames.Img)
-                .Where(elem => elem.ParentElement is not null && elem.ParentElement.TagName.Equals(TagNames.A, StringComparison.OrdinalIgnoreCase))
-                .Select(elem => elem.ParentElement!)
-                .Cast<IHtmlAnchorElement>()
-                .Where(elem => !string.IsNullOrWhiteSpace(elem.Href))
-                .Select(elem => elem.Href)
-                .ToList();
+            var images = new List<string>();
+            var imageElements = mainMessage.GetElementsByTagName(TagNames.Img);
+            foreach (var elem in imageElements)
+            {
+                var imageElement = (IHtmlImageElement)elem;
+                if (imageElement.Source is null) continue;
+                if (!imageElement.Source.StartsWith(ImageLinkPrefix, StringComparison.OrdinalIgnoreCase)) continue;
+
+                var anchorElement = (IHtmlAnchorElement?)(
+                    elem.ParentElement!.TagName.Equals(TagNames.NoScript, StringComparison.OrdinalIgnoreCase)
+                        ? elem.ParentElement!.ParentElement!.TagName.Equals(TagNames.A, StringComparison.OrdinalIgnoreCase)
+                            ? elem.ParentElement.ParentElement
+                            : null
+                        : elem.ParentElement.TagName.Equals(TagNames.A, StringComparison.OrdinalIgnoreCase)
+                            ? elem.ParentElement
+                            : null);
+
+                if (anchorElement is not null)
+                {
+                    images.Add(anchorElement.Href.StartsWith(ImageLinkPrefix) ? anchorElement.Href : imageElement.Source);
+                }
+                else
+                {
+                    images.Add(imageElement.Source);
+                }
+            }
 
             result.Images = images.Any() ? images : null;
         }
@@ -194,7 +238,7 @@ public class Scrapper
 
         // "Corrupted Kingdoms [v0.12.8] [ArcGames]"
 
-        var span = title.AsSpan();
+        var span = title.AsSpan().Trim();
         var bracketStartIndex = span.IndexOf('[');
         var bracketEndIndex = span.IndexOf(']');
 
@@ -204,10 +248,10 @@ public class Scrapper
         }
 
         // "Corrupted Kingdoms"
-        var nameSpan = span.Slice(0, bracketStartIndex - 1);
+        var nameSpan = span.Slice(0, bracketStartIndex - 1).Trim();
 
         // "v0.12.8"
-        var versionSpan = span.Slice(bracketStartIndex + 1, bracketEndIndex - bracketStartIndex - 1);
+        var versionSpan = span.Slice(bracketStartIndex + 1, bracketEndIndex - bracketStartIndex - 1).Trim();
 
         span = span.Slice(bracketEndIndex + 1);
         bracketStartIndex = span.IndexOf('[');
@@ -219,7 +263,7 @@ public class Scrapper
         }
 
         // "ArcGames"
-        var developerSpan = span.Slice(bracketStartIndex + 1, bracketEndIndex - bracketStartIndex - 1);
+        var developerSpan = span.Slice(bracketStartIndex + 1, bracketEndIndex - bracketStartIndex - 1).Trim();
 
         return (nameSpan.ToString(), versionSpan.ToString(), developerSpan.ToString());
     }
