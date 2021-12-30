@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using AngleSharp;
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
@@ -221,6 +222,44 @@ public class Scrapper
         return result;
     }
 
+    public async Task<List<ScrapperSearchResult>> ScrapSearchPage(string term, CancellationToken cancellationToken = default)
+    {
+        var context = BrowsingContext.New(_configuration);
+
+        var url = $"https://f95zone.to/search/{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}/?q={HttpUtility.UrlEncode(term)}&t=post&c[child_nodes]=1&c[nodes][0]=2&c[title_only]=1&o=relevance";
+        var document = await context.OpenAsync(url, cancellationToken);
+
+        var blockRows = document.GetElementsByClassName("block-row")
+            .Where(elem => elem.TagName.Equals(TagNames.Li, StringComparison.OrdinalIgnoreCase))
+            .Cast<IHtmlListItemElement>()
+            .Where(li => li.Dataset.Any(x => x.Key.Equals("author", StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+
+        var results = new List<ScrapperSearchResult>();
+        foreach (var blockRow in blockRows)
+        {
+            var headerElement = blockRow.GetElementsByClassName("contentRow-title").FirstOrDefault();
+            if (headerElement is null) continue;
+
+            var anchorElement = (IHtmlAnchorElement?)headerElement.Children.FirstOrDefault(x => x.TagName.Equals(TagNames.A, StringComparison.OrdinalIgnoreCase));
+            if (anchorElement is null || string.IsNullOrWhiteSpace(anchorElement.Href)) continue;
+
+            var link = anchorElement.Href;
+            var title = anchorElement.Text().Trim();
+            var name = GetNameOfSearchResult(title);
+
+            results.Add(new ScrapperSearchResult
+            {
+                Link = link,
+                Name = name
+            });
+
+            // TODO: maybe add ratings or something
+        }
+
+        return results;
+    }
+
     public static bool GetRating(string text, out double rating)
     {
         rating = double.NaN;
@@ -266,5 +305,30 @@ public class Scrapper
         var developerSpan = span.Slice(bracketStartIndex + 1, bracketEndIndex - bracketStartIndex - 1).Trim();
 
         return (nameSpan.ToString(), versionSpan.ToString(), developerSpan.ToString());
+    }
+
+    public static string GetNameOfSearchResult(string title)
+    {
+        var span = title.AsSpan().Trim();
+
+        // [Flash] [Completed] Corruption of Champions [Fenoxo]
+        // [Others] Corruption of Champions II [v0.4.28] [Savin/Salamander Studios]
+
+        var bracketStartIndex = span.IndexOf('[');
+        var bracketEndIndex = span.IndexOf(']');
+
+        if (bracketStartIndex == -1 || bracketEndIndex == -1) return title;
+
+        do
+        {
+            span = bracketStartIndex == 0
+                ? span.Slice(bracketEndIndex + 1).Trim()
+                : span.Slice(0, bracketStartIndex - 1).Trim();
+
+            bracketStartIndex = span.IndexOf('[');
+            bracketEndIndex = span.IndexOf(']');
+        } while (bracketStartIndex != -1 && bracketEndIndex != -1);
+
+        return span.Trim().ToString();
     }
 }

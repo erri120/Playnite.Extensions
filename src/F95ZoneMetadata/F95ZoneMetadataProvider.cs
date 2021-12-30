@@ -66,7 +66,7 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
             }
         }
 
-        var f95Link = game.Links.FirstOrDefault(link => link.Name.Equals("F95Zone", StringComparison.OrdinalIgnoreCase));
+        var f95Link = game.Links?.FirstOrDefault(link => link.Name.Equals("F95Zone", StringComparison.OrdinalIgnoreCase));
         if (f95Link is not null && !string.IsNullOrWhiteSpace(f95Link.Url))
         {
             return GetIdFromLink(f95Link.Url);
@@ -79,13 +79,6 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
     {
         if (_didRun) return _result;
 
-        var id = GetIdFromGame(Game);
-        if (id is null)
-        {
-            _logger.LogError("Unable to get Id from Game");
-            return null;
-        }
-
         var clientHandler = new HttpClientHandler();
         clientHandler.Properties.Add("User-Agent", "Playnite.Extensions");
 
@@ -97,6 +90,69 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
         }
 
         var scrapper = new Scrapper(CustomLogger.GetLogger<Scrapper>(nameof(Scrapper)), clientHandler);
+
+        var id = GetIdFromGame(Game);
+        if (id is null)
+        {
+            if (string.IsNullOrWhiteSpace(Game.Name))
+            {
+                _logger.LogError("Unable to get Id from Game and Name is null or whitespace!");
+                return null;
+            }
+
+            if (IsBackgroundDownload)
+            {
+                // background download so we just choose the first item
+
+                var searchTask = scrapper.ScrapSearchPage(Game.Name, args.CancelToken);
+                searchTask.Wait(args.CancelToken);
+
+                var searchResult = searchTask.Result;
+                if (searchResult is null || !searchResult.Any())
+                {
+                    _logger.LogError("Search return nothing, make sure you are logged in!");
+                    return null;
+                }
+
+                id = GetIdFromLink(searchResult.First().Link ?? string.Empty);
+                if (id is null)
+                {
+                    throw new NotImplementedException();
+                }
+            }
+            else
+            {
+                var item = _playniteAPI.Dialogs.ChooseItemWithSearch(
+                    new List<GenericItemOption>(),
+                    searchString =>
+                    {
+                        var searchTask = scrapper.ScrapSearchPage(searchString, args.CancelToken);
+                        searchTask.Wait(args.CancelToken);
+
+                        var searchResult = searchTask.Result;
+                        if (searchResult is null || !searchResult.Any())
+                        {
+                            _logger.LogError("Search return nothing, make sure you are logged in!");
+                            return null;
+                        }
+
+                        var items = searchResult
+                            .Where(x => x.Name is not null && x.Link is not null)
+                            .Select(x => new GenericItemOption(x.Name, x.Link))
+                            .ToList();
+
+                        return items;
+                    }, Game.Name, "Search F95Zone");
+
+                var link = item.Description;
+                id = GetIdFromLink(link ?? string.Empty);
+
+                if (id is null)
+                {
+                    throw new NotImplementedException();
+                }
+            }
+        }
 
         var task = scrapper.ScrapPage(id, args.CancelToken);
         task.Wait(args.CancelToken);

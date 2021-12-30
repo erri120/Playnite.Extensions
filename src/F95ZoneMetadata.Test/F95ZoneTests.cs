@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net.Http;
@@ -50,6 +51,28 @@ public class F95ZoneTests
     }
 
     [Theory]
+    [InlineData("Corruption of Champions", "search-1")]
+    public async Task TestScrapSearchPage(string term, string fileName)
+    {
+        var file = Path.Combine("files", $"{fileName}.html");
+        Assert.True(File.Exists(file));
+
+        var handler = new Mock<HttpMessageHandler>();
+        handler
+            .SetupAnyRequest()
+            .ReturnsResponse(File.ReadAllBytes(file));
+
+        var scrapper = new Scrapper(new XunitLogger<Scrapper>(_testOutputHelper), handler.Object);
+        var results = await scrapper.ScrapSearchPage(term);
+        Assert.NotEmpty(results);
+        Assert.All(results, x =>
+        {
+            Assert.NotNull(x.Name);
+            Assert.NotNull(x.Link);
+        });
+    }
+
+    [Theory]
     [InlineData("Corrupted Kingdoms [v0.12.8] [ArcGames]", "Corrupted Kingdoms", "v0.12.8", "ArcGames")]
     [InlineData("Treasure of Nadia [v1.0112] [NLT Media]", "Treasure of Nadia", "v1.0112", "NLT Media")]
     public void TestTitleBreakdown(string title, string name, string version, string developer)
@@ -89,5 +112,33 @@ public class F95ZoneTests
                 new("F95Zone", "https://f95zone.to/threads/31912/")
             })
         }));
+    }
+
+    [Theory]
+    [InlineData("[Flash] [Completed] Corruption of Champions [Fenoxo]", "Corruption of Champions")]
+    [InlineData("[Others] Corruption of Champions II [v0.4.28] [Savin/Salamander Studios]", "Corruption of Champions II")]
+    public void TestGetNameOfSearchResult(string title, string name)
+    {
+        Assert.Equal(name, Scrapper.GetNameOfSearchResult(title));
+    }
+
+    private static HttpClientHandler CreateHandler()
+    {
+        var settings = new Settings
+        {
+            CookieCsrf = Environment.GetEnvironmentVariable("XF_CSRF", EnvironmentVariableTarget.Process),
+            CookieUser = Environment.GetEnvironmentVariable("XF_USER", EnvironmentVariableTarget.Process),
+            CookieTfaTrust = Environment.GetEnvironmentVariable("XF_TFA_TRUST", EnvironmentVariableTarget.Process)
+        };
+
+        var handler = new HttpClientHandler();
+
+        var cookieContainer = settings.CreateCookieContainer();
+        Assert.NotNull(cookieContainer);
+
+        handler.UseCookies = true;
+        handler.CookieContainer = cookieContainer;
+
+        return handler;
     }
 }

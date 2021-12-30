@@ -13,3 +13,9 @@ public class ScrapperResult
     public double Rating { get; set; }
     public List<string>? Images { get; set; }
 }
+
+public class ScrapperSearchResult
+{
+    public string? Link { get; set; }
+    public string? Name { get; set; }
+}
