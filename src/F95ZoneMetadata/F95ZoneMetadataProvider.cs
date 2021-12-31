@@ -189,40 +189,43 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
         return id is null ? base.GetLinks(args) : new[] { new Link("F95Zone", Scrapper.DefaultBaseUrl + id) };
     }
 
-    public override IEnumerable<MetadataProperty> GetFeatures(GetMetadataFieldArgs args)
+    private IEnumerable<MetadataProperty>? GetProperties(GetMetadataFieldArgs args, PlayniteProperty currentProperty)
     {
-        var labels = GetResult(args)?.Labels;
-        if (labels is null) return base.GetFeatures(args);
+        // Tags
+        var tagProperties = PlaynitePropertyHelper.ConvertValuesIfPossible(
+            _playniteAPI,
+            _settings.TagProperty,
+            currentProperty,
+            () => GetResult(args)?.Tags);
 
-        var features = labels
-            .Select(label => (label, _playniteAPI.Database.Features.Where(x => x.Name is not null).FirstOrDefault(x => x.Name.Equals(label, StringComparison.OrdinalIgnoreCase))))
-            .Select(tuple =>
-            {
-                var (label, feature) = tuple;
-                if (feature is not null) return (MetadataProperty)new MetadataIdProperty(feature.Id);
-                return new MetadataNameProperty(label);
-            })
-            .ToList();
+        if (tagProperties is not null) return tagProperties;
 
-        return features;
+        // Labels
+        var labelProperties = PlaynitePropertyHelper.ConvertValuesIfPossible(
+            _playniteAPI,
+            _settings.LabelProperty,
+            currentProperty,
+            () => GetResult(args)?.Labels);
+
+        if (labelProperties is not null) return labelProperties;
+
+        // Default
+        return null;
     }
 
     public override IEnumerable<MetadataProperty> GetTags(GetMetadataFieldArgs args)
     {
-        var tagNames = GetResult(args)?.Tags;
-        if (tagNames is null) return base.GetTags(args);
+        return GetProperties(args, PlayniteProperty.Tags) ?? base.GetTags(args);
+    }
 
-        var tags = tagNames
-            .Select(tagName => (tagName, _playniteAPI.Database.Tags.Where(x => x.Name is not null).FirstOrDefault(x => x.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase))))
-            .Select(tuple =>
-            {
-                var (tagName, tag) = tuple;
-                if (tag is not null) return (MetadataProperty)new MetadataIdProperty(tag.Id);
-                return new MetadataNameProperty(tagName);
-            })
-            .ToList();
+    public override IEnumerable<MetadataProperty> GetFeatures(GetMetadataFieldArgs args)
+    {
+        return GetProperties(args, PlayniteProperty.Features) ?? base.GetFeatures(args);
+    }
 
-        return tags;
+    public override IEnumerable<MetadataProperty> GetGenres(GetMetadataFieldArgs args)
+    {
+        return GetProperties(args, PlayniteProperty.Genres) ?? base.GetGenres(args);
     }
 
     public override int? GetCommunityScore(GetMetadataFieldArgs args)

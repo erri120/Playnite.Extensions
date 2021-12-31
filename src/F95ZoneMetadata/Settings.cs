@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Extensions.Common;
 using Playnite.SDK;
 using Playnite.SDK.Events;
 using Playnite.SDK.Plugins;
@@ -31,6 +32,9 @@ public class Settings : ISettings
     /// Cross-Site Request Forgery cookie: "xf_csrf"
     /// </summary>
     public string? CookieCsrf { get; set; }
+
+    public PlayniteProperty LabelProperty { get; set; } = PlayniteProperty.Features;
+    public PlayniteProperty TagProperty { get; set; } = PlayniteProperty.Tags;
 
     public CookieContainer? CreateCookieContainer()
     {
@@ -78,6 +82,8 @@ public class Settings : ISettings
             CookieUser = savedSettings.CookieUser;
             CookieTfaTrust = savedSettings.CookieTfaTrust;
             CookieCsrf = savedSettings.CookieCsrf;
+            LabelProperty = savedSettings.LabelProperty;
+            TagProperty = savedSettings.TagProperty;
         }
     }
 
@@ -135,7 +141,9 @@ public class Settings : ISettings
         {
             CookieUser = CookieUser,
             CookieTfaTrust = CookieTfaTrust,
-            CookieCsrf = CookieCsrf
+            CookieCsrf = CookieCsrf,
+            LabelProperty = LabelProperty,
+            TagProperty = TagProperty
         };
     }
 
@@ -152,6 +160,8 @@ public class Settings : ISettings
         CookieUser = _previousSettings.CookieUser;
         CookieTfaTrust = _previousSettings.CookieTfaTrust;
         CookieCsrf = _previousSettings.CookieCsrf;
+        LabelProperty = _previousSettings.LabelProperty;
+        TagProperty = _previousSettings.TagProperty;
     }
 
     public bool VerifySettings(out List<string> errors)
@@ -166,6 +176,21 @@ public class Settings : ISettings
         if (CookieCsrf is null)
         {
             errors.Add("The xf_csrf cookie has to be set!");
+        }
+
+        if (!Enum.IsDefined(typeof(PlayniteProperty), LabelProperty))
+        {
+            errors.Add($"Unknown value \"{LabelProperty}\"");
+        }
+
+        if (!Enum.IsDefined(typeof(PlayniteProperty), TagProperty))
+        {
+            errors.Add($"Unknown value \"{TagProperty}\"");
+        }
+
+        if (LabelProperty == TagProperty)
+        {
+            errors.Add($"{nameof(LabelProperty)} == {nameof(TagProperty)}");
         }
 
         return !errors.Any();

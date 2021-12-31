@@ -4,9 +4,20 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:dlSiteMetadata="clr-namespace:DLSiteMetadata"
+             xmlns:common="clr-namespace:Extensions.Common;assembly=Extensions.Common"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d"
              d:DesignHeight="400" d:DesignWidth="600" d:DataContext="{d:DesignInstance dlSiteMetadata:Settings}">
-    <StackPanel>
+
+    <UserControl.Resources>
+        <ObjectDataProvider x:Key="DataFromEnum" ObjectType="{x:Type system:Enum}" MethodName="GetValues">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="common:PlayniteProperty"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </UserControl.Resources>
+
+    <StackPanel Margin="8">
         <TextBlock Text="Preferred Language:"/>
         <ComboBox ItemsSource="{Binding Mode=OneWay, Path=AvailableLanguages}" IsEditable="False"
                   SelectedValue="{Binding Mode=TwoWay, Path=PreferredLanguage}"/>
@@ -22,5 +33,13 @@
 
         <TextBlock Text="Include Music Creators as Developers"/>
         <CheckBox IsChecked="{Binding Mode=TwoWay, Path=IncludeMusicCreators}"/>
+
+        <TextBlock Text="Which property should the DLsite categories be assigned to in Playnite:"/>
+        <ComboBox ItemsSource="{Binding Source={StaticResource DataFromEnum}}"
+                  SelectedItem="{Binding Path=CategoryProperty}"/>
+
+        <TextBlock Text="Which property should the DLsite genres be assigned to in Playnite:"/>
+        <ComboBox ItemsSource="{Binding Source={StaticResource DataFromEnum}}"
+                  SelectedItem="{Binding Path=GenreProperty}"/>
     </StackPanel>
 </UserControl>

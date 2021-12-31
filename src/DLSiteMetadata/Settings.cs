@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Extensions.Common;
 using Playnite.SDK;
 using Playnite.SDK.Plugins;
 
@@ -17,6 +18,9 @@ public class Settings : ISettings
     public bool IncludeIllustrators { get; set; } = true;
     public bool IncludeVoiceActors { get; set; } = true;
     public bool IncludeMusicCreators { get; set; } = true;
+
+    public PlayniteProperty CategoryProperty { get; set; } = PlayniteProperty.Features;
+    public PlayniteProperty GenreProperty { get; set; } = PlayniteProperty.Genres;
 
     public List<string> AvailableLanguages { get; } = new()
     {
@@ -38,6 +42,12 @@ public class Settings : ISettings
         if (savedSettings is not null)
         {
             PreferredLanguage = savedSettings.PreferredLanguage;
+            IncludeIllustrators = savedSettings.IncludeIllustrators;
+            IncludeMusicCreators = savedSettings.IncludeMusicCreators;
+            IncludeScenarioWriters = savedSettings.IncludeScenarioWriters;
+            IncludeVoiceActors = savedSettings.IncludeVoiceActors;
+            CategoryProperty = savedSettings.CategoryProperty;
+            GenreProperty = savedSettings.GenreProperty;
         }
     }
 
@@ -51,7 +61,9 @@ public class Settings : ISettings
             IncludeIllustrators = IncludeIllustrators,
             IncludeMusicCreators = IncludeMusicCreators,
             IncludeScenarioWriters = IncludeScenarioWriters,
-            IncludeVoiceActors = IncludeVoiceActors
+            IncludeVoiceActors = IncludeVoiceActors,
+            CategoryProperty = CategoryProperty,
+            GenreProperty = GenreProperty,
         };
     }
 
@@ -70,6 +82,8 @@ public class Settings : ISettings
         IncludeMusicCreators = _previousSettings.IncludeMusicCreators;
         IncludeScenarioWriters = _previousSettings.IncludeScenarioWriters;
         IncludeVoiceActors = _previousSettings.IncludeVoiceActors;
+        CategoryProperty = _previousSettings.CategoryProperty;
+        GenreProperty = _previousSettings.GenreProperty;
     }
 
     public bool VerifySettings(out List<string> errors)
@@ -83,6 +97,21 @@ public class Settings : ISettings
         else if (!AvailableLanguages.Any(x => x.Equals(PreferredLanguage, StringComparison.OrdinalIgnoreCase)))
         {
             errors.Add($"Unknown language: \"{PreferredLanguage}\"");
+        }
+
+        if (!Enum.IsDefined(typeof(PlayniteProperty), CategoryProperty))
+        {
+            errors.Add($"Unknown value \"{CategoryProperty}\"");
+        }
+
+        if (!Enum.IsDefined(typeof(PlayniteProperty), GenreProperty))
+        {
+            errors.Add($"Unknown value \"{GenreProperty}\"");
+        }
+
+        if (CategoryProperty == GenreProperty)
+        {
+            errors.Add($"{nameof(CategoryProperty)} == {nameof(GenreProperty)}");
         }
 
         return !errors.Any();

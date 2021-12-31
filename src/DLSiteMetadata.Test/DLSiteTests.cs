@@ -32,7 +32,7 @@ public class DLSiteTests
         var handler = new Mock<HttpMessageHandler>();
         handler
             .SetupAnyRequest()
-            .ReturnsResponse(await File.ReadAllBytesAsync(file));
+            .ReturnsResponse(File.ReadAllBytes(file));
 
         var scrapper = new Scrapper(new XunitLogger<Scrapper>(_testOutputHelper), handler.Object);
         var res = await scrapper.ScrapGamePage(id);

@@ -182,40 +182,43 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
         return releaseDate.Equals(DateTime.MinValue) ? base.GetReleaseDate(args) : new ReleaseDate(releaseDate);
     }
 
+    private IEnumerable<MetadataProperty>? GetProperties(GetMetadataFieldArgs args, PlayniteProperty currentProperty)
+    {
+        // Categories
+        var categoryProperties = PlaynitePropertyHelper.ConvertValuesIfPossible(
+            _playniteAPI,
+            _settings.CategoryProperty,
+            currentProperty,
+            () => GetResult(args)?.Categories);
+
+        if (categoryProperties is not null) return categoryProperties;
+
+        // Genres
+        var genreProperties = PlaynitePropertyHelper.ConvertValuesIfPossible(
+            _playniteAPI,
+            _settings.GenreProperty,
+            currentProperty,
+            () => GetResult(args)?.Genres);
+
+        if (genreProperties is not null) return genreProperties;
+
+        // Default
+        return null;
+    }
+
+    public override IEnumerable<MetadataProperty> GetTags(GetMetadataFieldArgs args)
+    {
+        return GetProperties(args, PlayniteProperty.Tags) ?? base.GetTags(args);
+    }
+
     public override IEnumerable<MetadataProperty> GetFeatures(GetMetadataFieldArgs args)
     {
-        var categories = GetResult(args)?.Categories;
-        if (categories is null || !categories.Any()) return base.GetFeatures(args);
-
-        var features = categories
-            .Select(category => (category, _playniteAPI.Database.Features.Where(x => x.Name is not null).FirstOrDefault(feature => feature.Name.Equals(category, StringComparison.OrdinalIgnoreCase))))
-            .Select(tuple =>
-            {
-                var (category, feature) = tuple;
-                if (feature is not null) return (MetadataProperty) new MetadataIdProperty(feature.Id);
-                return new MetadataNameProperty(category);
-            })
-            .ToList();
-
-        return features;
+        return GetProperties(args, PlayniteProperty.Features) ?? base.GetFeatures(args);
     }
 
     public override IEnumerable<MetadataProperty> GetGenres(GetMetadataFieldArgs args)
     {
-        var genres = GetResult(args)?.Genres;
-        if (genres is null || !genres.Any()) return base.GetGenres(args);
-
-        var res = genres
-            .Select(name => (name, _playniteAPI.Database.Genres.Where(x => x.Name is not null).FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase))))
-            .Select(tuple =>
-            {
-                var (name, genre) = tuple;
-                if (genre is not null) return (MetadataProperty)new MetadataIdProperty(genre.Id);
-                return new MetadataNameProperty(name);
-            })
-            .ToList();
-
-        return res;
+        return GetProperties(args, PlayniteProperty.Genres) ?? base.GetGenres(args);
     }
 
     public override MetadataFile GetIcon(GetMetadataFieldArgs args)
