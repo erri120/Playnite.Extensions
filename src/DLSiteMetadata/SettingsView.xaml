@@ -10,5 +10,17 @@
         <TextBlock Text="Preferred Language:"/>
         <ComboBox ItemsSource="{Binding Mode=OneWay, Path=AvailableLanguages}" IsEditable="False"
                   SelectedValue="{Binding Mode=TwoWay, Path=PreferredLanguage}"/>
+
+        <TextBlock Text="Include Scenario Writers as Developers"/>
+        <CheckBox IsChecked="{Binding Mode=TwoWay, Path=IncludeScenarioWriters}"/>
+
+        <TextBlock Text="Include Illustrators as Developers"/>
+        <CheckBox IsChecked="{Binding Mode=TwoWay, Path=IncludeIllustrators}"/>
+
+        <TextBlock Text="Include Voice Actors as Developers"/>
+        <CheckBox IsChecked="{Binding Mode=TwoWay, Path=IncludeVoiceActors}"/>
+
+        <TextBlock Text="Include Music Creators as Developers"/>
+        <CheckBox IsChecked="{Binding Mode=TwoWay, Path=IncludeMusicCreators}"/>
     </StackPanel>
 </UserControl>

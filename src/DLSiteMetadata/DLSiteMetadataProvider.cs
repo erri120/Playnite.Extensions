@@ -108,22 +108,22 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
             staff.Add(result.Maker);
         }
 
-        if (result.Illustrators is not null)
+        if (result.Illustrators is not null && _settings.IncludeIllustrators)
         {
             staff.AddRange(result.Illustrators);
         }
 
-        if (result.MusicCreators is not null)
+        if (result.MusicCreators is not null && _settings.IncludeMusicCreators)
         {
             staff.AddRange(result.MusicCreators);
         }
 
-        if (result.ScenarioWriters is not null)
+        if (result.ScenarioWriters is not null && _settings.IncludeScenarioWriters)
         {
             staff.AddRange(result.ScenarioWriters);
         }
 
-        if (result.VoiceActors is not null)
+        if (result.VoiceActors is not null && _settings.IncludeVoiceActors)
         {
             staff.AddRange(result.VoiceActors);
         }
@@ -139,24 +139,6 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
             .ToList();
 
         return developers;
-    }
-
-    public override IEnumerable<MetadataProperty> GetFeatures(GetMetadataFieldArgs args)
-    {
-        var categories = GetResult(args)?.Categories;
-        if (categories is null || !categories.Any()) return base.GetFeatures(args);
-
-        var features = categories
-            .Select(category => (category, _playniteAPI.Database.Features.Where(x => x.Name is not null).FirstOrDefault(feature => feature.Name.Equals(category, StringComparison.OrdinalIgnoreCase))))
-            .Select(tuple =>
-            {
-                var (category, feature) = tuple;
-                if (feature is not null) return (MetadataProperty) new MetadataIdProperty(feature.Id);
-                return new MetadataNameProperty(category);
-            })
-            .ToList();
-
-        return features;
     }
 
     public override IEnumerable<Link> GetLinks(GetMetadataFieldArgs args)
@@ -198,6 +180,24 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
 
         var releaseDate = result.DateReleased;
         return releaseDate.Equals(DateTime.MinValue) ? base.GetReleaseDate(args) : new ReleaseDate(releaseDate);
+    }
+
+    public override IEnumerable<MetadataProperty> GetFeatures(GetMetadataFieldArgs args)
+    {
+        var categories = GetResult(args)?.Categories;
+        if (categories is null || !categories.Any()) return base.GetFeatures(args);
+
+        var features = categories
+            .Select(category => (category, _playniteAPI.Database.Features.Where(x => x.Name is not null).FirstOrDefault(feature => feature.Name.Equals(category, StringComparison.OrdinalIgnoreCase))))
+            .Select(tuple =>
+            {
+                var (category, feature) = tuple;
+                if (feature is not null) return (MetadataProperty) new MetadataIdProperty(feature.Id);
+                return new MetadataNameProperty(category);
+            })
+            .ToList();
+
+        return features;
     }
 
     public override IEnumerable<MetadataProperty> GetGenres(GetMetadataFieldArgs args)

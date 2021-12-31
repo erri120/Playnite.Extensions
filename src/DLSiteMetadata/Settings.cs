@@ -13,6 +13,11 @@ public class Settings : ISettings
 
     public string? PreferredLanguage { get; set; } = Scrapper.DefaultLanguage;
 
+    public bool IncludeScenarioWriters { get; set; } = true;
+    public bool IncludeIllustrators { get; set; } = true;
+    public bool IncludeVoiceActors { get; set; } = true;
+    public bool IncludeMusicCreators { get; set; } = true;
+
     public List<string> AvailableLanguages { get; } = new()
     {
         "en_US",
@@ -42,7 +47,11 @@ public class Settings : ISettings
     {
         _previousSettings = new Settings
         {
-            PreferredLanguage = PreferredLanguage
+            PreferredLanguage = PreferredLanguage,
+            IncludeIllustrators = IncludeIllustrators,
+            IncludeMusicCreators = IncludeMusicCreators,
+            IncludeScenarioWriters = IncludeScenarioWriters,
+            IncludeVoiceActors = IncludeVoiceActors
         };
     }
 
@@ -57,6 +66,10 @@ public class Settings : ISettings
         if (_previousSettings is null) return;
 
         PreferredLanguage = _previousSettings.PreferredLanguage;
+        IncludeIllustrators = _previousSettings.IncludeIllustrators;
+        IncludeMusicCreators = _previousSettings.IncludeMusicCreators;
+        IncludeScenarioWriters = _previousSettings.IncludeScenarioWriters;
+        IncludeVoiceActors = _previousSettings.IncludeVoiceActors;
     }
 
     public bool VerifySettings(out List<string> errors)
