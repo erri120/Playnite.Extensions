@@ -1,0 +1,226 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using Extensions.Common;
+using Microsoft.Extensions.Logging;
+using Playnite.SDK;
+using Playnite.SDK.Models;
+using Playnite.SDK.Plugins;
+
+namespace DLSiteMetadata;
+
+public class DLSiteMetadataProvider : OnDemandMetadataProvider
+{
+    private readonly IPlayniteAPI _playniteAPI;
+    private readonly Settings _settings;
+    private readonly ILogger<DLSiteMetadataProvider> _logger;
+
+    private readonly MetadataRequestOptions _options;
+    private Game Game => _options.GameData;
+    private bool IsBackgroundDownload => _options.IsBackgroundDownload;
+
+    // useless
+    public override List<MetadataField> AvailableFields { get; } = new();
+
+    public DLSiteMetadataProvider(IPlayniteAPI playniteAPI, Settings settings, MetadataRequestOptions options)
+    {
+        _playniteAPI = playniteAPI;
+        _settings = settings;
+        _options = options;
+
+        _logger = CustomLogger.GetLogger<DLSiteMetadataProvider>(nameof(DLSiteMetadataProvider));
+    }
+
+    private ScrapperResult? _result;
+    private bool _didRun;
+
+    private static string? GetIdFromLink(string link)
+    {
+        if (!link.StartsWith(Scrapper.DefaultBaseUrl, StringComparison.OrdinalIgnoreCase)) return null;
+
+        // https://www.dlsite.com/maniax/work/=/product_id/RJ246037.html
+
+        var gameId = link.Substring(Scrapper.DefaultBaseUrl.Length);
+
+        var dotIndex = gameId.IndexOf('.');
+        return dotIndex == -1 ? gameId : gameId.Substring(0, gameId.IndexOf('.'));
+    }
+
+    public static string? GetIdFromGame(Game game)
+    {
+        if (game.Name is not null)
+        {
+            {
+                var gameId = GetIdFromLink(game.Name);
+                if (gameId is not null) return gameId;
+            }
+
+            if (game.Name.StartsWith("RJ", StringComparison.OrdinalIgnoreCase) || game.Name.StartsWith("RE", StringComparison.OrdinalIgnoreCase))
+            {
+                return game.Name;
+            }
+        }
+
+        var dlSiteLink = game.Links?.FirstOrDefault(link => link.Name.Equals("DLsite", StringComparison.OrdinalIgnoreCase));
+        if (dlSiteLink is not null && !string.IsNullOrWhiteSpace(dlSiteLink.Url))
+        {
+            return GetIdFromLink(dlSiteLink.Url);
+        }
+
+        return null;
+    }
+
+    private ScrapperResult? GetResult(GetMetadataFieldArgs args)
+    {
+        if (_didRun) return _result;
+
+        var scrapper = new Scrapper(CustomLogger.GetLogger<Scrapper>(nameof(Scrapper)), new HttpClientHandler());
+
+        var id = GetIdFromGame(Game);
+        if (id is null)
+        {
+            _logger.LogError("Unable to get Id for Game {Name}", Game.Name);
+            return null;
+        }
+
+        var task = scrapper.ScrapGamePage(id, args.CancelToken, _settings.PreferredLanguage ?? Scrapper.DefaultLanguage);
+        task.Wait(args.CancelToken);
+        _result = task.Result;
+        _didRun = true;
+
+        return _result;
+    }
+
+    public override string GetName(GetMetadataFieldArgs args)
+    {
+        return GetResult(args)?.Title ?? base.GetName(args);
+    }
+
+    public override IEnumerable<MetadataProperty> GetDevelopers(GetMetadataFieldArgs args)
+    {
+        var result = GetResult(args);
+        if (result is null) return base.GetDevelopers(args);
+
+        var staff = new List<string>();
+        if (result.Maker is not null)
+        {
+            staff.Add(result.Maker);
+        }
+
+        if (result.Illustrators is not null)
+        {
+            staff.AddRange(result.Illustrators);
+        }
+
+        if (result.MusicCreators is not null)
+        {
+            staff.AddRange(result.MusicCreators);
+        }
+
+        if (result.ScenarioWriters is not null)
+        {
+            staff.AddRange(result.ScenarioWriters);
+        }
+
+        if (result.VoiceActors is not null)
+        {
+            staff.AddRange(result.VoiceActors);
+        }
+
+        var developers = staff
+            .Select(name => (name, _playniteAPI.Database.Companies.Where(x => x.Name is not null).FirstOrDefault(company => company.Name.Equals(name, StringComparison.OrdinalIgnoreCase))))
+            .Select(tuple =>
+            {
+                var (name, company) = tuple;
+                if (company is not null) return (MetadataProperty)new MetadataIdProperty(company.Id);
+                return new MetadataNameProperty(name);
+            })
+            .ToList();
+
+        return developers;
+    }
+
+    public override IEnumerable<MetadataProperty> GetFeatures(GetMetadataFieldArgs args)
+    {
+        var categories = GetResult(args)?.Categories;
+        if (categories is null || !categories.Any()) return base.GetFeatures(args);
+
+        var features = categories
+            .Select(category => (category, _playniteAPI.Database.Features.Where(x => x.Name is not null).FirstOrDefault(feature => feature.Name.Equals(category, StringComparison.OrdinalIgnoreCase))))
+            .Select(tuple =>
+            {
+                var (category, feature) = tuple;
+                if (feature is not null) return (MetadataProperty) new MetadataIdProperty(feature.Id);
+                return new MetadataNameProperty(category);
+            })
+            .ToList();
+
+        return features;
+    }
+
+    public override IEnumerable<Link> GetLinks(GetMetadataFieldArgs args)
+    {
+        var id = GetResult(args)?.Id;
+        if (id is null) yield break;
+
+        yield return new Link("Dlsite", $"{Scrapper.DefaultBaseUrl}{id}.html");
+    }
+
+    private MetadataFile? SelectImage(GetMetadataFieldArgs args, string caption)
+    {
+        var images = GetResult(args)?.ProductImages;
+        if (images is null || !images.Any()) return null;
+
+        if (IsBackgroundDownload)
+        {
+            return new MetadataFile(images.First());
+        }
+
+        var imageFileOption = _playniteAPI.Dialogs.ChooseImageFile(images.Select(image => new ImageFileOption(image)).ToList(), caption);
+        return imageFileOption == null ? null : new MetadataFile(imageFileOption.Path);
+    }
+
+    public override MetadataFile? GetCoverImage(GetMetadataFieldArgs args)
+    {
+        return SelectImage(args, "Select Cover Image");
+    }
+
+    public override MetadataFile? GetBackgroundImage(GetMetadataFieldArgs args)
+    {
+        return SelectImage(args, "Select Background Image");
+    }
+
+    public override ReleaseDate? GetReleaseDate(GetMetadataFieldArgs args)
+    {
+        var result = GetResult(args);
+        if (result is null) return base.GetReleaseDate(args);
+
+        var releaseDate = result.DateReleased;
+        return releaseDate.Equals(DateTime.MinValue) ? base.GetReleaseDate(args) : new ReleaseDate(releaseDate);
+    }
+
+    public override IEnumerable<MetadataProperty> GetGenres(GetMetadataFieldArgs args)
+    {
+        var genres = GetResult(args)?.Genres;
+        if (genres is null || !genres.Any()) return base.GetGenres(args);
+
+        var res = genres
+            .Select(name => (name, _playniteAPI.Database.Genres.Where(x => x.Name is not null).FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase))))
+            .Select(tuple =>
+            {
+                var (name, genre) = tuple;
+                if (genre is not null) return (MetadataProperty)new MetadataIdProperty(genre.Id);
+                return new MetadataNameProperty(name);
+            })
+            .ToList();
+
+        return res;
+    }
+
+    public override MetadataFile GetIcon(GetMetadataFieldArgs args)
+    {
+        var icon = GetResult(args)?.Icon;
+        return icon is null ? base.GetIcon(args) : new MetadataFile(icon);
+    }
+}

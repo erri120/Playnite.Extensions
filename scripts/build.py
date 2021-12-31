@@ -9,7 +9,8 @@ configuration = "Debug"
 target = "net462"
 
 plugins = [
-    "F95ZoneMetadata"
+    "F95ZoneMetadata",
+    "DLSiteMetadata"
 ]
 
 

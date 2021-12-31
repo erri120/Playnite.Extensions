@@ -217,7 +217,7 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
             .Select(tuple =>
             {
                 var (tagName, tag) = tuple;
-                if (tag is not null) return (MetadataProperty) new MetadataIdProperty(tag.Id);
+                if (tag is not null) return (MetadataProperty)new MetadataIdProperty(tag.Id);
                 return new MetadataNameProperty(tagName);
             })
             .ToList();
@@ -236,10 +236,10 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
         };
     }
 
-    private MetadataFile SelectImage(GetMetadataFieldArgs args, string caption)
+    private MetadataFile? SelectImage(GetMetadataFieldArgs args, string caption)
     {
         var images = GetResult(args)?.Images;
-        if (images is null) return base.GetCoverImage(args);
+        if (images is null || !images.Any()) return null;
 
         if (IsBackgroundDownload)
         {
@@ -247,15 +247,15 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
         }
 
         var imageFileOption = _playniteAPI.Dialogs.ChooseImageFile(images.Select(image => new ImageFileOption(image)).ToList(), caption);
-        return imageFileOption == null ? base.GetCoverImage(args) : new MetadataFile(imageFileOption.Path);
+        return imageFileOption == null ? null : new MetadataFile(imageFileOption.Path);
     }
 
-    public override MetadataFile GetCoverImage(GetMetadataFieldArgs args)
+    public override MetadataFile? GetCoverImage(GetMetadataFieldArgs args)
     {
         return SelectImage(args, "Select Cover Image");
     }
 
-    public override MetadataFile GetBackgroundImage(GetMetadataFieldArgs args)
+    public override MetadataFile? GetBackgroundImage(GetMetadataFieldArgs args)
     {
         return SelectImage(args, "Select Background Image");
     }

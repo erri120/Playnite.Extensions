@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Moq;
 using Moq.Contrib.HttpClient;
 using Playnite.SDK.Models;
+using TestUtils;
 using Xunit;
 using Xunit.Abstractions;
 

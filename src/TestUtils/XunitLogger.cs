@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
-namespace F95ZoneMetadata.Test;
+namespace TestUtils;
 
 public class XunitLogger<T> : ILogger<T>
 {

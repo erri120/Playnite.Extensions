@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Playnite.SDK;
+using Playnite.SDK.Events;
 using Playnite.SDK.Plugins;
 
 namespace F95ZoneMetadata;
@@ -94,25 +96,30 @@ public class Settings : ISettings
         webView.Open();
         webView.Navigate(LoginUrl);
 
-        webView.LoadingChanged += (sender, args) =>
+        webView.LoadingChanged += WebViewOnLoadingChanged;
+    }
+
+    private async void WebViewOnLoadingChanged(object sender, WebViewLoadingChangedEventArgs args)
+    {
+        if (args.IsLoading) return;
+        if (sender is not IWebView web) throw new NotImplementedException();
+
+        var address = web.GetCurrentAddress();
+        if (address is null || address.StartsWith(LoginUrl)) return;
+
+        await Task.Run(() =>
         {
-            if (args.IsLoading) return;
-            if (sender is not IWebView web) throw new NotImplementedException();
-
-            var address = web.GetCurrentAddress();
-            if (address is null || address.StartsWith(LoginUrl)) return;
-
-            return;
-
-            // TODO: deadlock because someone used .GetAwaiter().GetResult(): https://github.com/JosefNemec/Playnite/issues/2733
             var cookies = web.GetCookies();
             if (cookies is null || !cookies.Any()) return;
 
             CookieUser = GetCookie(cookies, "xf_user");
             CookieTfaTrust = GetCookie(cookies, "xf_tfa_trust");
             CookieCsrf = GetCookie(cookies, "xf_csrf");
-        };
+
+            web.Close();
+        });
     }
+
 
     private static string? GetCookie(IEnumerable<HttpCookie> cookies, string name)
     {
@@ -161,6 +168,6 @@ public class Settings : ISettings
             errors.Add("The xf_csrf cookie has to be set!");
         }
 
-        return true;
+        return !errors.Any();
     }
 }

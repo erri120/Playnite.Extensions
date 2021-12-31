@@ -21,6 +21,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\F95ZoneMetadata\F95ZoneMetadata.csproj" />
+      <ProjectReference Include="..\TestUtils\TestUtils.csproj" />
     </ItemGroup>
 
     <ItemGroup>
