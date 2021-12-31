@@ -56,6 +56,24 @@ public class DLSiteTests
         Assert.NotNull(res.Icon);
     }
 
+    [Theory]
+    [InlineData("search-EN.html", "ONEONE1", "en_US")]
+    [InlineData("search-JP.html", "ONEONE1", "ja_JP")]
+    public async Task TestScrapSearchPage(string file, string term, string language)
+    {
+        file = Path.Combine("files", file);
+        Assert.True(File.Exists(file));
+
+        var handler = new Mock<HttpMessageHandler>();
+        handler
+            .SetupAnyRequest()
+            .ReturnsResponse(File.ReadAllBytes(file));
+
+        var scrapper = new Scrapper(new XunitLogger<Scrapper>(_testOutputHelper), handler.Object);
+        var results = await scrapper.ScrapSearchPage(term, default, 100, language);
+        Assert.NotEmpty(results);
+    }
+
     [Fact]
     public void TestGetIdFromGame()
     {

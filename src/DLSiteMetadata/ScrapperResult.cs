@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace DLSiteMetadata;
 
@@ -18,4 +19,17 @@ public class ScrapperResult
     public List<string>? Categories { get; set; }
     public List<string>? Genres { get; set; }
     public string? Icon { get; set; }
+}
+
+[DebuggerDisplay("{Title} ({Href})")]
+public class SearchResult
+{
+    public readonly string Title;
+    public readonly string Href;
+
+    public SearchResult(string title, string href)
+    {
+        Title = title;
+        Href = href;
+    }
 }

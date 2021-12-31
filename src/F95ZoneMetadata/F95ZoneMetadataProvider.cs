@@ -110,7 +110,7 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
                 var searchResult = searchTask.Result;
                 if (searchResult is null || !searchResult.Any())
                 {
-                    _logger.LogError("Search return nothing, make sure you are logged in!");
+                    _logger.LogError("Search return nothing for {Name}, make sure you are logged in!", Game.Name);
                     return null;
                 }
 

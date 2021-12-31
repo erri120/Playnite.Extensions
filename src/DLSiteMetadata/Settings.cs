@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Extensions.Common;
 using Playnite.SDK;
+using Playnite.SDK.Data;
 using Playnite.SDK.Plugins;
 
 namespace DLSiteMetadata;
@@ -22,6 +23,17 @@ public class Settings : ISettings
     public PlayniteProperty CategoryProperty { get; set; } = PlayniteProperty.Features;
     public PlayniteProperty GenreProperty { get; set; } = PlayniteProperty.Genres;
 
+    public int MaxSearchResults { get; set; } = 50;
+
+    [DontSerialize]
+    public List<int> MaxSearchResultsSteps { get; } = new()
+    {
+        30,
+        50,
+        100
+    };
+
+    [DontSerialize]
     public List<string> AvailableLanguages { get; } = new()
     {
         "en_US",
@@ -48,6 +60,7 @@ public class Settings : ISettings
             IncludeVoiceActors = savedSettings.IncludeVoiceActors;
             CategoryProperty = savedSettings.CategoryProperty;
             GenreProperty = savedSettings.GenreProperty;
+            MaxSearchResults = savedSettings.MaxSearchResults;
         }
     }
 
@@ -64,6 +77,7 @@ public class Settings : ISettings
             IncludeVoiceActors = IncludeVoiceActors,
             CategoryProperty = CategoryProperty,
             GenreProperty = GenreProperty,
+            MaxSearchResults = MaxSearchResults
         };
     }
 
@@ -84,6 +98,7 @@ public class Settings : ISettings
         IncludeVoiceActors = _previousSettings.IncludeVoiceActors;
         CategoryProperty = _previousSettings.CategoryProperty;
         GenreProperty = _previousSettings.GenreProperty;
+        MaxSearchResults = _previousSettings.MaxSearchResults;
     }
 
     public bool VerifySettings(out List<string> errors)
@@ -112,6 +127,11 @@ public class Settings : ISettings
         if (CategoryProperty == GenreProperty)
         {
             errors.Add($"{nameof(CategoryProperty)} == {nameof(GenreProperty)}");
+        }
+
+        if (!MaxSearchResultsSteps.Contains(MaxSearchResults))
+        {
+            errors.Add($"Value for {nameof(MaxSearchResults)} but be selected from the provided values");
         }
 
         return !errors.Any();

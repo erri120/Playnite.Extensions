@@ -37,11 +37,11 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
 
     private static string? GetIdFromLink(string link)
     {
-        if (!link.StartsWith(Scrapper.DefaultBaseUrl, StringComparison.OrdinalIgnoreCase)) return null;
+        if (!link.StartsWith(Scrapper.ProductBaseUrl, StringComparison.OrdinalIgnoreCase)) return null;
 
         // https://www.dlsite.com/maniax/work/=/product_id/RJ246037.html
 
-        var gameId = link.Substring(Scrapper.DefaultBaseUrl.Length);
+        var gameId = link.Substring(Scrapper.ProductBaseUrl.Length);
 
         var dotIndex = gameId.IndexOf('.');
         return dotIndex == -1 ? gameId : gameId.Substring(0, gameId.IndexOf('.'));
@@ -80,8 +80,57 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
         var id = GetIdFromGame(Game);
         if (id is null)
         {
-            _logger.LogError("Unable to get Id for Game {Name}", Game.Name);
-            return null;
+            if (IsBackgroundDownload)
+            {
+                // background download so we just choose the first item
+
+                var searchTask = scrapper.ScrapSearchPage(Game.Name, args.CancelToken, _settings.MaxSearchResults, _settings.PreferredLanguage ?? Scrapper.DefaultLanguage);
+                searchTask.Wait(args.CancelToken);
+
+                var searchResult = searchTask.Result;
+                if (searchResult is null || !searchResult.Any())
+                {
+                    _logger.LogError("Search return nothing for {Name}", Game.Name);
+                    return null;
+                }
+
+                id = GetIdFromLink(searchResult.First().Title);
+                if (id is null)
+                {
+                    throw new NotImplementedException();
+                }
+            }
+            else
+            {
+                var item = _playniteAPI.Dialogs.ChooseItemWithSearch(
+                    new List<GenericItemOption>(),
+                    searchString =>
+                    {
+                        var searchTask = scrapper.ScrapSearchPage(searchString, args.CancelToken, _settings.MaxSearchResults, _settings.PreferredLanguage ?? Scrapper.DefaultLanguage);
+                        searchTask.Wait(args.CancelToken);
+
+                        var searchResult = searchTask.Result;
+                        if (searchResult is null || !searchResult.Any())
+                        {
+                            _logger.LogError("Search return nothing for {Name}", searchString);
+                            return null;
+                        }
+
+                        var items = searchResult
+                            .Select(x => new GenericItemOption(x.Title, x.Href))
+                            .ToList();
+
+                        return items;
+                    }, Game.Name, "Search DLsite");
+
+                var link = item.Description;
+                id = GetIdFromLink(link ?? string.Empty);
+
+                if (id is null)
+                {
+                    throw new NotImplementedException();
+                }
+            }
         }
 
         var task = scrapper.ScrapGamePage(id, args.CancelToken, _settings.PreferredLanguage ?? Scrapper.DefaultLanguage);
@@ -146,7 +195,7 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
         var id = GetResult(args)?.Id;
         if (id is null) yield break;
 
-        yield return new Link("Dlsite", $"{Scrapper.DefaultBaseUrl}{id}.html");
+        yield return new Link("Dlsite", $"{Scrapper.ProductBaseUrl}{id}.html");
     }
 
     private MetadataFile? SelectImage(GetMetadataFieldArgs args, string caption)

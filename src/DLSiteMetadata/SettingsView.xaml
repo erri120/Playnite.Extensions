@@ -41,5 +41,9 @@
         <TextBlock Text="Which property should the DLsite genres be assigned to in Playnite:"/>
         <ComboBox ItemsSource="{Binding Source={StaticResource DataFromEnum}}"
                   SelectedItem="{Binding Path=GenreProperty}"/>
+
+        <TextBlock Text="Max Search Results:"/>
+        <ComboBox ItemsSource="{Binding Mode=OneWay, Path=MaxSearchResultsSteps}" IsEditable="False"
+                  SelectedValue="{Binding Mode=TwoWay, Path=MaxSearchResults}"/>
     </StackPanel>
 </UserControl>

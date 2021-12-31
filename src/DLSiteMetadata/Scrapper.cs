@@ -17,16 +17,15 @@ public class Scrapper
 {
     public const string DefaultLanguage = "en_US";
 
-    public const string DefaultBaseUrl = "https://www.dlsite.com/maniax/work/=/product_id/";
-    private readonly string _baseUrl;
+    public const string ProductBaseUrl = "https://www.dlsite.com/maniax/work/=/product_id/";
+    public const string SearchFormatUrl = "https://www.dlsite.com/maniax/fsr/=/language/jp/sex_category%5B0%5D/male/keyword/{0}/order%5B0%5D/trend/per_page/{1}/from/fs.header/?locale={2}";
 
     private readonly ILogger<Scrapper> _logger;
     private readonly IConfiguration _configuration;
 
-    public Scrapper(ILogger<Scrapper> logger, HttpMessageHandler messageHandler, string baseUrl = DefaultBaseUrl)
+    public Scrapper(ILogger<Scrapper> logger, HttpMessageHandler messageHandler)
     {
         _logger = logger;
-        _baseUrl = baseUrl;
 
         _configuration = Configuration.Default
             .WithRequesters(messageHandler)
@@ -37,7 +36,7 @@ public class Scrapper
     {
         var context = BrowsingContext.New(_configuration);
 
-        var url = $"{DefaultBaseUrl}{id}.html/?locale={language}";
+        var url = $"{ProductBaseUrl}{id}.html/?locale={language}";
         var document = await context.OpenAsync(url, cancellationToken);
 
         var res = new ScrapperResult
@@ -220,5 +219,39 @@ public class Scrapper
         }
 
         return res;
+    }
+
+    public async Task<List<SearchResult>> ScrapSearchPage(string term, CancellationToken cancellationToken = default, int maxResults = 50, string language = DefaultLanguage)
+    {
+        var context = BrowsingContext.New(_configuration);
+
+        var url = string.Format(SearchFormatUrl, term, maxResults, language);
+        var document = await context.OpenAsync(url, cancellationToken);
+
+        var results = new List<SearchResult>();
+
+        var resultListElement = document.GetElementsByClassName("n_worklist").FirstOrDefault();
+        if (resultListElement is not null)
+        {
+            var enumerable = resultListElement.Children
+                .Where(x => x.TagName.Equals(TagNames.Li, StringComparison.OrdinalIgnoreCase));
+
+            foreach (var elem in enumerable)
+            {
+                var divElement = elem.GetElementsByClassName("multiline_truncate").FirstOrDefault();
+                if (divElement is null) continue;
+
+                var anchorElement = (IHtmlAnchorElement?)divElement.Children.FirstOrDefault(x => x.TagName.Equals(TagNames.A, StringComparison.OrdinalIgnoreCase));
+                if (anchorElement is null) continue;
+
+                var title = anchorElement.Title;
+                var href = anchorElement.Href;
+
+                if (title is null) continue;
+                results.Add(new SearchResult(title, href));
+            }
+        }
+
+        return results;
     }
 }
