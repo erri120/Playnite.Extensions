@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net462</TargetFramework>
+        <UseWpf>true</UseWpf>
     </PropertyGroup>
 
     <ItemGroup>
@@ -31,12 +32,5 @@
         <Reference Include="System.Xaml" />
         <Reference Include="System.Web" />
         <Reference Include="WindowsBase" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="SettingsView.xaml" />
-      <Page Include="SettingsView.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
     </ItemGroup>
 </Project>

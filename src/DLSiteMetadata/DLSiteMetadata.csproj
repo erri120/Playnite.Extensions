@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net462</TargetFramework>
-        <Nullable>enable</Nullable>
+        <UseWpf>true</UseWpf>
     </PropertyGroup>
 
     <ItemGroup>
@@ -34,11 +34,4 @@
         <Reference Include="WindowsBase" />
     </ItemGroup>
 
-    <ItemGroup>
-        <None Remove="SettingsView.xaml" />
-        <Page Include="SettingsView.xaml">
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-    </ItemGroup>
-    
 </Project>
