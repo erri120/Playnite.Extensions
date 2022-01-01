@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using Extensions.Common;
 using Microsoft.Extensions.Logging;
@@ -66,7 +65,7 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
             }
         }
 
-        var f95Link = game.Links?.FirstOrDefault(link => link.Name.Equals("F95Zone", StringComparison.OrdinalIgnoreCase));
+        var f95Link = game.Links?.FirstOrDefault(link => link.Name.Equals("F95zone", StringComparison.OrdinalIgnoreCase));
         if (f95Link is not null && !string.IsNullOrWhiteSpace(f95Link.Url))
         {
             return GetIdFromLink(f95Link.Url);
@@ -142,7 +141,7 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
                             .ToList();
 
                         return items;
-                    }, Game.Name, "Search F95Zone");
+                    }, Game.Name, "Search F95zone");
 
                 var link = item.Description;
                 id = GetIdFromLink(link ?? string.Empty);
@@ -186,7 +185,7 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
     public override IEnumerable<Link> GetLinks(GetMetadataFieldArgs args)
     {
         var id = GetResult(args)?.Id;
-        return id is null ? base.GetLinks(args) : new[] { new Link("F95Zone", Scrapper.DefaultBaseUrl + id) };
+        return id is null ? base.GetLinks(args) : new[] { new Link("F95zone", Scrapper.DefaultBaseUrl + id) };
     }
 
     private IEnumerable<MetadataProperty>? GetProperties(GetMetadataFieldArgs args, PlayniteProperty currentProperty)

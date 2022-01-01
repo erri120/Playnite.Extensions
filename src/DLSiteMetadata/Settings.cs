@@ -23,7 +23,7 @@ public class Settings : ISettings
     public PlayniteProperty CategoryProperty { get; set; } = PlayniteProperty.Features;
     public PlayniteProperty GenreProperty { get; set; } = PlayniteProperty.Genres;
 
-    public int MaxSearchResults { get; set; } = 50;
+    public int MaxSearchResults { get; set; } = 30;
 
     [DontSerialize]
     public List<int> MaxSearchResultsSteps { get; } = new()

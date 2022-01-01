@@ -18,7 +18,7 @@
     </UserControl.Resources>
 
     <StackPanel Margin="8">
-        <TextBlock TextWrapping="Wrap" Text="Use this Login button to log into F95Zone. If this doesn't work for whatever reason, copy the required cookies from your browser into the fields below."/>
+        <TextBlock TextWrapping="Wrap" Text="Use this Login button to log into F95zone. If this doesn't work for whatever reason, copy the required cookies from your browser into the fields below."/>
         <Button Click="ButtonBase_OnClick">Login</Button>
 
         <TextBlock Text="Cookie xf_csrf:"/>
@@ -30,11 +30,11 @@
         <TextBlock Text="Cookie xf_tfa_trust:"/>
         <TextBox Text="{Binding Mode=TwoWay, Path=CookieTfaTrust}"/>
 
-        <TextBlock Text="Which property should the F95Zone labels be assigned to in Playnite:"/>
+        <TextBlock Text="Which property should the F95zone labels be assigned to in Playnite:"/>
         <ComboBox ItemsSource="{Binding Source={StaticResource DataFromEnum}}"
                   SelectedItem="{Binding Path=LabelProperty}"/>
 
-        <TextBlock Text="Which property should the F95Zone tags be assigned to in Playnite:"/>
+        <TextBlock Text="Which property should the F95zone tags be assigned to in Playnite:"/>
         <ComboBox ItemsSource="{Binding Source={StaticResource DataFromEnum}}"
                   SelectedItem="{Binding Path=TagProperty}"/>
     </StackPanel>

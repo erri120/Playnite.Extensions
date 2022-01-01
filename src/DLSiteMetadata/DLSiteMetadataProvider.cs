@@ -195,7 +195,7 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
         var id = GetResult(args)?.Id;
         if (id is null) yield break;
 
-        yield return new Link("Dlsite", $"{Scrapper.ProductBaseUrl}{id}.html");
+        yield return new Link("DLsite", $"{Scrapper.ProductBaseUrl}{id}.html");
     }
 
     private MetadataFile? SelectImage(GetMetadataFieldArgs args, string caption)

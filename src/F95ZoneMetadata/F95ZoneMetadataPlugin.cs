@@ -16,7 +16,7 @@ public class F95ZoneMetadataPlugin : MetadataPlugin
     private readonly ILogger<F95ZoneMetadataPlugin> _logger;
     private readonly Settings _settings;
 
-    public override string Name => "F95Zone";
+    public override string Name => "F95zone";
     public override Guid Id => Guid.Parse("3af84c02-7825-4cd6-b0bd-d0800d26ffc5");
 
     public override List<MetadataField> SupportedFields { get; } = new();
