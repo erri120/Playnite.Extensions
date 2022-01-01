@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    
+    env:
+      SOLUTION: src/Playnite.Extensions.sln
 
     steps:
     - name: Checkout
@@ -16,5 +19,17 @@ jobs:
       with:
         fetch-depth: 0
 
+    # required for LangVersion 10
+    - name: Setup .NET 6.0.x
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+        
+    - name: Clear local NuGet cache (workaround for failed restores on windows-latest)
+      run: dotnet $env:SOLUTION clean && dotnet nuget locals all --clear
+      
+    - name: Restore dependencies
+      run: dotnet restore $env:SOLUTION
+      
     - name: Build
-      run: dotnet build src/Playnite.Extensions.sln
+      run: dotnet build $env:SOLUTION --no-restore
