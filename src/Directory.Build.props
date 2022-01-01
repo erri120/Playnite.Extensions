@@ -1,0 +1,8 @@
+<Project>
+    <PropertyGroup>
+        <!--<TargetFramework>netstandard2.0</TargetFramework>-->
+        <LangVersion>preview</LangVersion>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>disable</ImplicitUsings>
+    </PropertyGroup>
+</Project>
