@@ -8,6 +8,10 @@
         <PackageReference Include="AngleSharp" Version="0.16.0" />
         <PackageReference Include="AngleSharp.Io" Version="0.16.0" />
         <PackageReference Include="JetBrains.Annotations" Version="2021.3.0" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="PlayniteSDK" Version="6.2.0" />
         <PackageReference Include="System.Net.Http" Version="4.3.4" />
         <PackageReference Include="System.ValueTuple" Version="4.5.0" />
@@ -24,14 +28,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Extensions.Common\Extensions.Common.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Reference Include="PresentationCore" />
-        <Reference Include="PresentationFramework" />
-        <Reference Include="System.Xaml" />
-        <Reference Include="System.Web" />
-        <Reference Include="WindowsBase" />
     </ItemGroup>
 
 </Project>

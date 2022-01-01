@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using AngleSharp;
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
@@ -226,7 +225,7 @@ public class Scrapper
     {
         var context = BrowsingContext.New(_configuration);
 
-        var url = $"https://f95zone.to/search/{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}/?q={HttpUtility.UrlEncode(term)}&t=post&c[child_nodes]=1&c[nodes][0]=2&c[title_only]=1&o=relevance";
+        var url = $"https://f95zone.to/search/{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}/?q={term}&t=post&c[child_nodes]=1&c[nodes][0]=2&c[title_only]=1&o=relevance";
         var document = await context.OpenAsync(url, cancellationToken);
 
         var blockRows = document.GetElementsByClassName("block-row")
