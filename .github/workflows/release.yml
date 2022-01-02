@@ -48,7 +48,7 @@ jobs:
         python-version: '3.x'
     
     - name: Change Version
-      run: python scripts/build.py update ${{ steps.changelog_reader.outputs.version }}
+      run: python scripts/build.py update ${{ steps.tag_name.outputs.current_version }}
     
     - name: Pack
       run: mkdir out && python scripts/build.py pack out
@@ -59,8 +59,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
-        tag_name: v${{ steps.changelog_reader.outputs.version }}
-        name: Release ${{ steps.changelog_reader.outputs.version }}
+        tag_name: v${{ steps.tag_name.outputs.current_version }}
+        name: Release ${{ steps.tag_name.outputs.current_version }}
         #body: ${{ steps.changelog_reader.outputs.changes }}
         #draft: ${{ steps.changelog_reader.outputs.status == 'unreleased' }}
         #prerelease: ${{ steps.changelog_reader.outputs.status == 'prereleased' }}
