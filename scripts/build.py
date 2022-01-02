@@ -35,7 +35,7 @@ def main():
     if len(sys.argv) != 3:
         raise ValueError("Not enough arguments!")
 
-    src_path = os.path.abspath("../src")
+    src_path = os.path.abspath("src")
     validate_path(src_path)
 
     mode = sys.argv[1]
