@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'
+        required: true
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    env:
+      SOLUTION: src/Playnite.Extensions.sln
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Get version from input
+      id: tag_name
+      shell: bash
+      env:
+        INPUT_VERSION: ${{ github.event.inputs.version }}
+      run: |
+        echo ::set-output name=current_version::${INPUT_VERSION}
+
+    # required for LangVersion 10
+    - name: Setup .NET 6.0.x
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+        
+    - name: Clear local NuGet cache (workaround for failed restores on windows-latest)
+      run: dotnet clean $env:SOLUTION && dotnet nuget locals all --clear
+      
+    - name: Restore dependencies
+      run: dotnet restore $env:SOLUTION
+      
+    - name: Build
+      run: dotnet build $env:SOLUTION --no-restore
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    
+    - name: Change Version
+      run: python scripts/build.py update ${{ steps.changelog_reader.outputs.version }}
+    
+    - name: Pack
+      run: mkdir out && python scripts/build.py pack out
+    
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: v${{ steps.changelog_reader.outputs.version }}
+        name: Release ${{ steps.changelog_reader.outputs.version }}
+        #body: ${{ steps.changelog_reader.outputs.changes }}
+        #draft: ${{ steps.changelog_reader.outputs.status == 'unreleased' }}
+        #prerelease: ${{ steps.changelog_reader.outputs.status == 'prereleased' }}
+        files: |
+          out/*.zip
