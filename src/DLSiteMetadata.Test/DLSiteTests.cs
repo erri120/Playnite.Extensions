@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
+﻿using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Moq;
 using Moq.Contrib.HttpClient;
-using Playnite.SDK.Models;
 using TestUtils;
 using Xunit;
 using Xunit.Abstractions;
@@ -22,8 +19,8 @@ public class DLSiteTests
     }
 
     [Theory]
-    [InlineData("RJ246037-EN.html", "RJ246037")]
-    [InlineData("RJ246037-JP.html", "RJ246037")]
+    [InlineData("RJ246037-EN.html", "https://www.dlsite.com/maniax/work/=/product_id/RJ246037.html/?locale=en_US")]
+    [InlineData("RJ246037-JP.html", "https://www.dlsite.com/maniax/work/=/product_id/RJ246037.html/?locale=ja_JP")]
     public async Task TestScrapper(string file, string id)
     {
         file = Path.Combine("files", file);
@@ -72,20 +69,5 @@ public class DLSiteTests
         var scrapper = new Scrapper(new XunitLogger<Scrapper>(_testOutputHelper), handler.Object);
         var results = await scrapper.ScrapSearchPage(term, default, 100, language);
         Assert.NotEmpty(results);
-    }
-
-    [Fact]
-    public void TestGetIdFromGame()
-    {
-        Assert.Equal("RJ246037", DLSiteMetadataProvider.GetIdFromGame(new Game("https://www.dlsite.com/maniax/work/=/product_id/RJ246037.html")));
-        Assert.Equal("RJ246037", DLSiteMetadataProvider.GetIdFromGame(new Game("RJ246037")));
-        Assert.Equal("RJ246037", DLSiteMetadataProvider.GetIdFromGame(new Game("RJ246037")));
-        Assert.Equal("RJ246037", DLSiteMetadataProvider.GetIdFromGame(new Game
-        {
-            Links = new ObservableCollection<Link>(new List<Link>
-            {
-                new("DLsite", "https://www.dlsite.com/maniax/work/=/product_id/RJ246037.html")
-            })
-        }));
     }
 }

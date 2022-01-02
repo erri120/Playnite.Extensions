@@ -17,8 +17,9 @@ public class Scrapper
 {
     public const string DefaultLanguage = "en_US";
 
-    public const string ProductBaseUrl = "https://www.dlsite.com/maniax/work/=/product_id/";
-    public const string SearchFormatUrl = "https://www.dlsite.com/maniax/fsr/=/language/jp/sex_category%5B0%5D/male/keyword/{0}/order%5B0%5D/trend/per_page/{1}/from/fs.header/?locale={2}";
+    public const string SiteBaseUrl = "https://www.dlsite.com/";
+    public const string ProductBaseUrl = SiteBaseUrl + "maniax/work/=/product_id/";
+    public const string SearchFormatUrl = SiteBaseUrl + "maniax/fsr/=/language/jp/sex_category%5B0%5D/male/keyword/{0}/order%5B0%5D/trend/per_page/{1}/from/fs.header/?locale={2}";
 
     private readonly ILogger<Scrapper> _logger;
     private readonly IConfiguration _configuration;
@@ -32,16 +33,14 @@ public class Scrapper
             .WithDefaultLoader();
     }
 
-    public async Task<ScrapperResult> ScrapGamePage(string id, CancellationToken cancellationToken = default, string language = DefaultLanguage)
+    public async Task<ScrapperResult> ScrapGamePage(string url, CancellationToken cancellationToken = default, string language = DefaultLanguage)
     {
         var context = BrowsingContext.New(_configuration);
-
-        var url = $"{ProductBaseUrl}{id}.html/?locale={language}";
         var document = await context.OpenAsync(url, cancellationToken);
 
         var res = new ScrapperResult
         {
-            Id = id
+            Link = url
         };
 
         // Title

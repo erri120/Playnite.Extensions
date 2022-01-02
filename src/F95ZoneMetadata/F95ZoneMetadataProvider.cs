@@ -102,6 +102,7 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
             if (string.IsNullOrWhiteSpace(Game.Name))
             {
                 _logger.LogError("Unable to get Id from Game and Name is null or whitespace!");
+                _didRun = true;
                 return null;
             }
 
@@ -116,6 +117,7 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
                 if (searchResult is null || !searchResult.Any())
                 {
                     _logger.LogError("Search return nothing for {Name}, make sure you are logged in!", Game.Name);
+                    _didRun = true;
                     return null;
                 }
 
@@ -138,6 +140,7 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
                         if (searchResult is null || !searchResult.Any())
                         {
                             _logger.LogError("Search return nothing, make sure you are logged in!");
+                            _didRun = true;
                             return null;
                         }
 
@@ -149,7 +152,14 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
                         return items;
                     }, Game.Name, "Search F95zone");
 
+                if (item is null)
+                {
+                    _didRun = true;
+                    return null;
+                }
+
                 var link = item.Description;
+
                 id = GetIdFromLink(link ?? string.Empty);
 
                 if (id is null)

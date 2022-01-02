@@ -6,7 +6,7 @@ namespace DLSiteMetadata;
 
 public class ScrapperResult
 {
-    public string? Id { get; set; }
+    public string? Link { get; set; }
     public string? Title { get; set; }
     public List<string>? ProductImages { get; set; }
     public string? Maker { get; set; }

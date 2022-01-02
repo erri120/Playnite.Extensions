@@ -35,40 +35,20 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
     private ScrapperResult? _result;
     private bool _didRun;
 
-    private static string? GetIdFromLink(string link)
-    {
-        if (!link.StartsWith(Scrapper.ProductBaseUrl, StringComparison.OrdinalIgnoreCase)) return null;
-
-        // https://www.dlsite.com/maniax/work/=/product_id/RJ246037.html
-
-        var gameId = link.Substring(Scrapper.ProductBaseUrl.Length);
-
-        var dotIndex = gameId.IndexOf('.');
-        return dotIndex == -1 ? gameId : gameId.Substring(0, gameId.IndexOf('.'));
-    }
-
-    public static string? GetIdFromGame(Game game)
+    public static string? GetLinkFromGame(Game game)
     {
         if (game.Name is not null)
         {
-            {
-                var gameId = GetIdFromLink(game.Name);
-                if (gameId is not null) return gameId;
-            }
+            if (game.Name.StartsWith(Scrapper.SiteBaseUrl)) return game.Name;
 
             if (game.Name.StartsWith("RJ", StringComparison.OrdinalIgnoreCase) || game.Name.StartsWith("RE", StringComparison.OrdinalIgnoreCase))
             {
-                return game.Name;
+                return $"https://www.dlsite.com/maniax/work/=/product_id/{game.Name}.html";
             }
         }
 
         var dlSiteLink = game.Links?.FirstOrDefault(link => link.Name.Equals("DLsite", StringComparison.OrdinalIgnoreCase));
-        if (dlSiteLink is not null && !string.IsNullOrWhiteSpace(dlSiteLink.Url))
-        {
-            return GetIdFromLink(dlSiteLink.Url);
-        }
-
-        return null;
+        return dlSiteLink?.Url;
     }
 
     private ScrapperResult? GetResult(GetMetadataFieldArgs args)
@@ -77,8 +57,8 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
 
         var scrapper = new Scrapper(CustomLogger.GetLogger<Scrapper>(nameof(Scrapper)), new HttpClientHandler());
 
-        var id = GetIdFromGame(Game);
-        if (id is null)
+        var link = GetLinkFromGame(Game);
+        if (link is null)
         {
             if (IsBackgroundDownload)
             {
@@ -91,14 +71,11 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
                 if (searchResult is null || !searchResult.Any())
                 {
                     _logger.LogError("Search return nothing for {Name}", Game.Name);
+                    _didRun = true;
                     return null;
                 }
 
-                id = GetIdFromLink(searchResult.First().Title);
-                if (id is null)
-                {
-                    throw new NotImplementedException();
-                }
+                link = searchResult.First().Href;
             }
             else
             {
@@ -113,6 +90,7 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
                         if (searchResult is null || !searchResult.Any())
                         {
                             _logger.LogError("Search return nothing for {Name}", searchString);
+                            _didRun = true;
                             return null;
                         }
 
@@ -123,17 +101,23 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
                         return items;
                     }, Game.Name, "Search DLsite");
 
-                var link = item.Description;
-                id = GetIdFromLink(link ?? string.Empty);
-
-                if (id is null)
+                if (item is null)
                 {
-                    throw new NotImplementedException();
+                    _didRun = true;
+                    return null;
                 }
+
+                link = item.Description;
             }
         }
 
-        var task = scrapper.ScrapGamePage(id, args.CancelToken, _settings.PreferredLanguage ?? Scrapper.DefaultLanguage);
+        if (link is null)
+        {
+            _didRun = true;
+            return null;
+        }
+
+        var task = scrapper.ScrapGamePage(link, args.CancelToken, _settings.PreferredLanguage ?? Scrapper.DefaultLanguage);
         task.Wait(args.CancelToken);
         _result = task.Result;
         _didRun = true;
@@ -192,10 +176,10 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
 
     public override IEnumerable<Link> GetLinks(GetMetadataFieldArgs args)
     {
-        var id = GetResult(args)?.Id;
-        if (id is null) yield break;
+        var link = GetResult(args)?.Link;
+        if (link is null) yield break;
 
-        yield return new Link("DLsite", $"{Scrapper.ProductBaseUrl}{id}.html");
+        yield return new Link("DLsite", link);
     }
 
     private MetadataFile? SelectImage(GetMetadataFieldArgs args, string caption)
