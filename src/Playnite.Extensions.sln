@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".solutionItems", ".solution
 		Directory.Build.props = Directory.Build.props
 		..\README.md = ..\README.md
 		..\LICENSE = ..\LICENSE
+		..\CHANGELOG.md = ..\CHANGELOG.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Metadata", "Metadata", "{43D0787B-36A2-455F-B7C6-FC05395BB1CD}"
