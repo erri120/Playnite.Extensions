@@ -74,6 +74,8 @@ The following settings can be adjusted in _Add-ons..._ -> _Extensions settings_ 
 | Cookie `xf_tfa_trust`                                               | -             | Cookie used for authentication if the user has Two-Factor authentication enabled. If you do not have TFA enabled you don't need to set this value.                 |
 | Which property should the F95zone labels be assigned to in Playnite | Features      | You can decide whether the "Categories" from DLsite should go into the "Features", "Genres" or "Tags" field in Playnite                                            |
 | Which property should the F95zone tags be assigned to in Playnite   | Tags          | You can decide whether the "Genres" from DLsite should go into the "Features", "Genres" or "Tags" field in Playnite                                                |
+| Check for Updates on Startup                                        | false         | This Plugin will check for updates on startup if you want. You can also specify the minimum wait time between updates per game.                                    |
+| Update Interval in Days                                             | 7             | This is the minimum wait time between update checking **per game**. This value must be a positive number.                                                          |
 
 **Config location**: `3af84c02-7825-4cd6-b0bd-d0800d26ffc5/config.json`
 

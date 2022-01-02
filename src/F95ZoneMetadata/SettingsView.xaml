@@ -15,6 +15,8 @@
                 <x:Type TypeName="common:PlayniteProperty"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+
+        <f95ZoneMetadata:IntToStringConverter x:Key="IntToStringConverter"/>
     </UserControl.Resources>
 
     <StackPanel Margin="8">
@@ -37,5 +39,11 @@
         <TextBlock Text="Which property should the F95zone tags be assigned to in Playnite:"/>
         <ComboBox ItemsSource="{Binding Source={StaticResource DataFromEnum}}"
                   SelectedItem="{Binding Path=TagProperty}"/>
+
+        <TextBlock Text="Check for Updates on Startup:"/>
+        <CheckBox IsChecked="{Binding Mode=TwoWay, Path=CheckForUpdates}"/>
+
+        <TextBlock Text="Update Interval in Days:"/>
+        <TextBox TextChanged="TextBoxBase_OnTextChanged" Text="{Binding Mode=TwoWay, Path=DaysBetweenUpdate, Converter={StaticResource IntToStringConverter}}"/>
     </StackPanel>
 </UserControl>

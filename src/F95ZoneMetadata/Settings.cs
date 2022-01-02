@@ -6,6 +6,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Extensions.Common;
 using Playnite.SDK;
+using Playnite.SDK.Data;
 using Playnite.SDK.Events;
 using Playnite.SDK.Plugins;
 
@@ -35,6 +36,13 @@ public class Settings : ISettings
 
     public PlayniteProperty LabelProperty { get; set; } = PlayniteProperty.Features;
     public PlayniteProperty TagProperty { get; set; } = PlayniteProperty.Tags;
+
+    public bool CheckForUpdates { get; set; }
+
+    public int DaysBetweenUpdate { get; set; } = 7;
+
+    [DontSerialize]
+    public TimeSpan UpdateDistance => TimeSpan.FromDays(DaysBetweenUpdate);
 
     public CookieContainer? CreateCookieContainer()
     {
@@ -84,6 +92,8 @@ public class Settings : ISettings
             CookieCsrf = savedSettings.CookieCsrf;
             LabelProperty = savedSettings.LabelProperty;
             TagProperty = savedSettings.TagProperty;
+            CheckForUpdates = savedSettings.CheckForUpdates;
+            DaysBetweenUpdate = savedSettings.DaysBetweenUpdate;
         }
     }
 
@@ -143,7 +153,9 @@ public class Settings : ISettings
             CookieTfaTrust = CookieTfaTrust,
             CookieCsrf = CookieCsrf,
             LabelProperty = LabelProperty,
-            TagProperty = TagProperty
+            TagProperty = TagProperty,
+            CheckForUpdates = CheckForUpdates,
+            DaysBetweenUpdate = DaysBetweenUpdate
         };
     }
 
@@ -162,6 +174,8 @@ public class Settings : ISettings
         CookieCsrf = _previousSettings.CookieCsrf;
         LabelProperty = _previousSettings.LabelProperty;
         TagProperty = _previousSettings.TagProperty;
+        CheckForUpdates = _previousSettings.CheckForUpdates;
+        DaysBetweenUpdate = _previousSettings.DaysBetweenUpdate;
     }
 
     public bool VerifySettings(out List<string> errors)
@@ -191,6 +205,11 @@ public class Settings : ISettings
         if (LabelProperty == TagProperty)
         {
             errors.Add($"{nameof(LabelProperty)} == {nameof(TagProperty)}");
+        }
+
+        if (DaysBetweenUpdate < 0)
+        {
+            errors.Add("Update Interval must not be negative!");
         }
 
         return !errors.Any();

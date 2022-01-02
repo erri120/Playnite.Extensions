@@ -74,21 +74,27 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
         return null;
     }
 
+    public static Scrapper SetupScrapper(Settings settings)
+    {
+        var clientHandler = new HttpClientHandler();
+        clientHandler.Properties.Add("User-Agent", "Playnite.Extensions");
+
+        var cookieContainer = settings.CreateCookieContainer();
+        if (cookieContainer is not null)
+        {
+            clientHandler.UseCookies = true;
+            clientHandler.CookieContainer = settings.CreateCookieContainer();
+        }
+
+        var scrapper = new Scrapper(CustomLogger.GetLogger<Scrapper>(nameof(Scrapper)), clientHandler);
+        return scrapper;
+    }
+
     private ScrapperResult? GetResult(GetMetadataFieldArgs args)
     {
         if (_didRun) return _result;
 
-        var clientHandler = new HttpClientHandler();
-        clientHandler.Properties.Add("User-Agent", "Playnite.Extensions");
-
-        var cookieContainer = _settings.CreateCookieContainer();
-        if (cookieContainer is not null)
-        {
-            clientHandler.UseCookies = true;
-            clientHandler.CookieContainer = _settings.CreateCookieContainer();
-        }
-
-        var scrapper = new Scrapper(CustomLogger.GetLogger<Scrapper>(nameof(Scrapper)), clientHandler);
+        var scrapper = SetupScrapper(_settings);
 
         var id = GetIdFromGame(Game);
         if (id is null)
