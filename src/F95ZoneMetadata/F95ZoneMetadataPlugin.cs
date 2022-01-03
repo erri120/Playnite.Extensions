@@ -51,7 +51,7 @@ public class F95ZoneMetadataPlugin : MetadataPlugin
         var f95Games = _playniteAPI.Database.Games
             .Where(game => game.Links is not null && game.Links.Any(link => link.Name is not null && link.Name.Equals("F95zone", StringComparison.OrdinalIgnoreCase)))
             .Select(game => (game, tracking: _updateTracking.GetOrAdd(game)))
-            .Where(tuple => tuple.tracking.NeedsUpdate(_settings.UpdateDistance))
+            .Where(tuple => tuple.tracking.NeedsUpdate(tuple.game, _settings))
             .ToList();
 
         _logger.LogInformation("Looking for updates for {Count} games", f95Games.Count);
