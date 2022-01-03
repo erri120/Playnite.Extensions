@@ -35,7 +35,7 @@ public class GameTracking
     {
         if (!settings.CheckForUpdates) return false;
         if (DateTime.UtcNow - LastChecked < settings.UpdateDistance) return false;
-        if (settings.UpdateCompletedGames) return true;
+        if (settings.UpdateFinishedGames) return true;
 
         IEnumerable<DatabaseObject> enumerable = settings.LabelProperty switch
         {
@@ -45,6 +45,9 @@ public class GameTracking
             _ => throw new ArgumentOutOfRangeException()
         };
 
-        return !enumerable.Any(item => item.Name is not null && item.Name.Equals("Completed", StringComparison.OrdinalIgnoreCase));
+        return !enumerable.Any(item => item.Name is not null && (
+            item.Name.Equals("Completed", StringComparison.OrdinalIgnoreCase)
+            || item.Name.Equals("Abandoned", StringComparison.OrdinalIgnoreCase))
+        );
     }
 }

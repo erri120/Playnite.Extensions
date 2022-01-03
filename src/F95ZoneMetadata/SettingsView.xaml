@@ -46,7 +46,7 @@
         <TextBlock Text="Update Interval in Days:"/>
         <TextBox TextChanged="TextBoxBase_OnTextChanged" Text="{Binding Mode=TwoWay, Path=DaysBetweenUpdate, Converter={StaticResource IntToStringConverter}}"/>
 
-        <TextBlock Text="Look for Updates of Completed Games:"/>
-        <CheckBox IsChecked="{Binding Mode=TwoWay, Path=UpdateCompletedGames}"/>
+        <TextBlock Text="Look for Updates of finished Games:"/>
+        <CheckBox IsChecked="{Binding Mode=TwoWay, Path=UpdateFinishedGames}"/>
     </StackPanel>
 </UserControl>

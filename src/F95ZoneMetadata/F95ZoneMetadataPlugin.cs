@@ -46,6 +46,15 @@ public class F95ZoneMetadataPlugin : MetadataPlugin
 
     public override void OnApplicationStarted(OnApplicationStartedEventArgs args)
     {
+        var toRemove = _updateTracking.Games.Where(tracking => !_playniteAPI.Database.Games.Any(game => game.Id.Equals(tracking.GameId))).ToList();
+        _logger.LogDebug("Removing {Count} games from tracking because they no longer exist in the database", toRemove.Count);
+
+        foreach (var item in toRemove)
+        {
+            _updateTracking.Games.Remove(item);
+        }
+
+        File.WriteAllText(Path.Combine(GetPluginUserDataPath(), "updates.json"), Serialization.ToJson(_updateTracking, true));
         if (!_settings.CheckForUpdates) return;
 
         var f95Games = _playniteAPI.Database.Games
