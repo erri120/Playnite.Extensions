@@ -61,8 +61,8 @@ jobs:
       with:
         tag_name: v${{ steps.tag_name.outputs.current_version }}
         name: Release ${{ steps.tag_name.outputs.current_version }}
-        #body: ${{ steps.changelog_reader.outputs.changes }}
-        #draft: ${{ steps.changelog_reader.outputs.status == 'unreleased' }}
-        #prerelease: ${{ steps.changelog_reader.outputs.status == 'prereleased' }}
+        body: "[Changelog](https://github.com/erri120/Playnite.Extensions/blob/master/CHANGELOG.md)"
+        draft: false
+        prerelease: false
         files: |
           out/*.zip
