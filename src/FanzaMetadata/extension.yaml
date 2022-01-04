@@ -1,0 +1,10 @@
+﻿Id: FanzaMetadata
+Name: Fanza Metadata Provider
+Author: erri120
+Version: 2.0.0
+Module: FanzaMetadata.dll
+Type: MetadataProvider
+Icon: icon.png
+Links:
+    - Name: GitHub
+      Url: https://github.com/erri120/Playnite.Extensions

@@ -35,6 +35,11 @@ public class Scrapper
 
     public async Task<ScrapperResult> ScrapGamePage(string url, CancellationToken cancellationToken = default, string language = DefaultLanguage)
     {
+        if (!url.Contains("/?locale="))
+        {
+            url += url.EndsWith("/") ? $"?locale={language}" : $"/?locale={language}";
+        }
+
         var context = BrowsingContext.New(_configuration);
         var document = await context.OpenAsync(url, cancellationToken);
 

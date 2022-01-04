@@ -72,13 +72,43 @@ The following settings can be adjusted in _Add-ons..._ -> _Extensions settings_ 
 | Cookie `xf_csrf`                                                    | -             | Cookie used for authentication.                                                                                                                                                                                                                                                                                                |
 | Cookie `xf_user`                                                    | -             | Cookie used for authentication.                                                                                                                                                                                                                                                                                                |
 | Cookie `xf_tfa_trust`                                               | -             | Cookie used for authentication if the user has Two-Factor authentication enabled. If you do not have TFA enabled you don't need to set this value.                                                                                                                                                                             |
-| Which property should the F95zone labels be assigned to in Playnite | Features      | You can decide whether the "Categories" from DLsite should go into the "Features", "Genres" or "Tags" field in Playnite                                                                                                                                                                                                        |
-| Which property should the F95zone tags be assigned to in Playnite   | Tags          | You can decide whether the "Genres" from DLsite should go into the "Features", "Genres" or "Tags" field in Playnite                                                                                                                                                                                                            |
+| Which property should the F95zone labels be assigned to in Playnite | Features      | You can decide whether the "Categories" from F95zone should go into the "Features", "Genres" or "Tags" field in Playnite                                                                                                                                                                                                       |
+| Which property should the F95zone tags be assigned to in Playnite   | Tags          | You can decide whether the "Genres" from F95zone should go into the "Features", "Genres" or "Tags" field in Playnite                                                                                                                                                                                                           |
 | Check for Updates on Startup                                        | false         | This Plugin will check for updates on startup if you want. You can also specify the minimum wait time between updates per game.                                                                                                                                                                                                |
 | Update Interval in Days                                             | 7             | This is the minimum wait time between update checking **per game**. This value must be a positive number.                                                                                                                                                                                                                      |
 | Look for Updates of finished Games                                  | false         | By default, the Plugin will not look for update of games that are _finished_ (have either the "Completed" or "Abandoned" F95zone label). You can change this behaviour with this option however I advise against doing so because these games will not receive any updates. This is disabled by default to reduce server load. |
 
 **Config location**: `3af84c02-7825-4cd6-b0bd-d0800d26ffc5/config.json`
+
+## Fanza
+
+**Website**: [Fanza](https://www.dmm.co.jp)
+
+**Supported Fields**:
+
+- Name
+- Developers
+- Features/Genres/Tags
+- Community Score
+- Cover/Background Image
+- Icon
+- Series
+- Release Date
+
+**Usage**:
+
+This Metadata Provider expects a link to the game on Fanza (eg: `https://www.dmm.co.jp/dc/doujin/-/detail/=/cid=d_216826/`) as the name of the game.
+
+**Settings**:
+
+The following settings can be adjusted in _Add-ons..._ -> _Extensions settings_ -> _Metadata Sources_ -> _Fanza_:
+
+| Name                                                                  | Default Value | Description                                                                                                         |
+|-----------------------------------------------------------------------|---------------|---------------------------------------------------------------------------------------------------------------------|
+| Which property should the Fanza genres be assigned to in Playnite     | Features      | You can decide whether the "ジャンル" from Fanza should go into the "Features", "Genres" or "Tags" field in Playnite    |
+| Which property should the Fanza game theme be assigned to in Playnite | Tags          | You can decide whether the "ゲームジャンル" from Fanza should go into the "Features", "Genres" or "Tags" field in Playnite |
+
+**Config location**: `efc848be-82e1-4e3d-a151-59e5fab3e39a/config.json`
 
 ## Troubleshooting
 

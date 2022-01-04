@@ -10,7 +10,8 @@ target = "net462"
 
 plugins = [
     "F95ZoneMetadata",
-    "DLSiteMetadata"
+    "DLSiteMetadata",
+    "FanzaMetadata"
 ]
 
 

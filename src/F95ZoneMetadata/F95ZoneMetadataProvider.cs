@@ -83,7 +83,7 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
         if (cookieContainer is not null)
         {
             clientHandler.UseCookies = true;
-            clientHandler.CookieContainer = settings.CreateCookieContainer();
+            clientHandler.CookieContainer = cookieContainer;
         }
 
         var scrapper = new Scrapper(CustomLogger.GetLogger<Scrapper>(nameof(Scrapper)), clientHandler);
