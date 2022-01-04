@@ -36,7 +36,7 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
     private ScrapperResult? _result;
     private bool _didRun;
 
-    private static string? GetIdFromLink(string link)
+    public static string? GetIdFromLink(string link)
     {
         if (!link.StartsWith(Scrapper.GameBaseUrl, StringComparison.OrdinalIgnoreCase)) return null;
 
@@ -90,7 +90,68 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
         var id = GetIdFromGame(Game);
         if (id is null)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(Game.Name))
+            {
+                _logger.LogError("Unable to get Id from Game and Name is null or whitespace!");
+                _didRun = true;
+                return null;
+            }
+
+            if (IsBackgroundDownload)
+            {
+                // background download so we just choose the first item
+
+                var searchTask = scrapper.ScrapSearchPage(Game.Name, args.CancelToken);
+                searchTask.Wait(args.CancelToken);
+
+                var searchResult = searchTask.Result;
+                if (searchResult is null || !searchResult.Any())
+                {
+                    _logger.LogError("Search return nothing for {Name}, make sure you are logged in!", Game.Name);
+                    _didRun = true;
+                    return null;
+                }
+
+                id = searchResult.First().Id;
+            }
+            else
+            {
+                var item = _playniteAPI.Dialogs.ChooseItemWithSearch(
+                    new List<GenericItemOption>(),
+                    searchString =>
+                    {
+                        var searchTask = scrapper.ScrapSearchPage(searchString, args.CancelToken);
+                        searchTask.Wait(args.CancelToken);
+
+                        var searchResult = searchTask.Result;
+                        if (searchResult is null || !searchResult.Any())
+                        {
+                            _logger.LogError("Search return nothing, make sure you are logged in!");
+                            _didRun = true;
+                            return null;
+                        }
+
+                        var items = searchResult
+                            .Select(x => new GenericItemOption(x.Name, $"{Scrapper.GameBaseUrl}{x.Id}"))
+                            .ToList();
+
+                        return items;
+                    }, Game.Name, "Search Fanza");
+
+                if (item is null)
+                {
+                    _didRun = true;
+                    return null;
+                }
+
+                var link = item.Description;
+                id = GetIdFromLink(link ?? string.Empty);
+
+                if (id is null)
+                {
+                    throw new NotImplementedException();
+                }
+            }
         }
 
         var task = scrapper.ScrapGamePage(id, args.CancelToken);

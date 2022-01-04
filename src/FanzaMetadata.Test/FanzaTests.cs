@@ -44,6 +44,23 @@ public class FanzaTests
         Assert.NotEmpty(res.PreviewImages!);
     }
 
+    [Fact]
+    public async Task TestScrapSearchPage()
+    {
+        var file = Path.Combine("files", "search.html");
+        Assert.True(File.Exists(file));
+
+        var handler = new Mock<HttpMessageHandler>();
+        handler
+            .SetupAnyRequest()
+            .ReturnsResponse(File.ReadAllBytes(file));
+
+        var scrapper = new Scrapper(new XunitLogger<Scrapper>(_testOutputHelper), handler.Object);
+        var res = await scrapper.ScrapSearchPage("ゴブリンの巣穴");
+
+        Assert.NotEmpty(res);
+    }
+
     [Theory]
     [InlineData("216826", "https://www.dmm.co.jp/dc/doujin/-/detail/=/cid=d_216826/")]
     [InlineData("200809", "https://www.dmm.co.jp/dc/doujin/-/detail/=/cid=d_200809/?dmmref=ListRanking&i3_ref=list&i3_ord=5")]

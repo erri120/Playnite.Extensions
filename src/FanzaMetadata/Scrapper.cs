@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
@@ -18,6 +19,7 @@ public class Scrapper
 
     public const string GameBaseUrl = "https://www.dmm.co.jp/dc/doujin/-/detail/=/cid=d_";
     public const string IconUrlFormat = "https://doujin-assets.dmm.co.jp/digital/game/d_{0}/d_{0}pt.jpg";
+    public const string SearchBaseUrl = "https://www.dmm.co.jp/search/=/searchstr=";
 
     public Scrapper(ILogger<Scrapper> logger, HttpMessageHandler messageHandler)
     {
@@ -181,5 +183,36 @@ public class Scrapper
         result.IconUrl = string.Format(IconUrlFormat, id);
 
         return result;
+    }
+
+    public async Task<List<SearchResult>> ScrapSearchPage(string term, CancellationToken cancellationToken = default)
+    {
+        var url = SearchBaseUrl + term;
+
+        var context = BrowsingContext.New(_configuration);
+        var document = await context.OpenAsync(url, cancellationToken);
+
+        var anchorElements = document.GetElementsByClassName("tmb")
+            .Where(elem => elem.TagName.Equals(TagNames.P, StringComparison.OrdinalIgnoreCase))
+            .Select(elem => elem.Children.FirstOrDefault(x => x.TagName.Equals(TagNames.A, StringComparison.OrdinalIgnoreCase)))
+            .Cast<IHtmlAnchorElement>();
+
+        var results = new List<SearchResult>();
+
+        foreach (var anchorElement in anchorElements)
+        {
+            var id = FanzaMetadataProvider.GetIdFromLink(anchorElement.Href);
+            if (id is null) continue;
+
+            var txtElement = anchorElement.GetElementsByClassName("txt").FirstOrDefault();
+            if (txtElement is null) continue;
+
+            var name = txtElement.Text().Trim();
+            var searchResult = new SearchResult(name, id);
+
+            results.Add(searchResult);
+        }
+
+        return results;
     }
 }

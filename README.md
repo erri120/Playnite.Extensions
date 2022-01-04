@@ -97,7 +97,7 @@ The following settings can be adjusted in _Add-ons..._ -> _Extensions settings_ 
 
 **Usage**:
 
-This Metadata Provider expects a link to the game on Fanza (eg: `https://www.dmm.co.jp/dc/doujin/-/detail/=/cid=d_216826/`) as the name of the game.
+This Metadata Provider expects a link to the game on Fanza (eg: `https://www.dmm.co.jp/dc/doujin/-/detail/=/cid=d_216826/`) as the name of the game. If you do not provide a link the Plugin will search for the game on the site and let you choose from the results.
 
 **Settings**:
 
