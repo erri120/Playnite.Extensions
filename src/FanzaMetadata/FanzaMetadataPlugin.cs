@@ -19,7 +19,22 @@ public class FanzaMetadataPlugin : MetadataPlugin
     public override string Name => "Fanza";
     public override Guid Id => Guid.Parse("efc848be-82e1-4e3d-a151-59e5fab3e39a");
 
-    public override List<MetadataField> SupportedFields { get; } = new();
+    public override List<MetadataField> SupportedFields => Fields;
+    public static readonly List<MetadataField> Fields = new()
+    {
+        MetadataField.Developers,
+        MetadataField.Features,
+        MetadataField.Genres,
+        MetadataField.Icon,
+        MetadataField.Links,
+        MetadataField.Name,
+        MetadataField.Series,
+        MetadataField.Tags,
+        MetadataField.BackgroundImage,
+        MetadataField.CommunityScore,
+        MetadataField.CoverImage,
+        MetadataField.ReleaseDate
+    };
 
     public FanzaMetadataPlugin(IPlayniteAPI playniteAPI) : base(playniteAPI)
     {

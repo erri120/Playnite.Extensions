@@ -22,8 +22,7 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
     private Game Game => _options.GameData;
     private bool IsBackgroundDownload => _options.IsBackgroundDownload;
 
-    // useless
-    public override List<MetadataField> AvailableFields { get; } = new();
+    public override List<MetadataField> AvailableFields => F95ZoneMetadataPlugin.Fields;
 
     public F95ZoneMetadataProvider(IPlayniteAPI playniteAPI, Settings settings, MetadataRequestOptions options)
     {

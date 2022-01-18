@@ -19,7 +19,20 @@ public class DLSiteMetadataPlugin : MetadataPlugin
     public override string Name => "DLsite";
     public override Guid Id => Guid.Parse("7fa7b951-3d32-4844-a274-468e1adf8cca");
 
-    public override List<MetadataField> SupportedFields { get; } = new();
+    public override List<MetadataField> SupportedFields => Fields;
+    public static readonly List<MetadataField> Fields = new()
+    {
+        MetadataField.Name,
+        MetadataField.Developers,
+        MetadataField.Features,
+        MetadataField.Genres,
+        MetadataField.Icon,
+        MetadataField.Links,
+        MetadataField.Tags,
+        MetadataField.BackgroundImage,
+        MetadataField.CoverImage,
+        MetadataField.ReleaseDate
+    };
 
     public DLSiteMetadataPlugin(IPlayniteAPI playniteAPI) : base(playniteAPI)
     {

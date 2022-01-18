@@ -29,7 +29,20 @@ public class F95ZoneMetadataPlugin : MetadataPlugin
     public override string Name => "F95zone";
     public override Guid Id => Guid.Parse("3af84c02-7825-4cd6-b0bd-d0800d26ffc5");
 
-    public override List<MetadataField> SupportedFields { get; } = new();
+    public override List<MetadataField> SupportedFields => Fields;
+    public static readonly List<MetadataField> Fields = new()
+    {
+        MetadataField.Developers,
+        MetadataField.Features,
+        MetadataField.Genres,
+        MetadataField.Icon,
+        MetadataField.Links,
+        MetadataField.Name,
+        MetadataField.Tags,
+        MetadataField.BackgroundImage,
+        MetadataField.CommunityScore,
+        MetadataField.CoverImage
+    };
 
     public F95ZoneMetadataPlugin(IPlayniteAPI playniteAPI) : base(playniteAPI)
     {

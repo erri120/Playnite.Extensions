@@ -20,8 +20,7 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
     private Game Game => _options.GameData;
     private bool IsBackgroundDownload => _options.IsBackgroundDownload;
 
-    // useless
-    public override List<MetadataField> AvailableFields { get; } = new();
+    public override List<MetadataField> AvailableFields => DLSiteMetadataPlugin.Fields;
 
     public DLSiteMetadataProvider(IPlayniteAPI playniteAPI, Settings settings, MetadataRequestOptions options)
     {
