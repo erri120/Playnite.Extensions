@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    
+
     env:
       SOLUTION: src/Playnite.Extensions.sln
 
@@ -32,27 +32,27 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
-        
+
     - name: Clear local NuGet cache (workaround for failed restores on windows-latest)
       run: dotnet clean $env:SOLUTION && dotnet nuget locals all --clear
-      
+
     - name: Restore dependencies
       run: dotnet restore $env:SOLUTION
-      
+
     - name: Build
-      run: dotnet build $env:SOLUTION --no-restore
+      run: dotnet build $env:SOLUTION --no-restore -p:Version="${{ steps.tag_name.outputs.current_version }}"
 
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
-    
+
     - name: Change Version
       run: python scripts/build.py update ${{ steps.tag_name.outputs.current_version }}
-    
+
     - name: Pack
       run: mkdir out && python scripts/build.py pack out
-    
+
     - name: Create Release
       id: create_release
       uses: softprops/action-gh-release@v1
