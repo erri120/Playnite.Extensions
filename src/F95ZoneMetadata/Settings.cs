@@ -207,11 +207,6 @@ public class Settings : ISettings
             errors.Add($"Unknown value \"{TagProperty}\"");
         }
 
-        if (LabelProperty == TagProperty)
-        {
-            errors.Add($"{nameof(LabelProperty)} == {nameof(TagProperty)}");
-        }
-
         if (DaysBetweenUpdate < 0)
         {
             errors.Add("Update Interval must not be negative!");

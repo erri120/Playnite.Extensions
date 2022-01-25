@@ -252,8 +252,6 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
             currentProperty,
             () => GetResult(args)?.Genres);
 
-        if (genreProperties is not null) return genreProperties;
-
         // Game Genre/Theme
         var gameGenreProperties = PlaynitePropertyHelper.ConvertValuesIfPossible(
             _playniteAPI,
@@ -266,8 +264,7 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
                 return new[] { gameGenre };
             });
 
-        // Default
-        return null;
+        return PlaynitePropertyHelper.MultiConcat(genreProperties, gameGenreProperties);
     }
 
     public override IEnumerable<MetadataProperty> GetTags(GetMetadataFieldArgs args)

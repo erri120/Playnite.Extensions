@@ -124,11 +124,6 @@ public class Settings : ISettings
             errors.Add($"Unknown value \"{GenreProperty}\"");
         }
 
-        if (CategoryProperty == GenreProperty)
-        {
-            errors.Add($"{nameof(CategoryProperty)} == {nameof(GenreProperty)}");
-        }
-
         if (!MaxSearchResultsSteps.Contains(MaxSearchResults))
         {
             errors.Add($"Value for {nameof(MaxSearchResults)} but be selected from the provided values");

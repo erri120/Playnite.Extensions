@@ -223,8 +223,6 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
             currentProperty,
             () => GetResult(args)?.Categories);
 
-        if (categoryProperties is not null) return categoryProperties;
-
         // Genres
         var genreProperties = PlaynitePropertyHelper.ConvertValuesIfPossible(
             _playniteAPI,
@@ -232,10 +230,7 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
             currentProperty,
             () => GetResult(args)?.Genres);
 
-        if (genreProperties is not null) return genreProperties;
-
-        // Default
-        return null;
+        return PlaynitePropertyHelper.MultiConcat(categoryProperties, genreProperties);
     }
 
     public override IEnumerable<MetadataProperty> GetTags(GetMetadataFieldArgs args)

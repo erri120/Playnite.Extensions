@@ -56,4 +56,34 @@ public static class PlaynitePropertyHelper
         var properties = ConvertValuesToProperties(playniteAPI, values, settingsProperty);
         return properties ?? null;
     }
+
+    public static IEnumerable<MetadataProperty>? MultiConcat(params IEnumerable<MetadataProperty>?[] enumerables)
+    {
+        /*
+         * To reduce allocations we look for the first enumerable that is not null and use that as the starting point.
+         * This is more memory efficient than starting with an empty enumerable and appending everything to that.
+         */
+
+        var start = -1;
+        for (var i = 0; i < enumerables.Length; i++)
+        {
+            if (enumerables[i] is null) continue;
+
+            start = i;
+            break;
+        }
+
+        if (start == -1) return null;
+        var res = enumerables[start++]!;
+
+        for (var i = start; i < enumerables.Length; i++)
+        {
+            var cur = enumerables[i];
+            if (cur is null) continue;
+
+            res = res.Concat(cur);
+        }
+
+        return res;
+    }
 }

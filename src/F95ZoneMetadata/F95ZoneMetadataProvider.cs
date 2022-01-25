@@ -212,8 +212,6 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
             currentProperty,
             () => GetResult(args)?.Tags);
 
-        if (tagProperties is not null) return tagProperties;
-
         // Labels
         var labelProperties = PlaynitePropertyHelper.ConvertValuesIfPossible(
             _playniteAPI,
@@ -221,10 +219,7 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
             currentProperty,
             () => GetResult(args)?.Labels);
 
-        if (labelProperties is not null) return labelProperties;
-
-        // Default
-        return null;
+        return PlaynitePropertyHelper.MultiConcat(tagProperties, labelProperties);
     }
 
     public override IEnumerable<MetadataProperty> GetTags(GetMetadataFieldArgs args)

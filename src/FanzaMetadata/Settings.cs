@@ -67,11 +67,6 @@ public class Settings : ISettings
             errors.Add($"Unknown value \"{GameGenreProperty}\"");
         }
 
-        if (GenreProperty == GameGenreProperty)
-        {
-            errors.Add($"{nameof(GenreProperty)} == {nameof(GameGenreProperty)}");
-        }
-
         return !errors.Any();
     }
 }
