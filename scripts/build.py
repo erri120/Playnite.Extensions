@@ -11,7 +11,8 @@ target = "net462"
 plugins = [
     "F95ZoneMetadata",
     "DLSiteMetadata",
-    "FanzaMetadata"
+    "FanzaMetadata",
+    "GameManagement"
 ]
 
 
