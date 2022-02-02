@@ -80,7 +80,7 @@ The following settings can be adjusted in _Add-ons..._ -> _Extensions settings_ 
 
 **Config location**: `3af84c02-7825-4cd6-b0bd-d0800d26ffc5/config.json`
 
-## Fanza
+### Fanza
 
 **Website**: [Fanza](https://www.dmm.co.jp)
 
@@ -109,6 +109,22 @@ The following settings can be adjusted in _Add-ons..._ -> _Extensions settings_ 
 | Which property should the Fanza game theme be assigned to in Playnite | Tags          | You can decide whether the "ゲームジャンル" from Fanza should go into the "Features", "Genres" or "Tags" field in Playnite |
 
 **Config location**: `efc848be-82e1-4e3d-a151-59e5fab3e39a/config.json`
+
+## Generic Plugins
+
+### GameManagement
+
+This plugin keeps track of the installation size of your games and adds a new _Uninstall_ action to a game.
+
+#### Storage Statistics
+
+You access a view with storage statistics using the red icon on the sidebar. The installation size is calculated by going through all files in the _Installation Directory_ and adding up the file lengths. This gets cached to `a37e0963-91ac-4432-be2a-69e366c44726/storage.json` in the `ExtensionsData` folder.
+
+#### Game Uninstallation
+
+This only works for games with a valid _Installation Directory_. Playnite already has an uninstallation feature but this only works with games that provide their own uninstaller (like when installed from a CD). The games I manage with Playnite don't have an uninstaller, they don't even have an installer, and can simply be uninstalled by deleting the folder which is what this feature does.
+
+Simply right-click any game in Playnite and click _Uninstall_. This will delete the entire _Installation Directory_ and remove the game from Playnite. **The files will be deleted completely. They do not go into the Recycle Bin**.
 
 ## Troubleshooting
 
