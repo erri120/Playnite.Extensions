@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using AngleSharp;
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
+using Extensions.Common;
 using Microsoft.Extensions.Logging;
 
 namespace F95ZoneMetadata;
@@ -116,7 +117,7 @@ public class Scrapper
             if (selectRatingElement.Dataset.Any(x => x.Key.Equals("initial-rating", StringComparison.OrdinalIgnoreCase)))
             {
                 var kv = selectRatingElement.Dataset.FirstOrDefault(x => x.Key.Equals("initial-rating", StringComparison.OrdinalIgnoreCase));
-                if (double.TryParse(kv.Value, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, null, out var rating))
+                if (NumberExtensions.TryParse(kv.Value, out var rating))
                 {
                     result.Rating = rating;
                 }
@@ -267,7 +268,7 @@ public class Scrapper
         if (spaceIndex == -1) return false;
 
         var sDouble = text.Substring(0, spaceIndex);
-        return double.TryParse(sDouble, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowDecimalPoint, null, out rating);
+        return NumberExtensions.TryParse(sDouble, out rating);
     }
 
     public static (string? Name, string? Version, string? Developer) TitleBreakdown(string title)
