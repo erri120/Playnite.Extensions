@@ -2,10 +2,21 @@
 
 This is a collection of extensions for [Playnite](https://github.com/JosefNemec/Playnite) I created.
 
+- [Installation](#installation)
+- [Metadata Providers](#metadata-providers)
+  - [DLsite](#dlsite)
+  - [F95zone](#f95zone)
+  - [Fanza](#fanza)
+- [Generic Plugins](#generic-plugins)
+  - [GameManagement](#gamemanagement)
+    - [Storage Statistics](#storage-statistics)
+    - [Game Uninstallation](#game-uninstallation)
+- [Troubleshooting](#troubleshooting)
+
 ## Installation
 
-1) Get the latest Release from the [Release Tab](https://github.com/erri120/Playnite.Extensions/releases/).
-2) Copy the folder to your `Playnite/Extensions/` folder.
+1) Go to the [Latest Release](https://github.com/erri120/Playnite.Extensions/releases/latest) and download the Extensions you want
+2) Extract the downloaded `.zip` files into the `Playnite/Extensions/` folder
 
 ## Metadata Providers
 
