@@ -8,12 +8,16 @@
              d:DesignHeight="300" d:DesignWidth="300" d:DataContext="{d:DesignInstance local:StorageInfo}">
 
     <Grid Margin="0, 30, 0, 0">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <ScrollViewer Grid.Column="0" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <StackPanel Grid.Row="0">
+            <TextBox Text="{Binding Mode=OneWay,Path=TotalSize}"/>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
             <DataGrid ItemsSource="{Binding Mode=OneWay,Path=Games}"
                       CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" CanUserResizeColumns="True"
                       CanUserResizeRows="True" CanUserSortColumns="True" AutoGenerateColumns="False"
@@ -24,10 +28,6 @@
                 </DataGrid.Columns>
             </DataGrid>
         </ScrollViewer>
-
-        <StackPanel Grid.Column="1">
-            <TextBox Text="{Binding Mode=OneWay,Path=TotalSize}"/>
-        </StackPanel>
     </Grid>
 </UserControl>
 
