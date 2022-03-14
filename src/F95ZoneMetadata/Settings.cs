@@ -44,7 +44,9 @@ public class Settings : ISettings
     [DontSerialize]
     public TimeSpan UpdateDistance => TimeSpan.FromDays(DaysBetweenUpdate);
 
-    public bool UpdateFinishedGames { get; set; } = false;
+    public bool UpdateFinishedGames { get; set; }
+
+    public bool SetDefaultIcon { get; set; } = true;
 
     public CookieContainer? CreateCookieContainer()
     {
@@ -97,6 +99,7 @@ public class Settings : ISettings
             CheckForUpdates = savedSettings.CheckForUpdates;
             DaysBetweenUpdate = savedSettings.DaysBetweenUpdate;
             UpdateFinishedGames = savedSettings.UpdateFinishedGames;
+            SetDefaultIcon = savedSettings.SetDefaultIcon;
         }
     }
 
@@ -159,7 +162,8 @@ public class Settings : ISettings
             TagProperty = TagProperty,
             CheckForUpdates = CheckForUpdates,
             DaysBetweenUpdate = DaysBetweenUpdate,
-            UpdateFinishedGames = UpdateFinishedGames
+            UpdateFinishedGames = UpdateFinishedGames,
+            SetDefaultIcon = SetDefaultIcon
         };
     }
 
@@ -181,6 +185,7 @@ public class Settings : ISettings
         CheckForUpdates = _previousSettings.CheckForUpdates;
         DaysBetweenUpdate = _previousSettings.DaysBetweenUpdate;
         UpdateFinishedGames = _previousSettings.UpdateFinishedGames;
+        SetDefaultIcon = _previousSettings.SetDefaultIcon;
     }
 
     public bool VerifySettings(out List<string> errors)

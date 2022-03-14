@@ -274,6 +274,6 @@ public class F95ZoneMetadataProvider : OnDemandMetadataProvider
 
     public override MetadataFile GetIcon(GetMetadataFieldArgs args)
     {
-        return new MetadataFile(IconUrl);
+        return _settings.SetDefaultIcon ? new MetadataFile(IconUrl) : base.GetIcon(args);
     }
 }

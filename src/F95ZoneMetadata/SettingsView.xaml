@@ -48,5 +48,8 @@
 
         <TextBlock Text="Look for Updates of finished Games:"/>
         <CheckBox IsChecked="{Binding Mode=TwoWay, Path=UpdateFinishedGames}"/>
+
+        <TextBlock Text="Use the default F95zone Icon for Games:"/>
+        <CheckBox IsChecked="{Binding Mode=TwoWay, Path=SetDefaultIcon}"/>
     </StackPanel>
 </UserControl>
