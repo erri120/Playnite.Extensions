@@ -1,8 +1,9 @@
 # Changelog
 
-## 2.3.1
+## 2.4.0
 
 - Add option to enable/disable the default F95zone icon for Games
+- Add "Series" field for DLsite
 
 ## 2.3.0
 

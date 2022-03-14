@@ -248,6 +248,22 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
         return GetProperties(args, PlayniteProperty.Genres) ?? base.GetGenres(args);
     }
 
+    public override IEnumerable<MetadataProperty> GetSeries(GetMetadataFieldArgs args)
+    {
+        var result = GetResult(args);
+        if (result?.SeriesNames is null) return base.GetSeries(args);
+
+        var series = _playniteAPI.Database.Series
+            .Where(x => x.Name is not null)
+            .FirstOrDefault(series => series.Name.Equals(result.SeriesNames));
+
+        var property = series is null
+            ? (MetadataProperty)new MetadataNameProperty(result.SeriesNames)
+            : new MetadataIdProperty(series.Id);
+
+        return new[] { property };
+    }
+
     public override MetadataFile GetIcon(GetMetadataFieldArgs args)
     {
         var icon = GetResult(args)?.Icon;

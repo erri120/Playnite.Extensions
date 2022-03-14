@@ -125,6 +125,10 @@ public class Scrapper
                             {
                                 res.DateUpdated = dateUpdated;
                             }
+                        } else if (headerName.Equals("Series name", StringComparison.OrdinalIgnoreCase) ||
+                                   headerName.Equals("シリーズ名", StringComparison.OrdinalIgnoreCase))
+                        {
+                            res.SeriesNames = dataElement.Text().CustomTrim();
                         } else if (headerName.Equals("Scenario", StringComparison.OrdinalIgnoreCase) ||
                                    headerName.Equals("シナリオ", StringComparison.OrdinalIgnoreCase))
                         {
