@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Extensions.Common;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
+using Other;
 using Playnite.SDK;
 using Playnite.SDK.Events;
 using Playnite.SDK.Models;
@@ -28,11 +29,12 @@ public class GameManagementPlugin : GenericPlugin
     public GameManagementPlugin(IPlayniteAPI playniteAPI) : base(playniteAPI)
     {
         _playniteAPI = playniteAPI;
+        _logger = CustomLogger.GetLogger<GameManagementPlugin>(nameof(GameManagementPlugin));
+
+        AssemblyLoader.ValidateReferencedAssemblies(_logger);
 
         _storageInfo = new StorageInfo(_playniteAPI);
         _storageInfo.LoadFromFile(StoragePath);
-
-        _logger = CustomLogger.GetLogger<GameManagementPlugin>(nameof(GameManagementPlugin));
     }
 
     public override IEnumerable<GameMenuItem> GetGameMenuItems(GetGameMenuItemsArgs args)

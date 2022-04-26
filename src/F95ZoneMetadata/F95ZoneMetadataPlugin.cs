@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using Extensions.Common;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
+using Other;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Events;
@@ -48,6 +49,8 @@ public class F95ZoneMetadataPlugin : MetadataPlugin
     {
         _playniteAPI = playniteAPI;
         _logger = CustomLogger.GetLogger<F95ZoneMetadataPlugin>(nameof(F95ZoneMetadataPlugin));
+
+        AssemblyLoader.ValidateReferencedAssemblies(_logger);
 
         _settings = new Settings(this, _playniteAPI);
 

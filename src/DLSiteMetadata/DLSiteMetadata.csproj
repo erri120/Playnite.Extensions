@@ -29,4 +29,10 @@
         <ProjectReference Include="..\Extensions.Common\Extensions.Common.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Compile Include="..\other\AssemblyLoader.cs">
+            <Link>AssemblyLoader.cs</Link>
+        </Compile>
+    </ItemGroup>
+
 </Project>

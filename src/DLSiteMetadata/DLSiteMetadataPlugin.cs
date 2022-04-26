@@ -6,6 +6,7 @@ using Playnite.SDK;
 using Playnite.SDK.Plugins;
 using Extensions.Common;
 using Microsoft.Extensions.Logging;
+using Other;
 
 namespace DLSiteMetadata;
 
@@ -39,6 +40,8 @@ public class DLSiteMetadataPlugin : MetadataPlugin
     {
         _playniteAPI = playniteAPI;
         _logger = CustomLogger.GetLogger<DLSiteMetadataPlugin>(nameof(DLSiteMetadataPlugin));
+
+        AssemblyLoader.ValidateReferencedAssemblies(_logger);
 
         _settings = new Settings(_playniteAPI, this);
     }

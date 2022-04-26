@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using Extensions.Common;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
+using Other;
 using Playnite.SDK;
 using Playnite.SDK.Plugins;
 
@@ -40,6 +41,8 @@ public class FanzaMetadataPlugin : MetadataPlugin
     {
         _playniteAPI = playniteAPI;
         _logger = CustomLogger.GetLogger<FanzaMetadataPlugin>(nameof(FanzaMetadataPlugin));
+
+        AssemblyLoader.ValidateReferencedAssemblies(_logger);
 
         _settings = new Settings(this, playniteAPI);
     }
