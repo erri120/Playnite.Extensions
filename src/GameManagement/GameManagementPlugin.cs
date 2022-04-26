@@ -44,14 +44,36 @@ public class GameManagementPlugin : GenericPlugin
             Action = UninstallGameMenuAction,
             Description = "Uninstall"
         };
+
+        yield return new GameMenuItem
+        {
+            Action = UninstallAndRemoveGameMenuAction,
+            Description = "Uninstall and Remove"
+        };
     }
 
     private void UninstallGameMenuAction(GameMenuItemActionArgs args)
     {
+        UninstallGames(args);
+    }
+
+    private void UninstallAndRemoveGameMenuAction(GameMenuItemActionArgs args)
+    {
+        var games = UninstallGames(args);
+        foreach (var game in games)
+        {
+            _playniteAPI.Database.Games.Remove(game);
+        }
+    }
+
+    private List<Game> UninstallGames(GameMenuItemActionArgs args)
+    {
         var games = args.Games;
-        if (games is null || !games.Any()) return;
+        if (games is null || !games.Any()) return new List<Game>();
 
         _logger.LogInformation("Uninstalling {Count} games", games.Count.ToString());
+
+        var actuallyUninstalledGames = new List<Game>();
 
         foreach (var game in games)
         {
@@ -65,17 +87,13 @@ public class GameManagementPlugin : GenericPlugin
                 continue;
             }
 
+            actuallyUninstalledGames.Add(game);
             Directory.Delete(game.InstallDirectory, true);
-            _playniteAPI.Database.Games.Remove(game);
-
-            // the internal uninstallation thing by Playnite is unreliable and is intended to remove the files but not
-            // the game from Playnite itself
-            // _playniteAPI.UninstallGame(game.Id);
-
             _storageInfo.RemoveStorageInfo(game);
         }
 
         _storageInfo.SaveToFile(StoragePath);
+        return actuallyUninstalledGames;
     }
 
     private readonly CancellationTokenSource _source = new();
