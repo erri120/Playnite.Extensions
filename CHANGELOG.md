@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.5.0
+
+- Better handling of missing Assemblies
+- Add "Uninstall and Remove" option (see [README](README.md#gamemanagement))
+
 ## 2.4.0
 
 - Add option to enable/disable the default F95zone icon for Games

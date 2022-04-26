@@ -136,7 +136,9 @@ You access a view with storage statistics using the red icon on the sidebar. The
 
 This only works for games with a valid _Installation Directory_. Playnite already has an uninstallation feature but this only works with games that provide their own uninstaller (like when installed from a CD). The games I manage with Playnite don't have an uninstaller, they don't even have an installer, and can simply be uninstalled by deleting the folder which is what this feature does.
 
-Simply right-click any game in Playnite and click _Uninstall_. This will delete the entire _Installation Directory_ and remove the game from Playnite. **The files will be deleted completely. They do not go into the Recycle Bin**.
+Simply right-click any game in Playnite and click _Uninstall_. This will delete the entire _Installation Directory_. **The files will be deleted completely. They do not go into the Recycle Bin**.
+
+I've also added a new "Uninstall and Remove" action in 2.5.0 which will uninstall the game completely and remove it from Playnite.
 
 ## Troubleshooting
 
