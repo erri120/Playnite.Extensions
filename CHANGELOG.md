@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.5.1
+
+- more logging in the Assembly Loader
+- updated dependencies
+
 ## 2.5.0
 
 - Better handling of missing Assemblies
