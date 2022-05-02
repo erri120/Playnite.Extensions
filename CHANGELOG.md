@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.2
+
+- fix dependency issue
+
 ## 2.5.1
 
 - more logging in the Assembly Loader
