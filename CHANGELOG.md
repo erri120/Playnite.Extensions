@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.3
+
+- Game Uninstallation will now display a global cancelable progress
+
 ## 2.5.2
 
 - fix dependency issue
