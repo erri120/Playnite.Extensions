@@ -71,28 +71,45 @@ public class GameManagementPlugin : GenericPlugin
         var games = args.Games;
         if (games is null || !games.Any()) return new List<Game>();
 
-        _logger.LogInformation("Uninstalling {Count} games", games.Count.ToString());
+        _logger.LogInformation("Uninstalling {Count} game(s)", games.Count.ToString());
 
-        var actuallyUninstalledGames = new List<Game>();
+        var actuallyUninstalledGames = new List<Game>(games.Count);
 
-        foreach (var game in games)
+        _playniteAPI.Dialogs.ActivateGlobalProgress(progressArgs =>
         {
-            _logger.LogDebug("Uninstalling {Name}", game.Name);
+            progressArgs.ProgressMaxValue = games.Count;
+            progressArgs.CurrentProgressValue = 0;
 
-            if (game.InstallationStatus != InstallationStatus.Installed
-                || string.IsNullOrWhiteSpace(game.InstallDirectory)
-                || !Directory.Exists(game.InstallDirectory))
+            foreach (var game in games)
             {
-                _logger.LogError("Game {Name} is not installed!", game.Name);
-                continue;
+                if (progressArgs.CancelToken.IsCancellationRequested)
+                {
+                    _logger.LogInformation("Uninstallation has been canceled");
+                    return;
+                }
+
+                _logger.LogDebug("Uninstalling {Name}", game.Name);
+
+                progressArgs.CurrentProgressValue += 1;
+                progressArgs.Text = $"Uninstalling {game.Name}";
+
+                if (game.InstallationStatus != InstallationStatus.Installed
+                    || string.IsNullOrWhiteSpace(game.InstallDirectory)
+                    || !Directory.Exists(game.InstallDirectory))
+                {
+                    _logger.LogError("Game {Name} is not installed!", game.Name);
+                    continue;
+                }
+
+                Directory.Delete(game.InstallDirectory, true);
+                game.IsInstalled = false;
+                actuallyUninstalledGames.Add(game);
+                _storageInfo.RemoveStorageInfo(game);
             }
 
-            actuallyUninstalledGames.Add(game);
-            Directory.Delete(game.InstallDirectory, true);
-            _storageInfo.RemoveStorageInfo(game);
-        }
+            _storageInfo.SaveToFile(StoragePath);
+        }, new GlobalProgressOptions($"Uninstalling {games.Count} game(s)", true));
 
-        _storageInfo.SaveToFile(StoragePath);
         return actuallyUninstalledGames;
     }
 
