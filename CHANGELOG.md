@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.5
+
+- fix compression method for .pext files (was LZMA is now Deflate)
+
 ## 2.5.4
 
 - Extensions are now published as `.pext` files and can be installed via the manifest

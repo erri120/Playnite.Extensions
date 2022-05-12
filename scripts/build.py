@@ -90,7 +90,7 @@ def pack_plugin(plugin: str, build_output_path: str):
 
     zip_output_path = os.path.join(output_path, f"{plugin}.pext")
     print(f"Packing plugin {plugin} to {zip_output_path}")
-    with zipfile.ZipFile(zip_output_path, "w", zipfile.ZIP_LZMA) as myzip:
+    with zipfile.ZipFile(zip_output_path, "w", zipfile.ZIP_DEFLATED) as myzip:
         for root, dirs, files in os.walk(build_output_path):
             for file in files:
                 myzip.write(os.path.join(root, file), file)
