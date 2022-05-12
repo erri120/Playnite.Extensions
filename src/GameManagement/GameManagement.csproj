@@ -12,7 +12,6 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.Toolkit.HighPerformance" Version="7.1.2" />
-        <PackageReference Include="PlayniteSDK" Version="6.2.2" />
     </ItemGroup>
 
     <ItemGroup>
