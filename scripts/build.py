@@ -4,6 +4,7 @@ import errno
 import os
 import shutil
 import zipfile
+import yaml
 
 configuration = "Debug"
 target = "net462"
@@ -66,16 +67,12 @@ def update_plugin_manifest(plugin: str, build_output_path: str):
 
     print(f"Updating manifest of plugin {plugin} at {extension_file}")
 
-    lines = []
     with open(extension_file, "r", encoding="UTF-8") as f:
-        for line in f:
-            if line.startswith("Version: "):
-                lines.append(f"Version: {new_version}\n")
-            else:
-                lines.append(line)
+        extension_manifest = yaml.safe_load(f)
+        extension_manifest["Version"] = new_version
 
     with open(extension_file, "w", encoding="UTF-8") as f:
-        f.writelines(lines)
+        yaml.safe_dump(extension_manifest, f)
 
 
 def main():
