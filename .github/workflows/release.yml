@@ -6,6 +6,7 @@ on:
       version:
         description: 'Version'
         required: true
+
 jobs:
   build:
     runs-on: windows-latest
@@ -66,3 +67,9 @@ jobs:
         prerelease: false
         files: |
           out/*.pext
+
+    - name: Commit and Push Installer Manifests
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+          commit_message: Update Installer Manifests
+          file_pattern: manifests/*
