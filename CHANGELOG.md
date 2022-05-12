@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.4
+
+- Extensions are now published as `.pext` files and can be installed via the manifest
+
 ## 2.5.3
 
 - Game Uninstallation will now display a global cancelable progress
