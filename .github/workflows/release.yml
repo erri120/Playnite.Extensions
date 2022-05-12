@@ -65,4 +65,4 @@ jobs:
         draft: false
         prerelease: false
         files: |
-          out/*.zip
+          out/*.pext
