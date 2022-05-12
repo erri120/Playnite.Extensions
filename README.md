@@ -15,8 +15,12 @@ This is a collection of extensions for [Playnite](https://github.com/JosefNemec/
 
 ## Installation
 
-1) Go to the [Latest Release](https://github.com/erri120/Playnite.Extensions/releases/latest) and download the Extensions you want
-2) Extract the downloaded `.zip` files into the `Playnite/Extensions/` folder
+All of the extensions can be install via the Addon Database within Playnite. You can also manually download the extensions from the [Latest Release](https://github.com/erri120/Playnite.Extensions/releases/latest) tab or use one of these urls:
+
+- [DLsite](playnite://playnite/installaddon/DLSiteMetadata)
+- [F95zone](playnite://playnite/installaddon/F95ZoneMetadata)
+- [Fanza](playnite://playnite/installaddon/FanzaMetadata)
+- [GameManagement](playnite://playnite/installaddon/GameManagement)
 
 ## Metadata Providers
 
