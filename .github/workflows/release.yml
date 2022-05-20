@@ -28,6 +28,17 @@ jobs:
       run: |
         echo ::set-output name=current_version::${INPUT_VERSION}
 
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+        cache: 'pip'
+    - name: Installing pip dependencies
+      run: pip install -r requirements.txt
+
+    - name: Change Version
+      run: python scripts/build.py update ${{ steps.tag_name.outputs.current_version }}
+
     # required for LangVersion 10
     - name: Setup .NET 6.0.x
       uses: actions/setup-dotnet@v1
@@ -42,17 +53,6 @@ jobs:
 
     - name: Build
       run: dotnet build $env:SOLUTION --no-restore -p:Version="${{ steps.tag_name.outputs.current_version }}"
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.9'
-        cache: 'pip'
-    - name: Installing pip dependencies
-      run: pip install -r requirements.txt
-
-    - name: Change Version
-      run: python scripts/build.py update ${{ steps.tag_name.outputs.current_version }}
 
     - name: Pack
       run: mkdir out && python scripts/build.py pack out
@@ -75,4 +75,4 @@ jobs:
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
           commit_message: Update Installer Manifests
-          file_pattern: manifests/*
+          file_pattern: manifests/*.yaml src/*.yaml
