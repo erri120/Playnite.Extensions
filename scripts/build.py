@@ -98,8 +98,8 @@ def pack_plugin(plugin: str, build_output_path: Path):
                 myzip.write(os.path.join(root, file), file)
 
 
-def update_plugin_manifest(plugin: str, build_output_path: Path, new_version: str):
-    extension_file = build_output_path.joinpath('extension.yaml')
+def update_plugin_manifest(plugin: str, src_path: Path, new_version: str):
+    extension_file = src_path.joinpath(plugin, 'extension.yaml')
     validate_path(extension_file, False)
 
     print(f'Updating manifest of plugin {plugin} at {extension_file}')
@@ -113,9 +113,11 @@ def update_plugin_manifest(plugin: str, build_output_path: Path, new_version: st
         yaml.safe_dump(extension_manifest, file)
 
 
-def update_installer_manifest(plugin: str, new_version: str, playnite_version: str):
-    manifest_path = Path(os.path.abspath('manifests')).joinpath(f'{plugin}.yaml')
+def update_installer_manifest(plugin: str, manifests_dir: Path, new_version: str, playnite_version: str):
+    manifest_path = manifests_dir.joinpath(f'{plugin}.yaml')
     validate_path(manifest_path, is_dir=False)
+
+    print(f'Updating installer manifest of plugin {plugin} at {manifest_path}')
 
     with manifest_path.open('r', encoding='utf-8') as file:
         installer_manifest = yaml.safe_load(file)
@@ -153,6 +155,9 @@ def main():
     src_path = Path(os.path.abspath('src'))
     validate_path(src_path)
 
+    manifests_dir = Path(os.path.abspath('manifests'))
+    validate_path(manifests_dir)
+
     mode = sys.argv[1]
 
     csproj_path = src_path.joinpath('Extensions.Common', 'Extensions.Common.csproj')
@@ -176,8 +181,8 @@ def main():
         elif mode == 'pack':
             pack_plugin(plugin, build_output_path)
         elif mode == 'update':
-            update_plugin_manifest(plugin, build_output_path, new_version)
-            update_installer_manifest(plugin, new_version, playnite_version)
+            update_plugin_manifest(plugin, src_path, new_version)
+            update_installer_manifest(plugin, manifests_dir, new_version, playnite_version)
         else:
             raise ValueError(f'Unknown mode: {mode}')
 
