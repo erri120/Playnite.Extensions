@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using Extensions.Common;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
@@ -70,6 +71,13 @@ public class GameManagementPlugin : GenericPlugin
     {
         var games = args.Games;
         if (games is null || !games.Any()) return new List<Game>();
+
+        var result = _playniteAPI.Dialogs.ShowMessage($"Do you really want to uninstall {games.Count} game(s)?",
+            "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (result != MessageBoxResult.Yes)
+        {
+            return new List<Game>();
+        }
 
         _logger.LogInformation("Uninstalling {Count} game(s)", games.Count.ToString());
 

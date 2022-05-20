@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.0
+
+- add confirmation to game uninstallation
+
 ## 2.5.5
 
 - fix compression method for .pext files (was LZMA is now Deflate)
