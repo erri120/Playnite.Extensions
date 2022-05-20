@@ -1,5 +1,9 @@
 AddonId: DLSiteMetadata
 Packages:
+- PackageUrl: https://github.com/erri120/Playnite.Extensions/releases/download/v2.5.5/DLSiteMetadata.pext
+  ReleaseDate: '2022-05-12'
+  RequiredApiVersion: 6.2.2
+  Version: 2.5.5
 - PackageUrl: https://github.com/erri120/Playnite.Extensions/releases/download/v2.5.4/DLSiteMetadata.pext
   ReleaseDate: '2022-05-12'
   RequiredApiVersion: 6.2.2
