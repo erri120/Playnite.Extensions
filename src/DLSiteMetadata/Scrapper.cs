@@ -238,7 +238,7 @@ public class Scrapper
 
         var results = new List<SearchResult>();
 
-        var resultListElement = document.GetElementsByClassName("n_worklist").FirstOrDefault();
+        var resultListElement = document.GetElementsByClassName("n_worklist").FirstOrDefault(x => x.TagName.Equals(TagNames.Ul, StringComparison.OrdinalIgnoreCase));
         if (resultListElement is not null)
         {
             var enumerable = resultListElement.Children
