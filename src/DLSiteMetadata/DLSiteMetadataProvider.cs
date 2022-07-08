@@ -269,4 +269,23 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
         var icon = GetResult(args)?.Icon;
         return icon is null ? base.GetIcon(args) : new MetadataFile(icon);
     }
+
+    public override IEnumerable<MetadataProperty> GetPublishers(GetMetadataFieldArgs args)
+    {
+        return new[] { new MetadataNameProperty("DLsite") };
+    }
+
+    public override string GetDescription(GetMetadataFieldArgs args)
+    {
+        var result = GetResult(args);
+        if (result is null) return base.GetDescription(args);
+
+        return result.DescriptionHtml ?? "";
+    }
+
+    public override int? GetCommunityScore(GetMetadataFieldArgs args)
+    {
+        var result = GetResult(args);
+        return result?.Score;
+    }
 }
