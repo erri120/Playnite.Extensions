@@ -20,7 +20,6 @@ public class ScrapperResult
     public List<string>? Categories { get; set; }
     public List<string>? Genres { get; set; }
     public string? DescriptionHtml { get; set; }
-    public string? AgeRating { get; set; }
     public int? Score { get; set; }
     public string? Icon { get; set; }
 }

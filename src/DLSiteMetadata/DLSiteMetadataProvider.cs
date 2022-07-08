@@ -283,12 +283,6 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
         return result.DescriptionHtml ?? "";
     }
 
-    public override IEnumerable<MetadataProperty> GetAgeRatings(GetMetadataFieldArgs args)
-    {
-        // have
-        return base.GetAgeRatings(args);
-    }
-
     public override int? GetCommunityScore(GetMetadataFieldArgs args)
     {
         var result = GetResult(args);

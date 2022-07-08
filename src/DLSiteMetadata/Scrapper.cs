@@ -238,8 +238,6 @@ public class Scrapper
                                    headerName.Equals("年齡指定", StringComparison.OrdinalIgnoreCase) ||
                                    headerName.Equals("연령 지정", StringComparison.OrdinalIgnoreCase))
                         {
-                            var sAge = dataElement.Text().CustomTrim();
-                            res.AgeRating = sAge;
                             // res.Age = sAge switch
                             // {
                             //     "18+" or "18禁" => DLSiteAge.Adult,
