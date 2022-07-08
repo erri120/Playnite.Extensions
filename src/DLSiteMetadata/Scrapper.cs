@@ -24,6 +24,9 @@ public class Scrapper
     public const string ProductBaseUrl = SiteBaseUrl + "maniax/work/=/product_id/";
     public const string SearchFormatUrl = SiteBaseUrl + "maniax/fsr/=/language/jp/sex_category%5B0%5D/male/keyword/{0}/order%5B0%5D/trend/per_page/{1}/from/fs.header/?locale={2}";
 
+    private static readonly Regex _idRegex = new Regex(@"[a-zA-Z]+[0-9]+", RegexOptions.Compiled);
+    private static readonly Regex _imageLinkRegex = new Regex(@"(https?://[a-zA-Z0-9\.\?/%-_]*).(jpg|jpeg|png)", RegexOptions.Compiled);
+
     private readonly ILogger<Scrapper> _logger;
     private readonly IConfiguration _configuration;
 
@@ -48,12 +51,10 @@ public class Scrapper
             Link = url
         };
 
-        var idMatcher = Regex.Match(url, @"[a-zA-Z]+[0-9]+");
+        var idMatcher = _idRegex.Match(url);
         HttpClient client = new HttpClient();
-        var ajaxResult = await client.GetAsync("https://www.dlsite.com/maniax/product/info/ajax?product_id=" + idMatcher.Value);
-        var readTask = ajaxResult.Content.ReadAsStringAsync();
-        readTask.Wait();
-        var ajaxText = readTask.Result;
+        var ajaxResult = await client.GetAsync($"https://www.dlsite.com/maniax/product/info/ajax?product_id={idMatcher.Value}", cancellationToken);
+        var ajaxText = await ajaxResult.Content.ReadAsStringAsync();
 
         JsonReader reader = new JsonTextReader(new StringReader(ajaxText));
         double score = 0;
@@ -100,7 +101,7 @@ public class Scrapper
         }
         res.DescriptionHtml = descriptionHtml;
 
-        var imageMatches = Regex.Matches(descriptionHtml, @"(https?://[a-zA-Z0-9\.\?/%-_]*).(jpg|jpeg|png)");
+        var imageMatches = _imageLinkRegex.Matches(descriptionHtml);
         var imageListInDescription = new List<string>();
         foreach (Match image in imageMatches) {
             imageListInDescription.Add(image.Value);
