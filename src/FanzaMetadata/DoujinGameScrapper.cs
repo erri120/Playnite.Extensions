@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,34 +13,63 @@ using Microsoft.Extensions.Logging;
 
 namespace FanzaMetadata;
 
-public class Scrapper
+public class DoujinGameScrapper : IScrapper
 {
-    private readonly ILogger<Scrapper> _logger;
+    private readonly ILogger<DoujinGameScrapper> _logger;
     private readonly IConfiguration _configuration;
 
     public const string GameBaseUrl = "https://www.dmm.co.jp/dc/doujin/-/detail/=/cid=d_";
-    public const string IconUrlFormat = "https://doujin-assets.dmm.co.jp/digital/game/d_{0}/d_{0}pt.jpg";
-    public const string SearchBaseUrl = "https://www.dmm.co.jp/search/=/searchstr=";
 
-    public Scrapper(ILogger<Scrapper> logger, HttpMessageHandler messageHandler)
+    public const string IconUrlFormat = "https://doujin-assets.dmm.co.jp/digital/game/d_{0}/d_{0}pt.jpg";
+
+    //game category only
+    private const string SearchBaseUrl =
+        "https://www.dmm.co.jp/search/=/searchstr={0}/limit=30/n1=FgRCTw9VBA4GAV5NWV8I/n2=Aw1fVhQKX1ZRAlhMUlo5Uw4QXF9e/n3=AgReSwMKX1VZCFQCloTHi8SF";
+
+    public DoujinGameScrapper(ILogger<DoujinGameScrapper> logger, HttpMessageHandler messageHandler)
     {
         _logger = logger;
-
         _configuration = Configuration.Default
             .WithRequesters(messageHandler)
             .WithDefaultLoader();
     }
 
-    public async Task<ScrapperResult> ScrapGamePage(string id, CancellationToken cancellationToken = default)
+
+    public DoujinGameScrapper(ILogger<DoujinGameScrapper> logger)
     {
-        var url = GameBaseUrl + id;
+        _logger = logger;
+        var clientHandler = new HttpClientHandler();
+        clientHandler.Properties.Add("User-Agent", "Playnite.Extensions");
+        var cookieContainer = new CookieContainer();
+        cookieContainer.Add(new Cookie("age_check_done", "1", "/", ".dmm.co.jp")
+        {
+            Expires = DateTime.Now + TimeSpan.FromDays(30),
+            HttpOnly = true
+        });
+
+        clientHandler.CookieContainer = cookieContainer;
+        _configuration = Configuration.Default.WithRequesters(clientHandler).WithDefaultLoader();
+        clientHandler.UseCookies = true;
+    }
+
+    public async Task<ScrapperResult?> ScrapGamePage(SearchResult searchResult,
+        CancellationToken cancellationToken = default)
+    {
+        return await ScrapGamePage(searchResult.Href, cancellationToken);
+    }
+
+    public async Task<ScrapperResult?> ScrapGamePage(string link, CancellationToken cancellationToken)
+    {
+        var id = GetGameIdFromLinks(new List<string> { link });
+        if (string.IsNullOrEmpty(id)) return null;
 
         var context = BrowsingContext.New(_configuration);
-        var document = await context.OpenAsync(url, cancellationToken);
+        var document = await context.OpenAsync(link, cancellationToken);
+        if (document.StatusCode == HttpStatusCode.NotFound) return null;
 
         var result = new ScrapperResult
         {
-            Link = url
+            Link = link
         };
 
         var productTitleElement = document
@@ -101,7 +131,8 @@ public class Scrapper
         if (userReviewElement is not null)
         {
             var reviewElement = userReviewElement.GetElementsByTagName(TagNames.A)
-                .Select(elem => elem.Children.FirstOrDefault(x => x.ClassName is not null && x.ClassName.StartsWith("u-common__ico--review")))
+                .Select(elem => elem.Children.FirstOrDefault(x =>
+                    x.ClassName is not null && x.ClassName.StartsWith("u-common__ico--review")))
                 .FirstOrDefault();
 
             if (reviewElement is not null)
@@ -155,20 +186,23 @@ public class Scrapper
                     {
                         result.ReleaseDate = releaseDate;
                     }
-                } else if (ttlText.Equals("ゲームジャンル", StringComparison.OrdinalIgnoreCase))
+                }
+                else if (ttlText.Equals("ゲームジャンル", StringComparison.OrdinalIgnoreCase))
                 {
                     // game genres, not the same as genres (this is more like a theme, eg "RPG")
                     if (txt is null) continue;
 
                     result.GameGenre = txt;
-                } else if (ttlText.Equals("シリーズ", StringComparison.OrdinalIgnoreCase))
+                }
+                else if (ttlText.Equals("シリーズ", StringComparison.OrdinalIgnoreCase))
                 {
                     // series
                     if (txt is null) continue;
                     if (txt.Equals("----")) continue;
 
                     result.Series = txt;
-                } else if (ttlText.Equals("ジャンル", StringComparison.OrdinalIgnoreCase))
+                }
+                else if (ttlText.Equals("ジャンル", StringComparison.OrdinalIgnoreCase))
                 {
                     // genres, not the same as game genre (this is more like tags)
                     var genreTagTextElements = informationListElement.GetElementsByClassName("genreTag__txt");
@@ -181,38 +215,51 @@ public class Scrapper
         }
 
         result.IconUrl = string.Format(IconUrlFormat, id);
-
         return result;
     }
 
-    public async Task<List<SearchResult>> ScrapSearchPage(string term, CancellationToken cancellationToken = default)
+    public string? GetGameIdFromLinks(IEnumerable<string> links)
     {
-        var url = SearchBaseUrl + term;
+        return links.Where(link => link.StartsWith(GameBaseUrl, StringComparison.OrdinalIgnoreCase))
+            .Select(ParseLinkId)
+            .FirstOrDefault(x => !string.IsNullOrEmpty(x));
+    }
 
+    public static string? ParseLinkId(string link)
+    {
+        if (!link.StartsWith(GameBaseUrl, StringComparison.OrdinalIgnoreCase)) return null;
+
+        var afterIdSlashIdx = link.IndexOf("/", GameBaseUrl.Length, StringComparison.Ordinal);
+        var cidStr = "cid=d_";
+        var cidEndIdx = link.LastIndexOf(cidStr, StringComparison.Ordinal) + cidStr.Length;
+        return link.Substring(GameBaseUrl.Length, afterIdSlashIdx - cidEndIdx);
+    }
+
+
+    public async Task<List<SearchResult>> ScrapSearchPage(string searchName,
+        CancellationToken cancellationToken = default)
+    {
+        var url = string.Format(SearchBaseUrl, searchName);
         var context = BrowsingContext.New(_configuration);
         var document = await context.OpenAsync(url, cancellationToken);
 
-        var anchorElements = document.GetElementsByClassName("tmb")
-            .Where(elem => elem.TagName.Equals(TagNames.P, StringComparison.OrdinalIgnoreCase))
-            .Select(elem => elem.Children.FirstOrDefault(x => x.TagName.Equals(TagNames.A, StringComparison.OrdinalIgnoreCase)))
-            .Cast<IHtmlAnchorElement>();
+        var anchorElements = document.GetElementsByClassName("tileListImg__tmb")
+            .Where(ele =>
+            {
+                var aEle = ele.GetElementsByTagName("a").Cast<IHtmlAnchorElement>().First();
+                var title = aEle.FirstElementChild?.GetAttribute("alt");
+                if (string.IsNullOrEmpty(title)) return false;
 
-        var results = new List<SearchResult>();
-
-        foreach (var anchorElement in anchorElements)
-        {
-            var id = FanzaMetadataProvider.GetIdFromLink(anchorElement.Href);
-            if (id is null) continue;
-
-            var txtElement = anchorElement.GetElementsByClassName("txt").FirstOrDefault();
-            if (txtElement is null) continue;
-
-            var name = txtElement.Text().Trim();
-            var searchResult = new SearchResult(name, id);
-
-            results.Add(searchResult);
-        }
-
-        return results;
+                var id = GetGameIdFromLinks(new List<string> { aEle.Href });
+                return !string.IsNullOrEmpty(id);
+            })
+            .Select(ele =>
+            {
+                var aEle = ele.GetElementsByTagName("a").Cast<IHtmlAnchorElement>().First();
+                var title = aEle.FirstElementChild?.GetAttribute("alt");
+                var id = GetGameIdFromLinks(new List<string> { aEle.Href });
+                return new SearchResult(Convert.ToString(title), Convert.ToString(id), aEle.Href);
+            }).ToList();
+        return anchorElements;
     }
 }

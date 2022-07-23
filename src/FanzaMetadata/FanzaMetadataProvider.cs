@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using Extensions.Common;
 using Microsoft.Extensions.Logging;
 using Playnite.SDK;
@@ -23,6 +25,10 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
 
     public override List<MetadataField> AvailableFields => FanzaMetadataPlugin.Fields;
 
+    private ScrapperResult? _result;
+    private List<SearchResult>? _searchResults;
+    private bool _didRun;
+
     public FanzaMetadataProvider(IPlayniteAPI playniteAPI, Settings settings, MetadataRequestOptions options)
     {
         _playniteAPI = playniteAPI;
@@ -32,36 +38,8 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
         _logger = CustomLogger.GetLogger<FanzaMetadataProvider>(nameof(FanzaMetadataProvider));
     }
 
-    private ScrapperResult? _result;
-    private bool _didRun;
 
-    public static string? GetIdFromLink(string link)
-    {
-        if (!link.StartsWith(Scrapper.GameBaseUrl, StringComparison.OrdinalIgnoreCase)) return null;
-
-        var id = link.Substring(Scrapper.GameBaseUrl.Length);
-        var index = id.IndexOf('/');
-        return index == -1 ? id : id.Substring(0, index);
-    }
-
-    public static string? GetIdFromGame(Game game)
-    {
-        if (game.Name is not null)
-        {
-            var id = GetIdFromLink(game.Name);
-            if (id is not null) return id;
-        }
-
-        var link = game.Links?.FirstOrDefault(link => link.Name.Equals("Fanza", StringComparison.OrdinalIgnoreCase));
-        if (link is not null && !string.IsNullOrWhiteSpace(link.Url))
-        {
-            return GetIdFromLink(link.Url);
-        }
-
-        return null;
-    }
-
-    public static Scrapper SetupScrapper()
+    private static ScrapperManager SetupScrapperManager()
     {
         var clientHandler = new HttpClientHandler();
         clientHandler.Properties.Add("User-Agent", "Playnite.Extensions");
@@ -76,89 +54,158 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
         clientHandler.UseCookies = true;
         clientHandler.CookieContainer = cookieContainer;
 
-        var scrapper = new Scrapper(CustomLogger.GetLogger<Scrapper>(nameof(Scrapper)), clientHandler);
-        return scrapper;
+        var doujinGameScrapper = new DoujinGameScrapper(
+            CustomLogger.GetLogger<DoujinGameScrapper>(nameof(DoujinGameScrapper)),
+            clientHandler);
+        var gameScrapper = new GameScrapper(CustomLogger.GetLogger<GameScrapper>(nameof(GameScrapper)), clientHandler);
+
+        return new ScrapperManager(new List<IScrapper>() { gameScrapper, doujinGameScrapper });
     }
 
     private ScrapperResult? GetResult(GetMetadataFieldArgs args)
     {
+
         if (_didRun) return _result;
+        var scrapperManager = SetupScrapperManager();
 
-        var scrapper = SetupScrapper();
-
-        var id = GetIdFromGame(Game);
-        if (id is null)
+        var linksTask = TryGetMetadataFromLinks(args, scrapperManager);
+        linksTask.Wait(args.CancelToken);
+        var scrapperResult = linksTask.Result;
+        if (scrapperResult != null)
         {
-            if (string.IsNullOrWhiteSpace(Game.Name))
+            _result = scrapperResult;
+            _didRun = true;
+            return _result;
+        }
+
+        if (string.IsNullOrWhiteSpace(Game.Name))
+        {
+            _logger.LogError("Unable to metadata cuz links and name are not available");
+            _didRun = true;
+            return null;
+        }
+
+        if (IsBackgroundDownload)
+        {
+            // background download so we just choose the first item
+            var searchTask = scrapperManager.ScrapSearchPage(Game.Name, args.CancelToken);
+            searchTask.Wait(args.CancelToken);
+
+            var searchResult = searchTask.Result;
+            if (!searchResult.Any())
             {
-                _logger.LogError("Unable to get Id from Game and Name is null or whitespace!");
+                _logger.LogError("Search return nothing for {Name}, make sure you are logged in!", Game.Name);
                 _didRun = true;
                 return null;
             }
 
-            if (IsBackgroundDownload)
-            {
-                // background download so we just choose the first item
+            _searchResults = searchResult;
+        }
+        else
+        {
 
-                var searchTask = scrapper.ScrapSearchPage(Game.Name, args.CancelToken);
-                searchTask.Wait(args.CancelToken);
-
-                var searchResult = searchTask.Result;
-                if (searchResult is null || !searchResult.Any())
+            var item = _playniteAPI.Dialogs.ChooseItemWithSearch(
+                new List<GenericItemOption>(),
+                searchString =>
                 {
-                    _logger.LogError("Search return nothing for {Name}, make sure you are logged in!", Game.Name);
-                    _didRun = true;
-                    return null;
-                }
-
-                id = searchResult.First().Id;
-            }
-            else
-            {
-                var item = _playniteAPI.Dialogs.ChooseItemWithSearch(
-                    new List<GenericItemOption>(),
-                    searchString =>
+                    var searchTask = scrapperManager.ScrapSearchPage(searchString, args.CancelToken);
+                    searchTask.Wait(args.CancelToken);
+                    var searchResult = searchTask.Result;
+                    _searchResults = searchResult;
+                    if (searchResult is null || !searchResult.Any())
                     {
-                        var searchTask = scrapper.ScrapSearchPage(searchString, args.CancelToken);
-                        searchTask.Wait(args.CancelToken);
+                        _logger.LogError("Search return nothing, make sure you are logged in!");
+                        _didRun = true;
+                        return null;
+                    }
 
-                        var searchResult = searchTask.Result;
-                        if (searchResult is null || !searchResult.Any())
-                        {
-                            _logger.LogError("Search return nothing, make sure you are logged in!");
-                            _didRun = true;
-                            return null;
-                        }
+                    var items = searchResult
+                        .Select(x => new GenericItemOption(x.Name, x.Href))
+                        .ToList();
 
-                        var items = searchResult
-                            .Select(x => new GenericItemOption(x.Name, $"{Scrapper.GameBaseUrl}{x.Id}"))
-                            .ToList();
+                    return items;
+                }, Game.Name, "Search Fanza");
 
-                        return items;
-                    }, Game.Name, "Search Fanza");
-
-                if (item is null)
-                {
-                    _didRun = true;
-                    return null;
-                }
-
-                var link = item.Description;
-                id = GetIdFromLink(link ?? string.Empty);
-
-                if (id is null)
-                {
-                    throw new NotImplementedException();
-                }
+            if (item is null)
+            {
+                _didRun = true;
+                return null;
             }
         }
 
-        var task = scrapper.ScrapGamePage(id, args.CancelToken);
-        task.Wait(args.CancelToken);
-        _result = task.Result;
-        _didRun = true;
+        if (_searchResults != null)
+        {
+            var task = scrapperManager.ScrapGamePage(_searchResults.First(), args.CancelToken);
+            task.Wait(args.CancelToken);
+            _result = task.Result;
+        }
 
+        _didRun = true;
         return _result;
+    }
+
+    private async Task<ScrapperResult?> TryGetMetadataFromLinks(GetMetadataFieldArgs args,
+        ScrapperManager scrapperManager)
+    {
+        if (Game.Links == null) return null;
+
+        foreach (var gameLink in Game.Links)
+        {
+            if (gameLink == null) continue;
+            var res = await scrapperManager.ScrapGamePage(gameLink.Url, args.CancelToken);
+            if (res != null) return res;
+        }
+
+        return null;
+    }
+
+    public class ScrapperManager
+    {
+        private readonly IEnumerable<IScrapper> _scrappers;
+
+        public ScrapperManager(IEnumerable<IScrapper> scrappers)
+        {
+            _scrappers = scrappers;
+        }
+
+        public async Task<List<SearchResult>> ScrapSearchPage(string searchName, CancellationToken cancellationToken)
+        {
+            foreach (var scrapper in _scrappers)
+            {
+                var res = await scrapper.ScrapSearchPage(searchName, cancellationToken);
+                if (res.Any()) return res;
+            }
+
+            return new List<SearchResult>();
+        }
+
+
+        public async Task<ScrapperResult?> ScrapGamePage(SearchResult searchResult, CancellationToken cancellationToken)
+        {
+            foreach (var scrapper in _scrappers)
+            {
+                var res = await scrapper.ScrapGamePage(searchResult, cancellationToken);
+                if (res != null) return res;
+            }
+
+            return null;
+        }
+
+        public async Task<ScrapperResult?> ScrapGamePage(string link, CancellationToken cancellationToken)
+        {
+            var result = Uri.TryCreate(link, UriKind.Absolute, out var uri)
+                         && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+            if (!result) return null;
+
+
+            foreach (var scrapper in _scrappers)
+            {
+                var res = await scrapper.ScrapGamePage(link, cancellationToken);
+                if (res != null) return res;
+            }
+
+            return null;
+        }
     }
 
     public override string GetName(GetMetadataFieldArgs args)
@@ -177,7 +224,8 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
         var circle = GetResult(args)?.Circle;
         if (circle is null) return base.GetDevelopers(args);
 
-        var company = _playniteAPI.Database.Companies.Where(x => x.Name is not null).FirstOrDefault(x => x.Name.Equals(circle, StringComparison.OrdinalIgnoreCase));
+        var company = _playniteAPI.Database.Companies.Where(x => x.Name is not null)
+            .FirstOrDefault(x => x.Name.Equals(circle, StringComparison.OrdinalIgnoreCase));
         if (company is not null) return new[] { new MetadataIdProperty(company.Id) };
         return new[] { new MetadataNameProperty(circle) };
     }
@@ -194,7 +242,8 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
         var series = GetResult(args)?.Series;
         if (series is null) return base.GetSeries(args);
 
-        var item = _playniteAPI.Database.Series.Where(x => x.Name is not null).FirstOrDefault(x => x.Name.Equals(series, StringComparison.OrdinalIgnoreCase));
+        var item = _playniteAPI.Database.Series.Where(x => x.Name is not null)
+            .FirstOrDefault(x => x.Name.Equals(series, StringComparison.OrdinalIgnoreCase));
         if (item is not null) return new[] { new MetadataIdProperty(item.Id) };
         return new[] { new MetadataNameProperty(series) };
     }
@@ -209,7 +258,8 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
             return new MetadataFile(images.First());
         }
 
-        var imageFileOption = _playniteAPI.Dialogs.ChooseImageFile(images.Select(image => new ImageFileOption(image)).ToList(), caption);
+        var imageFileOption =
+            _playniteAPI.Dialogs.ChooseImageFile(images.Select(image => new ImageFileOption(image)).ToList(), caption);
         return imageFileOption == null ? null : new MetadataFile(imageFileOption.Path);
     }
 

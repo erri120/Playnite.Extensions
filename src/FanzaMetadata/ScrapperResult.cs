@@ -32,10 +32,12 @@ public class SearchResult
 {
     public readonly string Name;
     public readonly string Id;
+    public readonly string Href;
 
-    public SearchResult(string name, string id)
+    public SearchResult(string name, string id, string href)
     {
         Name = name;
         Id = id;
+        Href = href;
     }
 }
