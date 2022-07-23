@@ -25,6 +25,10 @@ public class ScrapperResult
     public List<string>? Genres { get; set; }
 
     public string? IconUrl { get; set; }
+
+    public string? Description { get; set; }
+
+    public bool Adult { get; set; }
 }
 
 [DebuggerDisplay("{Name} ({Id})")]

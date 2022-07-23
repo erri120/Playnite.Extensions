@@ -34,7 +34,10 @@ public class FanzaMetadataPlugin : MetadataPlugin
         MetadataField.BackgroundImage,
         MetadataField.CommunityScore,
         MetadataField.CoverImage,
-        MetadataField.ReleaseDate
+        MetadataField.ReleaseDate,
+        MetadataField.AgeRating,
+        MetadataField.Description,
+        MetadataField.Region
     };
 
     public FanzaMetadataPlugin(IPlayniteAPI playniteAPI) : base(playniteAPI)

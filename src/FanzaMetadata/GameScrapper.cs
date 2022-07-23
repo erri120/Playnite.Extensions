@@ -86,8 +86,6 @@ public class GameScrapper : IScrapper
     public async Task<ScrapperResult?> ScrapGamePage(string link, CancellationToken cancellationToken)
     {
         var id = GetGameIdFromLinks(new List<string> { link });
-
-        _logger.LogInformation("id" + id);
         if (string.IsNullOrEmpty(id)) return null;
 
         var context = BrowsingContext.New(_configuration);
@@ -109,6 +107,11 @@ public class GameScrapper : IScrapper
             .Where(className => className.StartsWith(ratingPrefix))
             .Select(className => className.Replace(ratingPrefix, ""))
             .Select(rating => double.Parse(rating) / 10D).First();
+
+        result.Description = document.QuerySelector(".read-text-area p.text-overflow")?.OuterHtml.Trim();
+
+        var r18NavigationBarLength = document.GetElementsByClassName("_n4v1-link-r18-name").Length;
+        result.Adult = r18NavigationBarLength <= 0;
 
         // <tr>
         //  <td class="type-left">ダウンロード版対応OS</td>

@@ -64,7 +64,6 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
 
     private ScrapperResult? GetResult(GetMetadataFieldArgs args)
     {
-
         if (_didRun) return _result;
         var scrapperManager = SetupScrapperManager();
 
@@ -103,7 +102,6 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
         }
         else
         {
-
             var item = _playniteAPI.Dialogs.ChooseItemWithSearch(
                 new List<GenericItemOption>(),
                 searchString =>
@@ -246,6 +244,28 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
             .FirstOrDefault(x => x.Name.Equals(series, StringComparison.OrdinalIgnoreCase));
         if (item is not null) return new[] { new MetadataIdProperty(item.Id) };
         return new[] { new MetadataNameProperty(series) };
+    }
+
+    public override string GetDescription(GetMetadataFieldArgs args)
+    {
+        var result = GetResult(args);
+        if (result is null) return base.GetDescription(args);
+        return result.Description ?? "";
+    }
+
+    public override IEnumerable<MetadataProperty> GetAgeRatings(GetMetadataFieldArgs args)
+    {
+        var adult = GetResult(args);
+        if (adult is { Adult: true })
+        {
+            return new[] { new MetadataNameProperty("CERO Z") };
+        }
+        return base.GetAgeRatings(args);
+    }
+
+    public override IEnumerable<MetadataProperty> GetRegions(GetMetadataFieldArgs args)
+    {
+        return new[] { new MetadataNameProperty("Japan") };
     }
 
     private MetadataFile? SelectImage(GetMetadataFieldArgs args, string caption)

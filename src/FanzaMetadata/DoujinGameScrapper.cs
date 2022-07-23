@@ -157,6 +157,12 @@ public class DoujinGameScrapper : IScrapper
             }
         }
 
+        var r18NavigationBarLength = document.GetElementsByClassName("_n4v1-link-r18-name").Length;
+        result.Adult = r18NavigationBarLength <= 0;
+
+        var descHtml = document.GetElementsByClassName("summary__txt").First()?.OuterHtml;
+        result.Description = descHtml;
+
         var informationListElements = document.GetElementsByClassName("informationList");
         if (informationListElements.Any())
         {

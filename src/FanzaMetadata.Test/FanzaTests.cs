@@ -32,6 +32,8 @@ public class FanzaTests
         Assert.NotNull(res?.GameGenre);
         Assert.NotNull(res?.PreviewImages);
         Assert.NotEmpty(res?.PreviewImages!);
+        Assert.True(res?.Adult);
+        Assert.NotNull(res?.Description);
     }
 
     [Fact]
@@ -94,6 +96,8 @@ public class FanzaTests
         Assert.NotNull(res);
         Assert.NotNull(res?.Title);
         Assert.NotNull(res?.Genres);
+        Assert.NotNull(res?.Description);
+        Assert.True(res?.Adult);
     }
 
 
