@@ -33,7 +33,9 @@ public class DLSiteMetadataPlugin : MetadataPlugin
         MetadataField.BackgroundImage,
         MetadataField.CoverImage,
         MetadataField.ReleaseDate,
-        MetadataField.Series
+        MetadataField.Series,
+        MetadataField.Description,
+        MetadataField.Region
     };
 
     public DLSiteMetadataPlugin(IPlayniteAPI playniteAPI) : base(playniteAPI)

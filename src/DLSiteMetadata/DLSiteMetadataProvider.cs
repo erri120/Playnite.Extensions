@@ -40,13 +40,15 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
         {
             if (game.Name.StartsWith(Scrapper.SiteBaseUrl)) return game.Name;
 
-            if (game.Name.StartsWith("RJ", StringComparison.OrdinalIgnoreCase) || game.Name.StartsWith("RE", StringComparison.OrdinalIgnoreCase))
+            if (game.Name.StartsWith("RJ", StringComparison.OrdinalIgnoreCase) ||
+                game.Name.StartsWith("RE", StringComparison.OrdinalIgnoreCase))
             {
                 return $"https://www.dlsite.com/maniax/work/=/product_id/{game.Name}.html";
             }
         }
 
-        var dlSiteLink = game.Links?.FirstOrDefault(link => link.Name.Equals("DLsite", StringComparison.OrdinalIgnoreCase));
+        var dlSiteLink =
+            game.Links?.FirstOrDefault(link => link.Name.Equals("DLsite", StringComparison.OrdinalIgnoreCase));
         return dlSiteLink?.Url;
     }
 
@@ -63,7 +65,8 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
             {
                 // background download so we just choose the first item
 
-                var searchTask = scrapper.ScrapSearchPage(Game.Name, args.CancelToken, _settings.MaxSearchResults, _settings.PreferredLanguage ?? Scrapper.DefaultLanguage);
+                var searchTask = scrapper.ScrapSearchPage(Game.Name, args.CancelToken, _settings.MaxSearchResults,
+                    _settings.PreferredLanguage ?? Scrapper.DefaultLanguage);
                 searchTask.Wait(args.CancelToken);
 
                 var searchResult = searchTask.Result;
@@ -82,7 +85,8 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
                     new List<GenericItemOption>(),
                     searchString =>
                     {
-                        var searchTask = scrapper.ScrapSearchPage(searchString, args.CancelToken, _settings.MaxSearchResults, _settings.PreferredLanguage ?? Scrapper.DefaultLanguage);
+                        var searchTask = scrapper.ScrapSearchPage(searchString, args.CancelToken,
+                            _settings.MaxSearchResults, _settings.PreferredLanguage ?? Scrapper.DefaultLanguage);
                         searchTask.Wait(args.CancelToken);
 
                         var searchResult = searchTask.Result;
@@ -161,7 +165,9 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
         }
 
         var developers = staff
-            .Select(name => (name, _playniteAPI.Database.Companies.Where(x => x.Name is not null).FirstOrDefault(company => company.Name.Equals(name, StringComparison.OrdinalIgnoreCase))))
+            .Select(name => (name,
+                _playniteAPI.Database.Companies.Where(x => x.Name is not null).FirstOrDefault(company =>
+                    company.Name.Equals(name, StringComparison.OrdinalIgnoreCase))))
             .Select(tuple =>
             {
                 var (name, company) = tuple;
@@ -191,7 +197,8 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
             return new MetadataFile(images.First());
         }
 
-        var imageFileOption = _playniteAPI.Dialogs.ChooseImageFile(images.Select(image => new ImageFileOption(image)).ToList(), caption);
+        var imageFileOption =
+            _playniteAPI.Dialogs.ChooseImageFile(images.Select(image => new ImageFileOption(image)).ToList(), caption);
         return imageFileOption == null ? null : new MetadataFile(imageFileOption.Path);
     }
 
@@ -287,5 +294,10 @@ public class DLSiteMetadataProvider : OnDemandMetadataProvider
     {
         var result = GetResult(args);
         return result?.Score;
+    }
+
+    public override IEnumerable<MetadataProperty> GetRegions(GetMetadataFieldArgs args)
+    {
+        return new[] { new MetadataNameProperty("Japan") };
     }
 }

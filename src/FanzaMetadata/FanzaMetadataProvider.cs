@@ -255,12 +255,15 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
 
     public override IEnumerable<MetadataProperty> GetAgeRatings(GetMetadataFieldArgs args)
     {
-        var adult = GetResult(args);
-        if (adult is { Adult: true })
+        var res = GetResult(args);
+        var adult = res?.Adult;
+        if (adult == null)
         {
-            return new[] { new MetadataNameProperty("CERO Z") };
+            return base.GetAgeRatings(args);
         }
-        return base.GetAgeRatings(args);
+
+        var ageRating = adult.Value ? "18禁" : "一般向";
+        return new[] { new MetadataNameProperty(ageRating) };
     }
 
     public override IEnumerable<MetadataProperty> GetRegions(GetMetadataFieldArgs args)

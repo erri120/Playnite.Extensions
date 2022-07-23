@@ -28,7 +28,7 @@ public class ScrapperResult
 
     public string? Description { get; set; }
 
-    public bool Adult { get; set; }
+    public bool? Adult { get; set; }
 }
 
 [DebuggerDisplay("{Name} ({Id})")]
