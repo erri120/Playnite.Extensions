@@ -70,7 +70,7 @@ public class FanzaTests
     public async void ShouldGetSearchResult()
     {
         var scrapper = new GameScrapper(new XunitLogger<GameScrapper>(_testOutputHelper));
-        var res = await scrapper.ScrapSearchPage("家の彼女");
+        var res = await scrapper.ScrapSearchPage("恥辱の制服2");
         Assert.NotEmpty(res);
     }
 
@@ -80,6 +80,17 @@ public class FanzaTests
         var scrapper = new GameScrapper(new XunitLogger<GameScrapper>(_testOutputHelper));
         var res = await scrapper.ScrapGamePage(new SearchResult("美少女万華鏡 呪われし伝説の少女", "views_0669",
             "https://dlsoft.dmm.co.jp/detail/views_0669/"));
+        Assert.NotNull(res);
+        Assert.NotNull(res?.Title);
+        Assert.NotNull(res?.Genres);
+    }
+
+    [Fact]
+    public async void ShouldGetScrapperResultFromUrl()
+    {
+        var scrapper =  new GameScrapper(new XunitLogger<GameScrapper>(_testOutputHelper));
+        var res = await scrapper.ScrapGamePage("https://dlsoft.dmm.co.jp/detail/moonstn_0014/?i3_ref=search&i3_ord=2",
+            CancellationToken.None);
         Assert.NotNull(res);
         Assert.NotNull(res?.Title);
         Assert.NotNull(res?.Genres);
