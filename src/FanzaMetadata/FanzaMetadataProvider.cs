@@ -26,7 +26,7 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
     public override List<MetadataField> AvailableFields => FanzaMetadataPlugin.Fields;
 
     private ScrapperResult? _result;
-    private List<SearchResult>? _searchResults;
+    private string? choosedGameUrl;
     private bool _didRun;
 
     public FanzaMetadataProvider(IPlayniteAPI playniteAPI, Settings settings, MetadataRequestOptions options)
@@ -98,7 +98,7 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
                 return null;
             }
 
-            _searchResults = searchResult;
+            choosedGameUrl = searchResult.First().Href;
         }
         else
         {
@@ -109,7 +109,6 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
                     var searchTask = scrapperManager.ScrapSearchPage(searchString, args.CancelToken);
                     searchTask.Wait(args.CancelToken);
                     var searchResult = searchTask.Result;
-                    _searchResults = searchResult;
                     if (searchResult is null || !searchResult.Any())
                     {
                         _logger.LogError("Search return nothing, make sure you are logged in!");
@@ -129,11 +128,13 @@ public class FanzaMetadataProvider : OnDemandMetadataProvider
                 _didRun = true;
                 return null;
             }
+
+            choosedGameUrl = item.Description;
         }
 
-        if (_searchResults != null)
+        if (!string.IsNullOrEmpty(choosedGameUrl))
         {
-            var task = scrapperManager.ScrapGamePage(_searchResults.First(), args.CancelToken);
+            var task = scrapperManager.ScrapGamePage(choosedGameUrl, args.CancelToken);
             task.Wait(args.CancelToken);
             _result = task.Result;
         }
