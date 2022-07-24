@@ -52,24 +52,19 @@ public class GameScrapper : IScrapper
     public async Task<List<SearchResult>> ScrapSearchPage(string searchName,
         CancellationToken cancellationToken = default)
     {
-        var url = BaseSearchUrl + Uri.EscapeUriString(searchName);
+        var url = BaseSearchUrl + searchName;
         var context = BrowsingContext.New(_configuration);
         var document = await context.OpenAsync(url, cancellationToken);
 
         await Console.Out.WriteAsync(document.Title);
 
-        return document.GetElementsByClassName("component-legacy-productTile")
-            .Where(ele =>
-            {
-                var s = ele.GetElementsByClassName("component-legacy-productTile__detailLink")
-                    .Cast<IHtmlAnchorElement>().First().Href;
-                return !string.IsNullOrEmpty(s);
-            })
+
+        return document.QuerySelectorAll(".component-legacy-productTile .component-legacy-productTile__detailLink")
+            .Where(element => !string.IsNullOrEmpty(element.HyperReference("")?.Href))
             .Select(element =>
                 {
                     var title = element.GetElementsByClassName("component-legacy-productTile__title").First().Text();
-                    var href = element.GetElementsByClassName("component-legacy-productTile__detailLink")
-                        .Cast<IHtmlAnchorElement>().First().Href;
+                    var href = element.HyperReference("").Href;
                     var id = new Uri(href).Segments.Last().Replace("/", "");
                     return new SearchResult(title, id, href);
                 }

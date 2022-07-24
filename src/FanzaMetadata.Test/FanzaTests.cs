@@ -70,7 +70,7 @@ public class FanzaTests
     public async void ShouldGetSearchResult()
     {
         var scrapper = new GameScrapper(new XunitLogger<GameScrapper>(_testOutputHelper));
-        var res = await scrapper.ScrapSearchPage("美少女万華鏡 呪われし伝説の少女");
+        var res = await scrapper.ScrapSearchPage("家の彼女");
         Assert.NotEmpty(res);
     }
 
