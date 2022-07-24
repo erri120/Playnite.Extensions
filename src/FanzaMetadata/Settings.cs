@@ -12,8 +12,8 @@ public class Settings : ISettings
     private IPlayniteAPI? _playniteAPI;
     private Plugin? _plugin;
 
-    public PlayniteProperty GenreProperty { get; set; } = PlayniteProperty.Genres;
-    public PlayniteProperty GameGenreProperty { get; set; } = PlayniteProperty.Features;
+    public PlayniteProperty GenreProperty { get; set; } = PlayniteProperty.Tags;
+    public PlayniteProperty GameGenreProperty { get; set; } = PlayniteProperty.Genres;
 
     public Settings() { }
 
@@ -25,6 +25,8 @@ public class Settings : ISettings
         var savedSettings = plugin.LoadPluginSettings<Settings>();
         if (savedSettings is not null)
         {
+            GenreProperty = savedSettings.GenreProperty;
+            GameGenreProperty = savedSettings.GameGenreProperty;
         }
     }
 
